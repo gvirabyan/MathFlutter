@@ -3,6 +3,7 @@ import 'package:untitled2/screens/activity_screen/answers_tab.dart';
 import 'package:untitled2/screens/activity_screen/progress_tab.dart';
 import 'package:untitled2/screens/activity_screen/status_tab.dart';
 import 'package:untitled2/screens/activity_screen/top_list_tab.dart';
+import 'package:untitled2/screens/auth/auth_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_player_tab.dart';
@@ -17,6 +18,8 @@ import 'package:untitled2/screens/topics_screen/topics_2_3_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_3_4_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_4_5tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_screen.dart';
+import 'package:untitled2/ui_elements/main_app_bar.dart';
+import 'package:untitled2/ui_elements/main_bottom_nav.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+      home: AuthScreen(),
     );
   }
 }
@@ -94,37 +97,22 @@ class _MainScreenState extends State<MainScreen> {
     final current = _tabs[_currentIndex];
 
     Widget page = Scaffold(
-      appBar: AppBar(
-        title: Text(current.title),
-        bottom:
-            current.subTabs == null
-                ? null
-                : TabBar(
-                  isScrollable: true,
-                  tabs:
-                      current.subTabs!.map((e) => Tab(text: e.label)).toList(),
-                ),
+      backgroundColor: Colors.white,
+      appBar: MainAppBar(
+        title: current.title,
+        tabs: current.subTabs?.map((e) => Tab(text: e.label)).toList(),
       ),
-      body:
-          current.subTabs == null
-              ? current.view!
-              : TabBarView(
-                children: current.subTabs!.map((e) => e.view).toList(),
-              ),
-      bottomNavigationBar: BottomNavigationBar(
+      body: current.subTabs == null
+          ? current.view!
+          : TabBarView(
+        children: current.subTabs!.map((e) => e.view).toList(),
+      ),
+      bottomNavigationBar: MainBottomNav(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Aktivität',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Themen'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Üben'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
       ),
     );
+
 
     // DefaultTabController должен быть ТОЛЬКО когда есть subTabs
     if (current.subTabs != null) {
