@@ -1,0 +1,675 @@
+{
+  "top-bar": {
+    "questions": "Fragen",
+    "today-goal": "Dein Ziel heute",
+    "notifications": "Benachrichtigungen"
+  },
+  "messages": {
+    "slow-connection": " Es sieht so aus, als ob deine Internetverbindung langsam ist. Danke für deine Geduld.",
+    "stable-connection": " Dein Internet ist jetzt stabil, lass uns fortfahren. ",
+    "no-connection-title": "Keine Internetverbindung",
+    "no-connection-text": "Du hast ein Problem mit deiner Internetverbindung, bitte warte, bis es sich wieder stabilisiert."
+  },
+  "buttons": {
+    "skip": "überspringen",
+    "send": "abgeben",
+    "description": "Erklärung",
+    "next": "nächstes",
+    "wrong-answer": "falsche Antwort",
+    "save": "speichern",
+    "start": "Start",
+    "close": "Schließen",
+    "ok": "OK"
+  },
+  "inputs": {
+    "E-mail-address": "E-Mail Adresse",
+    "name": "Name",
+    "surname": "Nachname",
+    "nickname": "Spitzname",
+    "date-of-birth": "Geburtsdatum",
+    "country": "Land",
+    "your-country": "In welchem Land lebst du?",
+    "city": "Stadt",
+    "your-city": "In welcher Stadt lebst du?",
+    "educational-institution": "Schule",
+    "your-educational-institution": "Name deiner Schule",
+    "class/course": "Klasse",
+    "your-class/course": "Deine Klasse (z.B. 7a oder 7.1)",
+    "class-error": "Bitte gib den Namen deine Schule an",
+    "E-mail": "E-Mail",
+    "your-email": "Deine E-Mail",
+    "paste-email": "Fügen Sie den Code aus der E-Mail ein",
+    "password": "Passwort",
+    "enter-password": "Passwort eingeben",
+    "enter-password-again": "Passwort erneut eingeben",
+    "confirm-password": "Passwort bestätigen",
+    "new-password": "Neues Passwort",
+    "confirm-new-password": "Neues Passwort bestätigen",
+    "enter-the-keyword": "Das Schlüsselwort eingeben",
+    "enter-the-result": "Ergebnis eingeben"
+  },
+  "popups": {
+    "leave-page-popup": {
+      "first-title": "Bist du sicher",
+      "second-title": "dass du diese Seite verlassen willst?",
+      "first-text": "Wenn du die Seite verlässt",
+      "second-text": "werden Informationen nicht gespeichert",
+      "save": "Speichern",
+      "leave": "Verlassen"
+    },
+    "delete-page-popup": {
+      "first-title": "Sind Sie sicher, dass Sie",
+      "second-title": "Ihr Konto löschen möchten?",
+      "first-text": "Wenn Sie Ihr Konto jetzt löschen,",
+      "second-text": "können Sie diese Aktion nicht rückgängig machen, alle Ihre Daten werden dauerhaft gelöscht.",
+      "delete": "Löschen",
+      "cancel": "Abbrechen"
+    },
+    "success-message-popup": {
+      "title": "Fertig",
+      "got-it": "Verstanden"
+    },
+    "input-popup": {
+      "title": "Erechne das Ergebnis",
+      "error": "Nur Zahlen eingeben"
+    }
+  },
+  "over": {
+    "points": "Punkte",
+    "week": "Woche",
+    "month": "Monat",
+    "next": "Nächstes",
+    "prev": "Zurück",
+    "loading": "Es lädt",
+    "search": "Suche",
+    "class": "Klasse",
+    "no-search-results": "Leider gibt es keine Suchergebnisse für Ihre Anfrage. Bitte ändern Sie Ihre Anfrage oder wählen Sie aus der Liste unten."
+  },
+
+  "home": {
+    "welcome": "Willkommen",
+    "play-game": "Spiele das Spiel",
+    "improve-your-skills": "Verbessere deine Fähigkeiten",
+    "be-the-first": "Werde täglich besser",
+    "start-playing": "Spiel starten"
+  },
+
+  "login-register": {
+    "sign-in": "Einloggen",
+    "sign-up": "Anmelden",
+    "registration": "Registrieren",
+    "only-nickname": "Nur Spitzname",
+    "remember-me": "Angemeldet bleiben",
+    "forgot-password": "Passwort vergessen",
+    "sign-in-using": "Einloggen mit",
+    "sign-up-using": "Anmelden mit",
+    "google": "Google",
+    "facebook": "Facebook",
+    "tiktok": "TikTok",
+    "apple": "Apple",
+    "dont-have-account": "Nicht Mitglied?",
+    "already-have-account": "Ich habe schon einen Account",
+    "user-cancelled-login": "du hast die Anmeldung abgebrochen oder dich nicht vollständig autorisiert",
+    "user-cancelled-register": "du hast die Registrierung abgebrochen oder dich nicht vollständig autorisiert"
+  },
+
+  "forgot-password": {
+    "forgot-password": "Passwort vergessen",
+    "send-email": "E-Mail senden",
+    "click": "",
+    "here": "Zurück",
+    "to-back-main-page": "zur Startseite"
+  },
+
+  "reset-password": {
+    "reset-password": "Passwort zurücksetzen",
+    "error-msg": "Passwort und Passwortbestätigung sollten übereinstimmen"
+  },
+
+  "activity": {
+    "Activity": "Aktivität",
+    "tabs": {
+      "My Status": "Mein Status",
+      "Top List": "Top List",
+      "My Answers": "Meine Antworten",
+      "Progress": "Progress"
+    },
+    "my-status": {
+      "set-everyday-goal": "Tägliches Ziel setzen",
+      "last-quiz": "Letztes Quiz",
+      "experience-points": "Punkte",
+      "last-update": "Letztes Update:",
+      "go-to-topics": "Beginne deine Reise, um Punkte zu sammeln - wähle ein Mathe-Themengebiet",
+      "past-categories": "Vergangene Kategorien",
+      "categories-were-answered": "Beantwortete Kategorien",
+      "you-are-in": "Du bist in Mathe App",
+      "welcome-app": "Willkommen auf Mathe App!\uD83D\uDC4B",
+      "no-goal": "Kein Ziel",
+      "today-activity": "Heutige Aktivität",
+      "wrong": "Falsch",
+      "skipped": "Übersprungen",
+      "correct": "Richtig",
+      "check-progress": "Fortschritt prüfen",
+      "goal-set": "Ihr tägliches Ziel wurde festgelegt"
+    },
+    "top-list": {
+      "lists": [
+        {
+          "title": "In deiner Klasse",
+          "fieldName": "Klasse"
+        },
+        {
+          "title": "In deiner Schule",
+          "fieldName": "Schule"
+        },
+        {
+          "title": "In deiner Stadt",
+          "fieldName": "Stadt"
+        },
+        {
+          "title": "In deinem Land",
+          "fieldName": "Land"
+        },
+        {
+          "title": "In der Welt",
+          "fieldName": "Welt"
+        }
+      ],
+      "place": "Platz",
+      "please": "Bitte",
+      "update": "Update",
+      "your": "",
+      "from": "aus",
+      "people": "Spielern",
+      "back-to-the-top-list": "Zurück zur Top-List",
+      "there-is-no-any-user": "Es gibt keinen Benutzer mit diesem Benutzernamen"
+    },
+    "my-answers": {
+      "summary": "Zusammenfassung",
+      "questions-passed": "Beantwortete Fragen",
+      "of": "von",
+      "correct-answers": "Richtige Antworten",
+      "wrong-answers": "Falsche Antworten",
+      "skipped-answers": "übersprungene Antworten"
+    },
+    "progress": {
+      "you-have-registered": "Du hast dich registriert am"
+    }
+  },
+
+  "topics": {
+    "topics": "Themen",
+    "classes": "Klasse"
+  },
+
+  "question": {
+    "question": "Fragen",
+    "continue": "Weitermachen",
+    "point": "Punkt",
+    "start-practice": "Üben beginnen",
+    "right-answered": "Richtige Antworten",
+    "score-on-this-topic": "s Punkte",
+    "check-skipped": "Übersprungene Fragen zeigen",
+    "single-skipped-text": "Du hast den Großteil des Themas bestanden, aber du hast 1 Frage übersprungen. Du kannst es noch einmal überprüfen oder es vorerst lassen",
+    "leave-for-now": "Vorerst verlassen",
+    "your-score-on-this-topic": "Deine Punkte zu diesem Thema",
+    "will-be-update": "Du hast dieses Thema abgeschlossen. Deine Erfolge werden aktualisiert.",
+    "skipped-first-text": "Du hast den Großteil des Themas bestanden, aber du hast ",
+    "skipped-second-text": " Fragen übersprungen. Du kannst sie noch einmal überprüfen oder sie vorerst lassen.",
+    "exercise-solution": "Übungslösung",
+    "no-solution": "Tut uns leid, wir haben im Moment keine Lösung.",
+    "whiteboard-button": "Whiteboard"
+  },
+
+  "practice": {
+    "practice": "Üben",
+    "player-vs-machine": "Spieler gegen Maschine",
+    "player-vs-friend": "Spieler gegen Freund",
+    "play-with-friends": "Spieler gegen Spieler",
+    "can-practice-with-friends": "Du kannst mit jemandem üben, der eine ähnliche Bewertung hat",
+    "practice-with-friends-questions": "Anzahl der Fragen: 10-30",
+    "try-again": "Erneut probieren",
+    "practice-with-friends-load": "Wir suchen nach einem Spieler, bitte warte",
+    "your-score": "Deine Punkte:",
+    "machine-score": "Punkte der Maschine:",
+    "nickname-score": "{nickname} Punkte:",
+    "friend-score": "Punkte der Freunde:",
+    "friend-think": "denkt gerade...",
+    "answered-all-text": "Du hast alle Fragen beantwortet",
+    "popup-go-topic": {
+      "Oops": "Ups!",
+      "first-text": "Sie müssen mindestens",
+      "second-text": "Fragen beantworten, um gegen die Maschine spielen zu können. Gehe zu den \"Themen\", um weiter zu lernen.",
+      "go-to-topics": "Gehe zum Thema"
+    },
+    "no-players-popup": {
+      "title": "Kein Spieler ist verfügbar",
+      "text": "Sorry, aktuell ist kein Spieler verfügbar \uD83E\uDD37\u200D♀\uFE0F. Probiere später noch einmal.",
+      "go-to-practice": "Gehe zum Üben",
+      "try-again": "Erneut versuchen"
+    },
+    "left-by-rival-popup": {
+      "title": "Ups!",
+      "text": "Dein Gegner hat das Spiel verlassen \uD83E\uDD2A. Du hast das Spiel gewonnen."
+    },
+    "leave-page-popup": {
+      "first-text": "Du wirst verlieren und dein Fortschritt wird verloren gehen \uD83E\uDD7A.",
+      "stay": "Bleibe"
+    },
+    "finish-game-popup": {
+      "save-btn-text": "Neues Spiel",
+      "leave-btn-text": "Mein Status",
+      "win": {
+        "title": "Prima! \uD83C\uDF89",
+        "text": "Du hast {points} Punkte gewonnen"
+      },
+      "draw": {
+        "title": "Unentschieden gespielt",
+        "text": "Du hast {points} Punkte gewonnen"
+      },
+      "lose": {
+        "title": "Oh schade \uD83D\uDE40",
+        "text": "Du hast {points} Punkte verloren"
+      }
+    },
+    "result-win": "Gewonnen",
+    "result-draw": "Unentschieden",
+    "result-lose": "Verloren"
+  },
+
+  "profile": {
+    "profile": "Profil",
+    "tabs": [
+      "Account",
+      "Sicherheit",
+      "Über uns",
+      "Erfolg teilen",
+      "Ton"
+    ],
+    "account": {
+      "logout-warning": "Abmeldenachricht",
+      "logout-text": "Bitte gib deine E-Mail und dein Passwort an, um dich später wieder anmelden zu können. Andernfalls werden dein Konto und alle damit verbundenen Daten sofort nach der Abmeldung gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "log-out": "Abmelden",
+      "delete": "Konto löschen",
+      "save-and-logout": "Speichern und abmelden",
+      "delete-account": "Account löschen"
+    },
+    "security": {
+      "popup-text": "Passwort wurde aktualisiert"
+    },
+    "about-us": {
+      "terms-of-services": "AGB",
+      "privacy": "Datenschutz",
+      "imprint": "Impresum",
+      "software-licenses": "Software-Lizenzen",
+      "release-notes": "Versionshinweise",
+      "write-review": "Eine Bewertung schreiben"
+    },
+    "send-reports": {
+      "introduction-text": "Teile deinen Erfolg mit deinen Eltern, Lehrern und Freunde per E-Mail",
+      "saved-email": "Gespeicherte E-Mails:",
+      "parent-email": "E-Mail Adresse angeben",
+      "not-saved-email": "Du hast keine E-Mail-Adresse gespeichert",
+      "add-four-email-text": "Du kannst bis zu vier E-Mail Adressen speichern. Die E-Mail Adressen können später bearbeitet oder gelöscht werden",
+      "enter-new-email": "Neue E-Mail Adresse angeben",
+      "leave-popup-title": "Bist du sicher, <br> dass du diese E-Mail löschen möchtest?",
+      "leave-popup-text": "Wenn du dieses Popup schließt, wird die E-Mail nicht entfernt",
+      "email-can-not-be-empty": "E-Mail kann nicht leer sein",
+      "saved-successfully": "Erfolgreich gespeichert",
+      "success-text": "Du hast die E-Mail erfolgreich aktualisiert",
+      "remove-success-text": "Die E-Mail-Adresse wurde gelöscht",
+      "successfully-updated": "Erfolgreich aktualisiert",
+      "no": "Nein",
+      "yes": "Ja"
+    },
+    "sound": {
+      "sound": "Ton",
+      "sound-volume": "Lautstärke"
+    }
+  },
+  "notification": {
+    "there-arnt-notification": "Es liegen noch keine Benachrichtigungen vor.",
+    "welcome-app": "Willkommen zur MatheApp",
+    "play-more-games": "Spiele und trainiere, verbessere deine Fähigkeiten und sei der Erste in der Welt!",
+    "mark-all-read": "Alle als gelesen markieren"
+  },
+  "not-found": {
+    "title": "404 Seite nicht gefunden",
+    "text": "Leider konnten wir die von Ihnen gesuchte Seite nicht finden, aber wir haben einige Informationen über berühmte Mathematiker gefunden. Viel Spaß :).",
+    "title-offline": "Kein Internet",
+    "text-offline": "Sie haben kein Internet, aber wir haben einige Informationen über berühmte Mathematiker gefunden. Viel Spaß :).",
+    "mathematics": [
+      {
+        "name": "Pythagoras",
+        "bio": "Vegetarischer mystischer Führer und zahlenbesessener Denker. Sein Ruhm als bekanntester Name der Mathematik beruht auf einem Theorem über rechtwinklige Dreiecke, obwohl es wahrscheinlich bereits vor ihm existierte. Er lebte in einer Gemeinschaft, in der Zahlen sowohl wegen ihrer spirituellen als auch ihrer mathematischen Qualitäten verehrt wurden. Seine Erhöhung der Zahlen als Essenz der Welt machte ihn zum bedeutendsten Begründer der griechischen Mathematik, und zum Beginn der Mathematik, wie wir sie heute kennen. Berühmt ist auch sein Verzicht auf Bohnen in der Ernährung.",
+        "img": "Pythagoras"
+      },
+      {
+        "name": "Euclid",
+        "bio": "Bekannt als der „Vater der Geometrie“, war Euklid ein antiker griechischer Mathematiker, der „Die Elemente“ schrieb, eines der einflussreichsten Werke in der Geschichte der Mathematik, das bis ins späte 19. Jahrhundert als Hauptlehrbuch der Mathematik diente.",
+        "img": "Euclid"
+      },
+      {
+        "name": "Archimedes",
+        "bio": "Archimedes von Syrakus (ca. 287 – ca. 212 v. Chr.) war ein antiker griechischer Mathematiker, Physiker, Ingenieur, Astronom und Erfinder aus der antiken Stadt Syrakus in Sizilien. Er gilt allgemein als der größte Mathematiker der Antike und einer der Größten aller Zeiten. Er gab die erste zufriedenstellende Erklärung des Hebelprinzips und wird für die Erfindung innovativer Maschinen wie der archimedischen Schraube, zusammengesetzte Flaschenzüge und Verteidigungsmaschinen zur Verteidigung seines heimischen Syrakus gegen Invasionen gutgeschrieben.",
+        "img": "Archimedes"
+      },
+      {
+        "name": "Isaac Newton",
+        "bio": "Isaac Newton ist einer der berühmtesten Wissenschaftler aller Zeiten und er entdeckte einige erstaunliche Dinge. Er war der erste, der erkannte, dass weißes Licht aus allen Farben des Regenbogens besteht. Er erfand die Infinitesimalrechnung, die Mathematik der Bewegung, die heute verwendet wird, um Wolkenkratzer zu bauen und Raketen ins All zu schicken. Außerdem entdeckte er die Kraft, die Dinge zu Boden zieht – die Schwerkraft. Er war ein sonderbarer Charakter, litt unter Depressionen und sprach selten mit jemandem. Darüber hinaus war er ein heimlicher Alchemist, der versuchte, Blei in Gold zu verwandeln.",
+        "img": "Isaac"
+      },
+      {
+        "name": "Carl Friedrich Gauss",
+        "bio": "Bekannt als der Fürst der Mathematiker, leistete Gauss bedeutende Beiträge zu den meisten Gebieten der Mathematik des 19. Jahrhunderts. Als obsessiver Perfektionist veröffentlichte er wenig, da er Theoreme lieber überarbeitete und verbesserte, bevor er sie publizierte. Seine revolutionäre Entdeckung des nichteuklidischen Raums (dass es mathematisch konsistent ist, dass parallele Linien divergieren können) wurde erst nach seinem Tod in seinen Notizen gefunden. Während seiner Analyse astronomischer Daten stellte er fest, dass Messfehler eine Glockenkurve erzeugten – diese Form ist heute als Gaußsche Verteilung bekannt.",
+        "img": "Carl"
+      },
+      {
+        "name": "Leonhard Euler",
+        "bio": "Der produktivste Mathematiker aller Zeiten, der nahezu 900 Bücher veröffentlichte. Als er in seinen späten 50er Jahren erblindete, stieg seine Produktivität in vielen Bereichen sogar an. Seine berühmte Formel ‘eiπ + 1 = 0’, bei der ‘e’ die mathematische Konstante ist, die manchmal als Eulers Zahl bekannt ist, und ‘i’ die Quadratwurzel von minus eins ist, wird weithin als die schönste in der Mathematik angesehen. Später interessierte er sich für lateinische Quadrate – Gitter, in denen jede Zeile und Spalte jedes Mitglied einer Zahlen- oder Objektmenge einmal enthält. Ohne diese Arbeit hätten wir möglicherweise kein Sudoku.",
+        "img": "Leonhard"
+      },
+      {
+        "name": "René Descartes",
+        "bio": "Oftmals als der 'Vater der modernen Philosophie' bezeichnet, war Descartes auch eine Schlüsselperson in der Mathematik für die Grundlagen der Entwicklung der Infinitesimalrechnung und seiner Arbeit in der analytischen Geometrie.",
+        "img": "Descartes"
+      },
+      {
+        "name": "Blaise Pascal",
+        "bio": "Blaise Pascal war ein Mathematiker und Physiker, der bekannt ist für seine Arbeiten in den Bereichen Wahrscheinlichkeit und Fluidmechanik. Zu seinen Erfindungen gehört die Pascaline, ein früher Taschenrechner, und seine Beiträge zur Hydrodynamik und Druckmessungen.",
+        "img": "Blaise"
+      },
+      {
+        "name": "Pierre-Simon Laplace",
+        "bio": "Laplace war ein Mathematiker und Astronom, dessen Arbeit grundlegend für die Entwicklung der mathematischen Statistik, der himmlischen Mechanik und der Wahrscheinlichkeitstheorie war.",
+        "img": "Laplace"
+      },
+      {
+        "name": "Bernhard Riemann",
+        "bio": "Bekannt für die Riemannsche Hypothese, eines der ungelösten Probleme der Mathematik, war Riemann eine Schlüsselfigur in der Analyse und Differentialgeometrie und beeinflusste Bereiche wie die Zahlentheorie.",
+        "img": "Riemann"
+      },
+      {
+        "name": "Johannes Kepler",
+        "bio": "Kepler ist am bekanntesten für seine Gesetze der Planetenbewegung, die den Grundstein für Newtons Theorie der universellen Gravitation legten. Seine Beiträge zur Astronomie machten ihn zu einer Schlüsselfigur in der wissenschaftlichen Revolution des 17. Jahrhunderts.",
+        "img": "Kepler"
+      },
+      {
+        "name": "Évariste Galois",
+        "bio": "Galois war eine bahnbrechende Figur in der Entwicklung der abstrakten Algebra. Seine Arbeiten legten die Grundlagen für die Gruppentheorie und waren fundamental für das Verständnis quadratischer Gleichungen.",
+        "img": "Galois"
+      },
+      {
+        "name": "David Hilbert",
+        "bio": "Hilbert war eine führende Figur in der Formalisierung der Mathematik und der Entwicklung der mathematischen Logik. Seine 23 ungelösten Probleme, die er auf dem internationalen Mathematikerkongress im Jahr 1900 präsentierte, setzten die Agenda für die Forschung der Mathematik des 20. Jahrhunderts.",
+        "img": "Hilbert"
+      },
+      {
+        "name": "Georg Cantor",
+        "bio": "Von allen großen Mathematikern erfüllt Cantor das (Hollywood-)Klischee, dass ein Genie der Mathematik und psychische Erkrankung irgendwie untrennbar verbunden sind, am besten. Cantors brillanteste Einsicht war die Entwicklung einer Methode, um über mathematische Unendlichkeit zu sprechen. Seine Mengenlehre führte zu der kontraintuitiven Entdeckung, dass einige Unendlichkeiten größer waren als andere. Das Ergebnis war umwerfend. Leider erlitt er geistige Zusammenbrüche und wurde häufig hospitalisiert. Er fixierte sich auch darauf, zu beweisen, dass die Werke Shakespeares tatsächlich von Francis Bacon geschrieben wurden.",
+        "img": "Georg"
+      }
+    ]
+  },
+  "versions": [
+    {
+      "v": "1.0.27",
+      "date": "2025-02-25",
+      "changes": [
+        "Übungsdesign-Update",
+        "Stilkorrekturen",
+        "Themenkopfzeilen-Update",
+        "Geschwindigkeitsverbesserungen",
+        "Whiteboard"
+      ]
+    },
+    {
+      "v": "1.0.26",
+      "date": "2025-01-21",
+      "changes": [
+        "Fehlerbehebung bei Push-Benachrichtigungen"
+      ]
+    },
+    {
+      "v": "1.0.25",
+      "date": "2025-01-11",
+      "changes": [
+        "Kleinere Stiländerungen am Such-Popup",
+        "Aktualisierung externer Links"
+      ]
+    },
+    {
+      "v": "1.0.24",
+      "date": "2024-12-15",
+      "changes": [
+        "Nicht gefundene Seite: beheben und aktualisieren.",
+        "Kopf- und Fußzeilenaktualisierung",
+        "Push-Benachrichtigungen beheben."
+      ]
+    },
+    {
+      "v": "1.0.23",
+      "date": "2024-11-12",
+      "changes": [
+        "Popup-Kopfzeilenaktualisierung.",
+        "Kopf- und Fußzeilenkorrekturen.",
+        "Korrekturen des sicheren Bereichs."
+      ]
+    },
+    {
+      "v": "1.0.22",
+      "date": "2024-10-12",
+      "changes": [
+        "Aktualisierung der Über-uns-Seiten.",
+        "Aktualisierung der Über-uns-, Abmelde-, Such-, Benachrichtigungs- und Lösungspopups.",
+        "Aktualisierung der Alarmfenster.",
+        "Natürliches Verhalten für einige Popups.",
+        "Korrektur des Navigationsstils.",
+        "Stilkorrekturen.",
+        "Korrektur der Push-Benachrichtigungen."
+      ]
+    },
+    {
+      "v": "1.0.21",
+      "date": "2024-09-18",
+      "changes": [
+        "Account-Löschfunktion.",
+        "Übersetzungsfehlerbehebungen.",
+        "Softwareaktualisierungen.",
+        "Sprachkorrekturen."
+      ]
+    },
+    {
+      "v": "1.0.20",
+      "date": "2024-08-01",
+      "changes": [
+        "Übersetzungsfehler behoben.",
+        "Pop-up- und Ladeanimationsfehler behoben.",
+        "Neue Themen für die Suche.",
+        "Android-Version aktualisiert."
+      ]
+    },
+    {
+      "v": "1.0.19",
+      "date": "2024-04-30",
+      "changes": [
+        "Machen Sie mehr Themen in der Klasse sichtbar.",
+        "Offene Fragen zur zuletzt verwendeten Klasse.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.18",
+      "date": "2024-04-13",
+      "changes": [
+        "Übersetzungskorrekturen.",
+        "Ladeanimationskorrekturen.",
+        "Lösungen bei beantworteten Fragen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.17",
+      "date": "2024-03-30",
+      "changes": [
+        "Bugfixes und Leistungsverbesserungen."
+      ]
+    },
+    {
+      "v": "1.0.16",
+      "date": "2024-03-29",
+      "changes": [
+        "Leistungsverbesserungen",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.15",
+      "date": "2024-03-21",
+      "changes": [
+        "Haupt-E-Mail-Aktualisierung.",
+        "Korrekturen bei Übersetzungen",
+        "Aktualisierung der Passwort-Zurücksetzungsfunktion.",
+        "Verbesserung der Ladeanimation",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.14",
+      "date": "2024-03-19",
+      "changes": [
+        "Aktualisierung des Versions-Popups.",
+        "Meta-Aktualisierungen.",
+        "Kleiner Fehler bei Google Autocomplete behoben.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.13",
+      "date": "2024-03-15",
+      "changes": [
+        "Änderung der Wischlänge für eine bessere Erfahrung.",
+        "Klarheitsaktualisierung.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.12",
+      "date": "2024-03-12",
+      "changes": [
+        "Neue Vorlage von Übungen.",
+        "SMTP-Server-Fix.",
+        "Aktualisierung fehlender Übersetzungen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.11",
+      "date": "2024-03-08",
+      "changes": [
+        "Neue Vorlage von Übungen.",
+        "Viele neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.10",
+      "date": "2024-02-29",
+      "changes": [
+        "Designaktualisierungen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.9",
+      "date": "2024-02-19",
+      "changes": [
+        "Designaktualisierungen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.8",
+      "date": "2024-02-09",
+      "changes": [
+        "Designaktualisierungen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.7",
+      "date": "2024-02-02",
+      "changes": [
+        "Datenschutzerklärung-Aktualisierung.",
+        "Erstellung einer Liste genutzter Dienste.",
+        "Aktualisierung der Logik für die zweite Antwort.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.6",
+      "date": "2024-01-18",
+      "changes": [
+        "KI-Implementierung für Übungen.",
+        "Stiländerungen.",
+        "Bugfixes und Leistungsverbesserungen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.5",
+      "date": "2024-01-18",
+      "changes": [
+        "Integration von Verwaltungstools.",
+        "Benachrichtigung-Update.",
+        "Verbesserung des Android-Builds.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.4",
+      "date": "2024-01-04",
+      "changes": [
+        "KI-Nachrichten-Update.",
+        "Implementierung der Grundlogik für Lösungen.",
+        "E-Mail-Update.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.3",
+      "date": "2023-12-18",
+      "changes": [
+        "Grundlegende KI-Integration.",
+        "Designkorrekturen.",
+        "Leistungsverbesserungen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.2",
+      "date": "2023-11-10",
+      "changes": [
+        "Unveröffentlichte Übungen aus der Liste entfernen.",
+        "Statistik-API hinzufügen.",
+        "Korrekturen bei Benachrichtigungen zu täglichen Zielen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.1",
+      "date": "2023-10-26",
+      "changes": [
+        "Benachrichtigung-Update.",
+        "Bugfixes und Leistungsverbesserungen.",
+        "Neue Übungen hinzugefügt."
+      ]
+    },
+    {
+      "v": "1.0.0",
+      "date": "2023-10-13",
+      "changes": [
+        "Erste Funktionalität."
+      ]
+    }
+  ]
+}

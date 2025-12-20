@@ -49,7 +49,7 @@ class ProfileAboutTab extends StatelessWidget {
           onTap: () {
             _openPage(
               context,
-              const SoftwarePopup(),
+              const SoftwarePage(),
             );
           },
         ),
