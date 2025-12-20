@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled2/services/token_storage.dart';
 import 'api_service.dart';
 
 class AuthService {
@@ -90,10 +91,8 @@ class AuthService {
     return {'status': 'error', 'message': data['error']?['message']};
   }
 
-  // 👤 GET USER
   static Future<Map<String, dynamic>> getUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('user-id');
+    final userId = await TokenStorage.getUserId();
 
     final data = await ApiService.get(
       'users/$userId?populate[0]=institution&populate[1]=installations',
@@ -103,6 +102,7 @@ class AuthService {
         ? {'status': 'success', 'user': data}
         : {'status': 'error', 'message': data['error']?['message']};
   }
+
 
   // ✏️ UPDATE USER
   static Future<Map<String, dynamic>> updateUser(
@@ -132,19 +132,16 @@ class AuthService {
         : {'status': 'error', 'message': data['error']?['message']};
   }
 
-  // 🚪 LOGOUT
   static Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-    await prefs.remove('user-id');
+    await TokenStorage.clearAll();
   }
 
-  // 🔐 STORE JWT
+
   static Future<void> _storeJwtAndUser(
       Map<String, dynamic> data,
       ) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', data['jwt']);
-    await prefs.setString('user-id', data['user']['id'].toString());
+    await TokenStorage.saveToken(data['jwt']);
+    await TokenStorage.saveUserId(data['user']['id']);
   }
+
 }

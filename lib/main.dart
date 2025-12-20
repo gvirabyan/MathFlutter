@@ -7,7 +7,7 @@ import 'package:untitled2/screens/auth/auth_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_player_tab.dart';
-import 'package:untitled2/screens/profile_screen/profile_about_tab.dart';
+import 'package:untitled2/screens/profile_screen/about_us/profile_about_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_account_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_screen.dart';
 import 'package:untitled2/screens/profile_screen/profile_security_tab.dart';
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AuthScreen(),
+      home: MainScreen(),
     );
   }
 }

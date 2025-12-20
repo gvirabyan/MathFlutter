@@ -1,27 +1,397 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class TopListTab extends StatelessWidget {
+import '../../services/auth_service.dart';
+import '../../services/top_list_service.dart';
+
+class TopListTab extends StatefulWidget {
   const TopListTab({super.key});
 
   @override
+  State<TopListTab> createState() => _TopListTabState();
+}
+
+class _TopListTabState extends State<TopListTab> {
+  final TopListService _service = TopListService();
+
+  bool isLoading = true;
+
+  Map<String, dynamic> user = {};
+  Map<String, dynamic> rankings = {};
+
+  TopListCategory? selectedCategory;
+
+  final List<TopListCategory> categories = [
+    TopListCategory(
+      title: 'Kurs',
+      fieldName: 'Kurs',
+      key: 'course',
+    ),
+    TopListCategory(
+      title: 'Institution',
+      fieldName: 'Institution',
+      key: 'institution',
+    ),
+    TopListCategory(
+      title: 'Stadt',
+      fieldName: 'Stadt',
+      key: 'city',
+    ),
+    TopListCategory(
+      title: 'Land',
+      fieldName: 'Land',
+      key: 'country',
+    ),
+    TopListCategory(
+      title: 'Welt',
+      fieldName: 'Welt',
+      key: 'world',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMenu();
+  }
+
+  Future<void> _loadMenu() async {
+    setState(() => isLoading = true);
+
+    try {
+      // 1) user
+      final resUser = await AuthService.getUser();
+      if (resUser['status'] == 'success') {
+        user = (resUser['user'] as Map).cast<String, dynamic>();
+      }
+
+      // fallback: иногда points может храниться где-то ещё
+      if (user.isEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        final points = prefs.getInt('points');
+        if (points != null) user['points'] = points;
+      }
+
+      // 2) rankings
+      rankings = await TopListService.getRankings();
+
+      // 3) заполнить UI как в Vue watch(rankings)
+      for (final c in categories) {
+        final r = rankings[c.key];
+        if (r is Map) {
+          final rm = r.cast<String, dynamic>();
+          c.place = rm['my_place']?.toString();
+          final usersAmount = rm['users_amount']?.toString();
+          if (usersAmount != null) {
+            c.fromText = 'Von $usersAmount Personen';
+          }
+          c.points = rm['points']?.toString();
+        } else {
+          c.place = null;
+          c.fromText = null;
+          c.points = null;
+        }
+      }
+    } catch (e, s) {
+      debugPrint('❌ TopList load error: $e');
+      debugPrintStack(stackTrace: s);
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  bool _canOpenCategory(TopListCategory c) {
+    if (c.key == 'world') return true;
+    final v = user[c.key];
+    return v != null && v.toString().trim().isNotEmpty;
+  }
+
+  void _chooseCategory(TopListCategory c) {
+    if (_canOpenCategory(c)) {
+      setState(() => selectedCategory = c);
+    } else {
+      // как в Vue: показываем подсказку “please update your ...”
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Bitte aktualisiere dein Profil: ${c.fieldName}',
+          ),
+        ),
+      );
+    }
+  }
+
+  void _backToMenu() {
+    setState(() => selectedCategory = null);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: 10,
-      separatorBuilder: (_, __) => const Divider(),
-      itemBuilder: (context, index) {
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundColor: Colors.purple.shade100,
-            child: Text('${index + 1}'),
+    if (isLoading) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 80),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // 2-й экран: TopListSingle
+    if (selectedCategory != null) {
+      return TopListSingle(
+        category: selectedCategory!,
+        onBack: _backToMenu,
+        service: _service,
+      );
+    }
+
+    // 1-й экран: меню как в Vue
+    final points = (user['points'] is num)
+        ? (user['points'] as num).toInt()
+        : int.tryParse(user['points']?.toString() ?? '') ?? 0;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      child: Column(
+        children: [
+          _CirclePoints(points: points),
+          const SizedBox(height: 16),
+          ...categories.map((c) => _TopListMenuCard(
+            category: c,
+            enabled: _canOpenCategory(c),
+            onTap: () => _chooseCategory(c),
+          )),
+        ],
+      ),
+    );
+  }
+}
+
+class TopListCategory {
+  final String title;     // UI
+  final String fieldName; // UI
+  final String key;       // backend key
+
+  String? place;
+  String? fromText;
+  String? points;
+
+  TopListCategory({
+    required this.title,
+    required this.fieldName,
+    required this.key,
+    this.place,
+    this.fromText,
+    this.points,
+  });
+}
+
+class _CirclePoints extends StatelessWidget {
+  final int points;
+
+  const _CirclePoints({required this.points});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 140,
+      height: 140,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.black12, width: 1),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '$points\nPunkte',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
+class _TopListMenuCard extends StatelessWidget {
+  final TopListCategory category;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _TopListMenuCard({
+    required this.category,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final place = category.place;
+    final points = category.points ?? '0';
+
+    return Opacity(
+      opacity: enabled ? 1 : 0.6,
+      child: InkWell(
+        onTap: enabled ? onTap : onTap, // Vue тоже даёт тап, но внутри решает
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.black12),
+            color: Colors.white,
           ),
-          title: Text('Benutzer ${index + 1}'),
-          trailing: const Text(
-            '1200',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Text(
+                    category.title,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  if (place != null)
+                    Text(
+                      '$place Platz',
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: place != null
+                        ? Text(
+                      category.fromText ?? '',
+                      style: const TextStyle(color: Colors.black54),
+                    )
+                        : Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(text: 'Bitte aktualisiere dein Profil: '),
+                          TextSpan(
+                            text: category.fieldName,
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      style: const TextStyle(color: Colors.black54),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    points,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
+    );
+  }
+}
+
+class TopListSingle extends StatefulWidget {
+  final TopListCategory category;
+  final VoidCallback onBack;
+  final TopListService service;
+
+  const TopListSingle({
+    super.key,
+    required this.category,
+    required this.onBack,
+    required this.service,
+  });
+
+  @override
+  State<TopListSingle> createState() => _TopListSingleState();
+}
+
+class _TopListSingleState extends State<TopListSingle> {
+  bool isLoading = true;
+  List<Map<String, dynamic>> items = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  int _toInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse(v.toString()) ?? 0;
+  }
+
+  Future<void> _load() async {
+    setState(() => isLoading = true);
+    try {
+      items = await TopListService.getTopListByCategory(widget.category.key);
+    } catch (e, s) {
+      debugPrint('❌ TopListSingle error: $e');
+      debugPrintStack(stackTrace: s);
+      items = [];
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // простой “navbar”
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: widget.onBack,
+                icon: const Icon(Icons.arrow_back),
+              ),
+              Text(
+                widget.category.title,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: _load,
+                icon: const Icon(Icons.refresh),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const Divider(),
+            itemBuilder: (context, index) {
+              final u = items[index];
+              final username = u['username']?.toString() ?? '—';
+              final points = _toInt(u['points']);
+
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.purple.shade100,
+                  child: Text('${index + 1}'),
+                ),
+                title: Text(username),
+                trailing: Text(
+                  '$points',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
