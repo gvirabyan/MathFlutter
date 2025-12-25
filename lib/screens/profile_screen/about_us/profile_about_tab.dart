@@ -66,7 +66,7 @@ class ProfileAboutTab extends StatelessWidget {
         ),
 
         // ---------------- WRITE REVIEW ----------------
-        if (Platform.isAndroid)
+        /*if (Platform.isAndroid)
           _AboutItem(
             title: 'Bewertung schreiben',
             onTap: () {
@@ -84,7 +84,7 @@ class ProfileAboutTab extends StatelessWidget {
                 'https://apps.apple.com/de/app/matheappde/id6447060725',
               );
             },
-          ),
+          ),*/
       ],
     );
   }

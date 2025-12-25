@@ -3,13 +3,11 @@ import 'package:untitled2/screens/activity_screen/answers_tab.dart';
 import 'package:untitled2/screens/activity_screen/progress_tab.dart';
 import 'package:untitled2/screens/activity_screen/status_tab.dart';
 import 'package:untitled2/screens/activity_screen/top_list_tab.dart';
-import 'package:untitled2/screens/auth/auth_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
-import 'package:untitled2/screens/practice_screen/practice_vs_player_tab.dart';
+import 'package:untitled2/screens/practice_screen/practice_vs_player_tab.dart'; // Добавьте импорт
 import 'package:untitled2/screens/profile_screen/about_us/profile_about_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_account_tab.dart';
-import 'package:untitled2/screens/profile_screen/profile_screen.dart';
 import 'package:untitled2/screens/profile_screen/profile_security_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_share_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_sound_tab.dart';
@@ -17,7 +15,6 @@ import 'package:untitled2/screens/topics_screen/topics_1_2_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_2_3_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_3_4_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_4_5tab.dart';
-import 'package:untitled2/screens/topics_screen/topics_screen.dart';
 import 'package:untitled2/ui_elements/main_app_bar.dart';
 import 'package:untitled2/ui_elements/main_bottom_nav.dart';
 
@@ -47,6 +44,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
+  // Данные для режима практики (имитация состояния)
+  bool startPracticeVsFriend = false;
+
   late final List<_MainTabConfig> _tabs = [
     _MainTabConfig(
       title: 'Aktivität',
@@ -66,17 +66,16 @@ class _MainScreenState extends State<MainScreen> {
         _SubTabConfig(label: '4.–5. Klasse', view: const Topics45Tab()),
       ],
     ),
-
     _MainTabConfig(
       title: 'Üben',
       subTabs: [
         _SubTabConfig(
-          label: 'Spieler gegen Maschine',
-          view: const PracticeVsMachineTab(),
+          label: 'Spiel vs Maschine',
+          view: PracticeVsMachineTab(),
         ),
         _SubTabConfig(
-          label: 'Spieler gegen Spieler',
-          view: const PracticeVsPlayerTab(),
+          label: 'Mit Freunden',
+          view: PracticeVsPlayerTab(),
         ),
       ],
     ),
@@ -90,7 +89,8 @@ class _MainScreenState extends State<MainScreen> {
         _SubTabConfig(label: 'Erfolg teilen', view: const ProfileShareTab()),
         _SubTabConfig(label: 'Ton', view: const ProfileSoundTab()),
       ],
-    ),  ];
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -109,12 +109,16 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: MainBottomNav(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+            // Сбрасываем состояние игры при смене основной вкладки
+            startPracticeVsFriend = false;
+          });
+        },
       ),
     );
 
-
-    // DefaultTabController должен быть ТОЛЬКО когда есть subTabs
     if (current.subTabs != null) {
       page = DefaultTabController(
         key: ValueKey(_currentIndex),
@@ -133,10 +137,10 @@ class _MainTabConfig {
   final List<_SubTabConfig>? subTabs;
 
   _MainTabConfig({required this.title, this.view, this.subTabs})
-    : assert(
-        (view != null) ^ (subTabs != null),
-        'Either view or subTabs must be provided (not both).',
-      );
+      : assert(
+  (view != null) ^ (subTabs != null),
+  'Either view or subTabs must be provided (not both).',
+  );
 }
 
 class _SubTabConfig {

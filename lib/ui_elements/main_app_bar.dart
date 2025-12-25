@@ -13,11 +13,37 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(title),
+      elevation: 0,
+
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+
+      // 🎨 GRADIENT BACKGROUND
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF8419FF),
+              Color(0xFF5B12C9),
+            ],
+          ),
+        ),
+      ),
+
       bottom: tabs == null
           ? null
           : TabBar(
         isScrollable: true,
+        indicatorColor: Colors.white,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
         tabs: tabs!,
       ),
     );

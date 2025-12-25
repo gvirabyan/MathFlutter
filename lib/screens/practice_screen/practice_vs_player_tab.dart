@@ -5,10 +5,24 @@ class PracticeVsPlayerTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Spieler gegen Spieler',
-        style: TextStyle(fontSize: 18),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(
+            Icons.group,
+            size: 64,
+            color: Colors.deepPurple,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Spieler gegen Spieler',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
