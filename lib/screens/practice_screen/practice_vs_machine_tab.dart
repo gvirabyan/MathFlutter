@@ -15,43 +15,78 @@ class PracticeVsMachineTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
-        const SizedBox(height: 32),
-        Row(
-          children: [
-            _btn(context, 10),
-            _btn(context, 20),
-            _btn(context, 30),
-          ],
+        _item(
+          context,
+          title: '10 Fragen',
+          score: '+10, +5, -2',
+          count: 10,
         ),
+        _divider(),
+        _item(
+          context,
+          title: '20 Fragen',
+          score: '+20, +10, -4',
+          count: 20,
+        ),
+        _divider(),
+        _item(
+          context,
+          title: '30 Fragen',
+          score: '+30, +15, -6',
+          count: 30,
+        ),
+        _divider(),
       ],
     );
   }
 
-  Widget _btn(BuildContext context, int count) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _startQuiz(context, count),
-        child: Container(
-          height: 80,
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.deepPurple,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Center(
-            child: Text(
-              '$count',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+  Widget _item(
+      BuildContext context, {
+        required String title,
+        required String score,
+        required int count,
+      }) {
+    return InkWell(
+      onTap: () => _startQuiz(context, count),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        child: Row(
+          children: [
+            /// LEFT
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
+
+            /// RIGHT
+            Text(
+              score,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF7C3AED), // фиолетовый как на скрине
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _divider() {
+    return const Divider(
+      height: 1,
+      thickness: 1,
+      indent: 20,
+      endIndent: 20,
     );
   }
 }

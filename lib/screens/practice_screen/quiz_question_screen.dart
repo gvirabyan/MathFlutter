@@ -137,6 +137,14 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
       );
     }
 
+    if (questions.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Keine Fragen verfügbar'),
+        ),
+      );
+    }
+
     final q = questions[index];
 
     return QuizQuestionView(
@@ -150,7 +158,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
       answers: q.answers,
       secondsLeft: secondsLeft,
       selectedIndex: selectedIndex,
-      results: answersResult, // ✅ передаём результаты
+      results: answersResult,
       onSelect: submitted
           ? null
           : (i) => setState(() => selectedIndex = i),
@@ -159,4 +167,5 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
           : () => _submitAnswer(selectedIndex),
     );
   }
+
 }
