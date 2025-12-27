@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled2/services/auth_service.dart';
 import '../../services/user_stats_service.dart';
 
 class StatusTab extends StatefulWidget {
@@ -14,12 +16,10 @@ class _StatusTabState extends State<StatusTab> {
 
   bool isLoading = true;
   bool disableSelect = false;
-  bool showSuccess = false;
 
   int dailyGoal = 0;
   int points = 0;
 
-  // 🔽 backend driven
   Map<String, dynamic>? lastQuiz;
   String? lastUpdate;
   String? timeInApp;
@@ -33,6 +33,7 @@ class _StatusTabState extends State<StatusTab> {
   @override
   void initState() {
     super.initState();
+    _loadDailyGoalFromStorage();
     _loadUserStatus();
   }
 
@@ -43,11 +44,11 @@ class _StatusTabState extends State<StatusTab> {
       final status = await _userStatsService.getUserStatus();
 
       setState(() {
-        dailyStatics =
-        List<Map<String, dynamic>>.from(status["daily_statics"] ?? []);
+        dailyStatics = List<Map<String, dynamic>>.from(
+          status["daily_statics"] ?? [],
+        );
         points = _parseInt(status["points"]);
 
-        // ✅ agreed changes
         lastQuiz = status["last_quiz"];
         lastUpdate = status["last_update"]?.toString();
         timeInApp = status["time_in_app"]?.toString();
@@ -70,15 +71,12 @@ class _StatusTabState extends State<StatusTab> {
     return int.tryParse(value.toString()) ?? 0;
   }
 
-  int get amountAnswered {
-    return dailyStatics.fold(0, (sum, e) {
-      return sum + _parseInt(e["count"]);
-    });
-  }
+  int get amountAnswered =>
+      dailyStatics.fold(0, (s, e) => s + _parseInt(e["count"]));
 
   Map<String, dynamic> stat(String key) {
     final item = dailyStatics.firstWhere(
-          (e) => e["status"] == key,
+      (e) => e["status"] == key,
       orElse: () => {"count": 0},
     );
 
@@ -91,12 +89,24 @@ class _StatusTabState extends State<StatusTab> {
   void setGoal(int value) async {
     setState(() => disableSelect = true);
 
-    await Future.delayed(const Duration(milliseconds: 300));
-    setState(() {
-      dailyGoal = value;
-      showSuccess = true;
-      disableSelect = false;
-    });
+    try {
+      final res = await AuthService.updateUser({'everyday_goal': value});
+
+      if (res['status'] == 'success') {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('daily_goal', value);
+
+        setState(() => dailyGoal = value);
+      }
+    } finally {
+      if (mounted) setState(() => disableSelect = false);
+    }
+  }
+
+  Future<void> _loadDailyGoalFromStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    dailyGoal = prefs.getInt('daily_goal') ?? 0;
+    setState(() {});
   }
 
   @override
@@ -125,44 +135,32 @@ class _StatusTabState extends State<StatusTab> {
 
           const SizedBox(height: 32),
 
-          _TodayActivity(
-            amount: amountAnswered,
-            correct: stat("correct")["count"],
-            skipped: stat("skipped")["count"],
-            wrong: stat("wrong")["count"],
-            percentCorrect: stat("correct")["percent"],
-          ),
+          if (dailyStatics.isNotEmpty)
+            _TodayActivity(
+              amount: amountAnswered,
+              correct: stat("correct")["count"],
+              skipped: stat("skipped")["count"],
+              wrong: stat("wrong")["count"],
+              percentCorrect: stat("correct")["percent"],
+            ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
-          _CheckProgressButton(onTap: () {}),
-
-          const SizedBox(height: 32),
-
-          _PointsSection(
-            points: points,
-            lastUpdate: lastUpdate,
-          ),
+          _PointsSection(points: points, lastUpdate: lastUpdate),
 
           if (pastCategoriesCount > 0 && categoriesCount > 0) ...[
             const SizedBox(height: 32),
-            Column(
-              children: [
-                const Text(
-                  'Vergangene Kategorien',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Text('$pastCategoriesCount von $categoriesCount'),
-                const SizedBox(height: 6),
-                Text(
-                  '${pastCategoriesPercent.toStringAsFixed(0)} %',
-                  style: const TextStyle(
-                    color: Colors.purple,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            Text(
+              'Vergangene Kategorien',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text('$pastCategoriesCount von $categoriesCount'),
+            Text(
+              '${pastCategoriesPercent.toStringAsFixed(0)} %',
+              style: const TextStyle(
+                color: Colors.purple,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
 
@@ -177,7 +175,7 @@ class _StatusTabState extends State<StatusTab> {
   }
 }
 
-/* ================= DAILY GOAL (UNTOUCHED) ================= */
+/* ================= DAILY GOAL ================= */
 
 class _DailyGoal extends StatelessWidget {
   final int value;
@@ -197,14 +195,9 @@ class _DailyGoal extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Tägliches Ziel setzen',
-            style: TextStyle(fontSize: 14, color: Colors.black54),
-          ),
-          const SizedBox(height: 12),
+          const Text('Tägliches Ziel setzen'),
           DropdownButton<int>(
             value: value == 0 ? null : value,
-            hint: const Text('Ziel auswählen'),
             isExpanded: true,
             onChanged: disabled ? null : (v) => onChanged(v!),
             items: const [
@@ -214,7 +207,6 @@ class _DailyGoal extends StatelessWidget {
               DropdownMenuItem(value: 40, child: Text('40 Fragen')),
             ],
           ),
-          const Divider(),
         ],
       ),
     );
@@ -234,33 +226,23 @@ class _LastQuiz extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final category = lastQuiz!["lastCategory"];
-    final name = category["name"] ?? "";
-    final answered = lastQuiz!["answeredQuestions"] ?? 0;
-    final total = lastQuiz!["totalQuestions"] ?? 0;
-
     return Column(
       children: [
         const Text(
           'Letztes Quiz',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 12),
-        Text(name),
-        const SizedBox(height: 6),
+        Text(lastQuiz!["lastCategory"]["name"] ?? ''),
         Text(
-          '$answered / $total',
-          style: const TextStyle(
-            color: Colors.purple,
-            fontWeight: FontWeight.bold,
-          ),
+          '${lastQuiz!["answeredQuestions"]} / ${lastQuiz!["totalQuestions"]}',
+          style: const TextStyle(color: Colors.purple),
         ),
       ],
     );
   }
 }
 
-/* ================= TODAY ACTIVITY (UNTOUCHED) ================= */
+/* ================= TODAY ACTIVITY ================= */
 
 class _TodayActivity extends StatelessWidget {
   final int amount;
@@ -285,12 +267,17 @@ class _TodayActivity extends StatelessWidget {
           'Heutige Aktivität',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 40),
         SizedBox(
           width: 220,
           height: 160,
           child: CustomPaint(
-            painter: _OpenCirclePainter(percentCorrect, gapDegrees: 50),
+            painter: _OpenCirclePainter(
+              percent: percentCorrect,
+              gapDegrees: 50,
+              color: Colors.green,
+              strokeWidth: 10,
+            ),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -302,74 +289,32 @@ class _TodayActivity extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text('Richtig $correct',
-                      style: const TextStyle(color: Colors.green)),
+                  Text(
+                    'Richtig $correct',
+                    style: const TextStyle(color: Colors.green),
+                  ),
                   Text('Übersprungen $skipped'),
-                  Text('Falsch $wrong',
-                      style: const TextStyle(color: Colors.red)),
+                  Text(
+                    'Falsch $wrong',
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ],
               ),
             ),
           ),
+        ),
+        const SizedBox(height: 20),
+        _CheckProgressButton(
+          onTap: () {
+            DefaultTabController.of(context).animateTo(1);
+          },
         ),
       ],
     );
   }
 }
 
-/* ================= PAINTER ================= */
-
-class _OpenCirclePainter extends CustomPainter {
-  final double percent;
-  final double gapDegrees;
-
-  _OpenCirclePainter(this.percent, {this.gapDegrees = 50});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const stroke = 10.0;
-
-    final bg = Paint()
-      ..color = Colors.grey.shade300
-      ..strokeWidth = stroke
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final fg = Paint()
-      ..color = Colors.purple
-      ..strokeWidth = stroke
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final padding = stroke / 2 + 10;
-    final diameter = math.min(size.width, size.height) - padding * 2;
-
-    final rect = Rect.fromLTWH(
-      (size.width - diameter) / 2,
-      (size.height - diameter) / 2,
-      diameter,
-      diameter,
-    );
-
-    final gap = gapDegrees * math.pi / 180.0;
-    final totalSweep = 2 * math.pi - gap;
-    final startAngle = math.pi / 2 + gap / 2;
-
-    final p = (percent / 100.0).clamp(0.0, 1.0);
-
-    canvas.drawArc(rect, startAngle, totalSweep, false, bg);
-    canvas.drawArc(rect, startAngle, totalSweep * p, false, fg);
-  }
-
-  @override
-  bool shouldRepaint(covariant _OpenCirclePainter oldDelegate) {
-    return oldDelegate.percent != percent ||
-        oldDelegate.gapDegrees != gapDegrees;
-  }
-}
-
-/* ================= BUTTON ================= */
+/* ================= POINTS (SECOND CIRCLE) ================= */
 
 class _CheckProgressButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -392,16 +337,11 @@ class _CheckProgressButton extends StatelessWidget {
   }
 }
 
-/* ================= POINTS ================= */
-
 class _PointsSection extends StatelessWidget {
   final int points;
   final String? lastUpdate;
 
-  const _PointsSection({
-    required this.points,
-    required this.lastUpdate,
-  });
+  const _PointsSection({required this.points, required this.lastUpdate});
 
   @override
   Widget build(BuildContext context) {
@@ -411,23 +351,35 @@ class _PointsSection extends StatelessWidget {
           'Punkte',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        if (lastUpdate != null) ...[
-          const SizedBox(height: 6),
+        if (lastUpdate != null)
           Text(
             'Letztes Update: $lastUpdate',
             style: const TextStyle(color: Colors.black54),
           ),
-        ],
         const SizedBox(height: 20),
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: const Color(0xFFF2ECFF),
-          child: Text(
-            '$points',
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
+        SizedBox(
+          width: 190,
+          height: 190,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CustomPaint(
+                size: const Size(190, 190),
+                painter: _OpenCirclePainter(
+                  percent: 100,
+                  gapDegrees: 0,
+                  color: const Color(0xFFEDE7FF),
+                  strokeWidth: 10,
+                ),
+              ),
+              Text(
+                '$points',
+                style: const TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -444,16 +396,68 @@ class _FooterText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (timeInApp == null || timeInApp!.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (timeInApp == null || timeInApp!.isEmpty) return const SizedBox.shrink();
 
-    return Text(
-      'Du bist in Mathe App $timeInApp',
-      style: const TextStyle(
-        color: Colors.purple,
-        fontWeight: FontWeight.bold,
+    return RichText(
+      text: TextSpan(
+        children: [
+          const TextSpan(
+            text: 'Du bist in Mathe App ',
+            style: TextStyle(color: Colors.black),
+          ),
+          TextSpan(
+            text: timeInApp,
+            style: const TextStyle(
+              color: Colors.purple,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+/* ================= PAINTER ================= */
+
+class _OpenCirclePainter extends CustomPainter {
+  final double percent;
+  final double gapDegrees;
+  final Color color;
+  final double strokeWidth;
+
+  _OpenCirclePainter({
+    required this.percent,
+    required this.gapDegrees,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final radius = size.width / 2 - strokeWidth;
+    final center = Offset(size.width / 2, size.height / 2);
+
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    final gap = gapDegrees * math.pi / 180;
+    final sweep = (2 * math.pi - gap) * (percent / 100);
+    final start = math.pi / 2 + gap / 2;
+
+    canvas.drawArc(rect, start, sweep, false, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _OpenCirclePainter old) =>
+      old.percent != percent ||
+      old.gapDegrees != gapDegrees ||
+      old.color != color ||
+      old.strokeWidth != strokeWidth;
 }

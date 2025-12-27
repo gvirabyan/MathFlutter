@@ -216,6 +216,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
             text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
             enabled: !_saving && !_processing,
             onPressed: _saveProfile,
+            color: Colors.yellow,
           ),
 
           const SizedBox(height: 24),

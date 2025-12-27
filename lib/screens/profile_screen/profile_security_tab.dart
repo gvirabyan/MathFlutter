@@ -100,6 +100,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
             text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
             enabled: !_saving,
             onPressed: _changePassword,
+            color: Colors.yellow,
           ),
         ],
       ),

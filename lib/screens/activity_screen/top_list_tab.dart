@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/auth_service.dart';
 import '../../services/top_list_service.dart';
+import '../../ui_elements/open_circle_gauge.dart';
 
 class TopListTab extends StatefulWidget {
   const TopListTab({super.key});
@@ -191,22 +192,28 @@ class _CirclePoints extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      height: 140,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.black12, width: 1),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        '$points\nPunkte',
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return OpenCircleGauge(
+      percent: 100, // полный круг
+      size: 180,
+      strokeWidth: 8,
+      color: const Color(0xFFEDE7FF),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$points',
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Text('Punkte'),
+        ],
       ),
     );
   }
 }
+
 
 class _TopListMenuCard extends StatelessWidget {
   final TopListCategory category;
@@ -343,28 +350,82 @@ class _TopListSingleState extends State<TopListSingle> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // простой “navbar”
+        // ← Zurück zur Top-List
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: widget.onBack,
-                icon: const Icon(Icons.arrow_back),
-              ),
-              Text(
-                widget.category.title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: _load,
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: GestureDetector(
+            onTap: widget.onBack,
+            child: Row(
+              children: const [
+                Icon(Icons.arrow_back_ios, size: 16, color: Colors.black54),
+                SizedBox(width: 4),
+                Text(
+                  'Zurück zur Top-List',
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ),
-        const Divider(height: 1),
+
+        // ФИОЛЕТОВАЯ КАРТОЧКА (как на скрине)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF4ECFF),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                // LEFT
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'In der ${widget.category.title}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.category.fromText ?? '',
+                      style: const TextStyle(color: Colors.black54),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+
+                // RIGHT
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (widget.category.place != null)
+                      Text(
+                        '${widget.category.place} Platz',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                        ),
+                      ),
+                    const SizedBox(height: 4),
+                    if (widget.category.points != null)
+                      Text(
+                        '${widget.category.points} Punkte',
+                        style: const TextStyle(color: Colors.black54),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // СПИСОК
         Expanded(
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -377,16 +438,30 @@ class _TopListSingleState extends State<TopListSingle> {
               final username = u['username']?.toString() ?? '—';
               final points = _toInt(u['points']);
 
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.purple.shade100,
-                  child: Text('${index + 1}'),
-                ),
-                title: Text(username),
-                trailing: Text(
-                  '$points',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+              return Row(
+                children: [
+                  Text(
+                    '${index + 1}.',
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      username,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '$points',
+                    style: const TextStyle(
+                      color: Colors.purple,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -394,4 +469,5 @@ class _TopListSingleState extends State<TopListSingle> {
       ],
     );
   }
+
 }

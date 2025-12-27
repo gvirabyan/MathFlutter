@@ -60,7 +60,7 @@ class _AnswersTabState extends State<AnswersTab> {
       percent: percent,
       color: color,
       size: 200,
-      strokeWidth: 14,
+      strokeWidth: 11,
       top: Text(
         '${percent.toInt()}%',
         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -74,7 +74,7 @@ class _AnswersTabState extends State<AnswersTab> {
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 13),
         ),
       ),
     );

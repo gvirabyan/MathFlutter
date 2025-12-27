@@ -49,6 +49,26 @@ class _ProgressTabState extends State<ProgressTab> {
   String _fmt(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
   /* ================= LOAD DATA ================= */
+  void _prepareScaleValues() {
+    amountLargest = 0;
+
+    for (final day in days) {
+      final data = userProgress[day];
+      if (data == null) continue;
+
+      int amount = 0;
+      for (final v in data.values) {
+        amount += _parseInt(v);
+      }
+
+      if (amountLargest < amount) {
+        amountLargest = amount;
+      }
+    }
+
+    topValueOfAmount =
+    amountLargest == 0 ? 0 : amountLargest + 5 - (amountLargest % 5);
+  }
 
   Future<void> _updateProgress() async {
     setState(() {
@@ -83,6 +103,7 @@ class _ProgressTabState extends State<ProgressTab> {
       days.add(_fmt(d));
       d = d.add(const Duration(days: 1));
     }
+    _prepareScaleValues();
 
     setState(() => isLoading = false);
   }
@@ -247,9 +268,9 @@ class _ProgressTabState extends State<ProgressTab> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _bar(day, 'wrong', Colors.red),
+                  _bar(day, 'wrong', Colors.green),
                   _bar(day, 'skipped', Colors.grey),
-                  _bar(day, 'correct', Colors.green),
+                  _bar(day, 'correct', Colors.red),
                 ],
               ),
             ),
