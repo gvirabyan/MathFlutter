@@ -38,11 +38,13 @@ class _StatusTabState extends State<StatusTab> {
   }
 
   Future<void> _loadUserStatus() async {
+    if (!mounted) return;
     setState(() => isLoading = true);
 
     try {
       final status = await _userStatsService.getUserStatus();
 
+      if (!mounted) return;
       setState(() {
         dailyStatics = List<Map<String, dynamic>>.from(
           status["daily_statics"] ?? [],
@@ -61,9 +63,11 @@ class _StatusTabState extends State<StatusTab> {
     } catch (e) {
       debugPrint("Error loading user status: $e");
     } finally {
+      if (!mounted) return;
       setState(() => isLoading = false);
     }
   }
+
 
   int _parseInt(dynamic value) {
     if (value == null) return 0;
@@ -105,8 +109,10 @@ class _StatusTabState extends State<StatusTab> {
 
   Future<void> _loadDailyGoalFromStorage() async {
     final prefs = await SharedPreferences.getInstance();
-    dailyGoal = prefs.getInt('daily_goal') ?? 0;
-    setState(() {});
+    if (!mounted) return;
+    setState(() {
+      dailyGoal = prefs.getInt('daily_goal') ?? 0;
+    });
   }
 
   @override
