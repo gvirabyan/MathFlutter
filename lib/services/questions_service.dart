@@ -3,11 +3,12 @@ import 'api_service.dart';
 class QuestionsService {
   /// Получить вопросы по категории
   static Future<Map<String, dynamic>> getQuestions({
-    required int categoryId,
-    int page = 1,
+    int? categoryId,
   }) async {
     final res = await ApiService.get(
-      'topic-questions?categoryId=$categoryId&pagination[page]=$page',
+      'questions'
+          '?filters[category][id][\$eq]=$categoryId'
+          '&pagination[limit]=100',
     );
 
     return res;

@@ -19,6 +19,15 @@ class _StatusTabState extends State<StatusTab> {
   int dailyGoal = 0;
   int points = 0;
 
+  // 🔽 backend driven
+  Map<String, dynamic>? lastQuiz;
+  String? lastUpdate;
+  String? timeInApp;
+
+  int pastCategoriesCount = 0;
+  int categoriesCount = 0;
+  double pastCategoriesPercent = 0;
+
   List<Map<String, dynamic>> dailyStatics = [];
 
   @override
@@ -37,6 +46,16 @@ class _StatusTabState extends State<StatusTab> {
         dailyStatics =
         List<Map<String, dynamic>>.from(status["daily_statics"] ?? []);
         points = _parseInt(status["points"]);
+
+        // ✅ agreed changes
+        lastQuiz = status["last_quiz"];
+        lastUpdate = status["last_update"]?.toString();
+        timeInApp = status["time_in_app"]?.toString();
+
+        pastCategoriesCount = _parseInt(status["past_categories_count"]);
+        categoriesCount = _parseInt(status["categories_count"]);
+        pastCategoriesPercent =
+            (status["past_categories_percent"] ?? 0).toDouble();
       });
     } catch (e) {
       debugPrint("Error loading user status: $e");
@@ -45,7 +64,6 @@ class _StatusTabState extends State<StatusTab> {
     }
   }
 
-  /// ===== SAFE INT PARSER =====
   int _parseInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;
@@ -94,14 +112,19 @@ class _StatusTabState extends State<StatusTab> {
       child: Column(
         children: [
           const SizedBox(height: 16),
+
           _DailyGoal(
             value: dailyGoal,
             disabled: disableSelect,
             onChanged: setGoal,
           ),
+
           const SizedBox(height: 24),
-          const _LastQuiz(),
+
+          _LastQuiz(lastQuiz: lastQuiz),
+
           const SizedBox(height: 32),
+
           _TodayActivity(
             amount: amountAnswered,
             correct: stat("correct")["count"],
@@ -109,12 +132,44 @@ class _StatusTabState extends State<StatusTab> {
             wrong: stat("wrong")["count"],
             percentCorrect: stat("correct")["percent"],
           ),
+
           const SizedBox(height: 24),
+
           _CheckProgressButton(onTap: () {}),
+
           const SizedBox(height: 32),
-          _PointsSection(points: points),
+
+          _PointsSection(
+            points: points,
+            lastUpdate: lastUpdate,
+          ),
+
+          if (pastCategoriesCount > 0 && categoriesCount > 0) ...[
+            const SizedBox(height: 32),
+            Column(
+              children: [
+                const Text(
+                  'Vergangene Kategorien',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Text('$pastCategoriesCount von $categoriesCount'),
+                const SizedBox(height: 6),
+                Text(
+                  '${pastCategoriesPercent.toStringAsFixed(0)} %',
+                  style: const TextStyle(
+                    color: Colors.purple,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+
           const SizedBox(height: 40),
-          const _FooterText(),
+
+          _FooterText(timeInApp: timeInApp),
+
           const SizedBox(height: 100),
         ],
       ),
@@ -122,7 +177,7 @@ class _StatusTabState extends State<StatusTab> {
   }
 }
 
-/* ================= DAILY GOAL ================= */
+/* ================= DAILY GOAL (UNTOUCHED) ================= */
 
 class _DailyGoal extends StatelessWidget {
   final int value;
@@ -169,22 +224,33 @@ class _DailyGoal extends StatelessWidget {
 /* ================= LAST QUIZ ================= */
 
 class _LastQuiz extends StatelessWidget {
-  const _LastQuiz();
+  final Map<String, dynamic>? lastQuiz;
+
+  const _LastQuiz({required this.lastQuiz});
 
   @override
   Widget build(BuildContext context) {
+    if (lastQuiz == null || lastQuiz!["lastCategory"] == null) {
+      return const SizedBox.shrink();
+    }
+
+    final category = lastQuiz!["lastCategory"];
+    final name = category["name"] ?? "";
+    final answered = lastQuiz!["answeredQuestions"] ?? 0;
+    final total = lastQuiz!["totalQuestions"] ?? 0;
+
     return Column(
-      children: const [
-        Text(
+      children: [
+        const Text(
           'Letztes Quiz',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 12),
-        Text('Rechne in zwei Schritten'),
-        SizedBox(height: 6),
+        const SizedBox(height: 12),
+        Text(name),
+        const SizedBox(height: 6),
         Text(
-          '0/60',
-          style: TextStyle(
+          '$answered / $total',
+          style: const TextStyle(
             color: Colors.purple,
             fontWeight: FontWeight.bold,
           ),
@@ -194,7 +260,7 @@ class _LastQuiz extends StatelessWidget {
   }
 }
 
-/* ================= TODAY ACTIVITY ================= */
+/* ================= TODAY ACTIVITY (UNTOUCHED) ================= */
 
 class _TodayActivity extends StatelessWidget {
   final int amount;
@@ -224,7 +290,6 @@ class _TodayActivity extends StatelessWidget {
           width: 220,
           height: 160,
           child: CustomPaint(
-            // ✅ Here is the new painter: circle with bottom gap
             painter: _OpenCirclePainter(percentCorrect, gapDegrees: 50),
             child: Center(
               child: Column(
@@ -253,9 +318,10 @@ class _TodayActivity extends StatelessWidget {
   }
 }
 
-/// ✅ FULL CIRCLE but with a small gap at the bottom (not drawn)
+/* ================= PAINTER ================= */
+
 class _OpenCirclePainter extends CustomPainter {
-  final double percent; // 0..100
+  final double percent;
   final double gapDegrees;
 
   _OpenCirclePainter(this.percent, {this.gapDegrees = 50});
@@ -276,7 +342,6 @@ class _OpenCirclePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    // Make it a perfect circle inside the available box
     final padding = stroke / 2 + 10;
     final diameter = math.min(size.width, size.height) - padding * 2;
 
@@ -287,24 +352,20 @@ class _OpenCirclePainter extends CustomPainter {
       diameter,
     );
 
-    final gap = gapDegrees * math.pi / 180.0; // in radians
-    final totalSweep = 2 * math.pi - gap; // the drawable part
-
-    // Center the gap at the bottom
+    final gap = gapDegrees * math.pi / 180.0;
+    final totalSweep = 2 * math.pi - gap;
     final startAngle = math.pi / 2 + gap / 2;
 
     final p = (percent / 100.0).clamp(0.0, 1.0);
 
-    // background arc (almost full circle)
     canvas.drawArc(rect, startAngle, totalSweep, false, bg);
-
-    // progress arc
     canvas.drawArc(rect, startAngle, totalSweep * p, false, fg);
   }
 
   @override
   bool shouldRepaint(covariant _OpenCirclePainter oldDelegate) {
-    return oldDelegate.percent != percent || oldDelegate.gapDegrees != gapDegrees;
+    return oldDelegate.percent != percent ||
+        oldDelegate.gapDegrees != gapDegrees;
   }
 }
 
@@ -335,8 +396,12 @@ class _CheckProgressButton extends StatelessWidget {
 
 class _PointsSection extends StatelessWidget {
   final int points;
+  final String? lastUpdate;
 
-  const _PointsSection({required this.points});
+  const _PointsSection({
+    required this.points,
+    required this.lastUpdate,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -346,11 +411,13 @@ class _PointsSection extends StatelessWidget {
           'Punkte',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 6),
-        const Text(
-          'Letztes Update: vor kurzem',
-          style: TextStyle(color: Colors.black54),
-        ),
+        if (lastUpdate != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Letztes Update: $lastUpdate',
+            style: const TextStyle(color: Colors.black54),
+          ),
+        ],
         const SizedBox(height: 20),
         CircleAvatar(
           radius: 60,
@@ -371,13 +438,19 @@ class _PointsSection extends StatelessWidget {
 /* ================= FOOTER ================= */
 
 class _FooterText extends StatelessWidget {
-  const _FooterText();
+  final String? timeInApp;
+
+  const _FooterText({required this.timeInApp});
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      'Du bist in Mathe App 21 Tage und 20 Stunden',
-      style: TextStyle(
+    if (timeInApp == null || timeInApp!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Text(
+      'Du bist in Mathe App $timeInApp',
+      style: const TextStyle(
         color: Colors.purple,
         fontWeight: FontWeight.bold,
       ),

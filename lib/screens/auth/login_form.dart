@@ -5,6 +5,7 @@ import '../../ui_elements/primary_button.dart';
 import '../../services/auth_service.dart';
 import '../activity_screen/activity_screen.dart';
 import 'auth_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginForm extends StatefulWidget {
   final void Function(AuthMode) onSwitch;
@@ -21,6 +22,8 @@ class _LoginFormState extends State<LoginForm> {
 
   bool _loading = false;
   bool _obscure = true;
+  bool _rememberMe = false;
+
 
   bool get _isValid =>
       _emailController.text.trim().isNotEmpty &&
@@ -88,6 +91,49 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
         ),
+        const SizedBox(height: 20),
+
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _rememberMe = !_rememberMe;
+                });
+              },
+              child: Icon(
+                _rememberMe
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                size: 20,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Angemeldet bleiben',
+              style: TextStyle(fontSize: 14),
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ForgotPasswordScreen(),
+                  ),
+                );
+              },
+              child: const Text(
+                'Passwort vergessen',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
+        ),
 
         const SizedBox(height: 24),
         PrimaryButton(
@@ -99,7 +145,18 @@ class _LoginFormState extends State<LoginForm> {
 
         GestureDetector(
           onTap: () => widget.onSwitch(AuthMode.register),
-          child: const Text('Nicht Mitglied? Anmelden'),
+          child: RichText(
+            text: TextSpan(
+              style: DefaultTextStyle.of(context).style,
+              children: const [
+                TextSpan(text: 'Nicht Mitglied? '),
+                TextSpan(
+                  text: 'Anmelden',
+                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 16),
 

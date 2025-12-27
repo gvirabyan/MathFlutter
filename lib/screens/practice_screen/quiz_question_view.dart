@@ -5,6 +5,7 @@ class QuizQuestionView extends StatelessWidget {
   final int total;
   final int myPoints;
   final int machinePoints;
+  final String rivalLabel; // ✅ new
   final String title;
   final String question;
   final List<String> answers;
@@ -20,6 +21,7 @@ class QuizQuestionView extends StatelessWidget {
     required this.total,
     required this.myPoints,
     required this.machinePoints,
+    this.rivalLabel = 'Punkte der Maschine', // ✅ default
     required this.title,
     required this.question,
     required this.answers,
@@ -30,65 +32,83 @@ class QuizQuestionView extends StatelessWidget {
     required this.onSubmit,
   });
 
-  Color _circleColor(int i) {
-    if (results[i] == true) return Colors.green;
-    if (results[i] == false) return Colors.red;
-    if (i == currentIndex) return Colors.black;
-    return Colors.grey.shade300;
-  }
-
-  Color _textColor(int i) {
-    final bg = _circleColor(i);
-    if (bg == Colors.grey.shade300) return Colors.black;
-    return Colors.white;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: const Text('Spieler gegen Maschine'),
-        actions: [
-          Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(16),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            child: Text(
-              '0:${secondsLeft.toString().padLeft(2, '0')}',
-              style: const TextStyle(color: Colors.white),
+            const SizedBox(width: 10),
+            Row(
+              children: [
+                const Icon(Icons.timer, size: 18),
+                const SizedBox(width: 6),
+                Text(
+                  '0:${secondsLeft.toString().padLeft(2, '0')}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-          )
-        ],
+          ],
+        ),
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          /// 🔢 номера вопросов
+          // ✅ top circles
           SizedBox(
-            height: 40,
+            height: 42,
             child: ListView.separated(
-              scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
+              scrollDirection: Axis.horizontal,
               itemCount: total,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, i) {
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, i) {
+                final r = (i < results.length) ? results[i] : null;
+                Color border = Colors.grey.shade300;
+                Color bg = Colors.transparent;
+
+                if (r == true) {
+                  border = Colors.green;
+                  bg = Colors.green.withOpacity(0.15);
+                } else if (r == false) {
+                  border = Colors.red;
+                  bg = Colors.red.withOpacity(0.15);
+                }
+
+                final isCurrent = i == currentIndex;
+
                 return CircleAvatar(
                   radius: 16,
-                  backgroundColor: _circleColor(i),
-                  child: Text(
-                    '${i + 1}',
-                    style: TextStyle(
-                      color: _textColor(i),
-                      fontWeight: FontWeight.bold,
+                  backgroundColor: isCurrent ? Colors.deepPurple : bg,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isCurrent ? Colors.deepPurple : border,
+                        width: 2,
+                      ),
+                    ),
+                    child: Text(
+                      '${i + 1}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isCurrent ? Colors.white : Colors.black,
+                      ),
                     ),
                   ),
                 );
@@ -96,51 +116,47 @@ class QuizQuestionView extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          /// очки
+          // ✅ scores
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.circular(12),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 12,
                     ),
-                    child: Text(
-                      'Deine Punkte: $myPoints',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.deepPurple),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Punkte der Maschine: $machinePoints',
+                      'Deine Punkte: $myPoints',
+                      style: const TextStyle(color: Colors.deepPurple),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.deepPurple),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$rivalLabel: $machinePoints',
                       style: const TextStyle(color: Colors.deepPurple),
                     ),
                   ),
                 ),
               ],
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
 
@@ -157,23 +173,23 @@ class QuizQuestionView extends StatelessWidget {
           const SizedBox(height: 24),
 
           ...List.generate(answers.length, (i) {
+            final selected = selectedIndex == i;
+
             return GestureDetector(
               onTap: onSelect == null ? null : () => onSelect!(i),
               child: Container(
-                margin:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
+                  color: selected ? Colors.deepPurple.withOpacity(0.08) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: selectedIndex == i
-                        ? Colors.deepPurple
-                        : Colors.grey.shade300,
-                    width: 2,
+                    color: selected ? Colors.deepPurple : Colors.grey.shade300,
+                    width: 1,
                   ),
-                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${String.fromCharCode(97 + i)}. ${answers[i]}',
+                  answers[i],
                   style: const TextStyle(fontSize: 18),
                 ),
               ),
@@ -183,16 +199,22 @@ class QuizQuestionView extends StatelessWidget {
           const Spacer(),
 
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: onSubmit,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 52),
-                backgroundColor: Colors.amber,
-              ),
-              child: const Text(
-                'abgeben',
-                style: TextStyle(fontSize: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            child: SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: onSubmit,
+                child: const Text(
+                  'Senden',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
               ),
             ),
           ),

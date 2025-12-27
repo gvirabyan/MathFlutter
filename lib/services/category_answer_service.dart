@@ -1,5 +1,10 @@
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
+import 'package:untitled2/services/questions_service.dart';
+
+import '../models/topic_progress_item.dart';
 import 'api_service.dart';
+import 'category_service.dart';
 
 class CategoryAnswerService {
   /// Главный метод — получить ответы для UI

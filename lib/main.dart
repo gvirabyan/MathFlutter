@@ -11,10 +11,17 @@ import 'package:untitled2/screens/profile_screen/profile_account_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_security_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_share_tab.dart';
 import 'package:untitled2/screens/profile_screen/profile_sound_tab.dart';
+import 'package:untitled2/screens/topics_screen/topics_10_11_tab.dart';
+import 'package:untitled2/screens/topics_screen/topics_11_12_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_1_2_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_2_3_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_3_4_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_4_5tab.dart';
+import 'package:untitled2/screens/topics_screen/topics_5_6_tab.dart';
+import 'package:untitled2/screens/topics_screen/topics_6_7_tab.dart';
+import 'package:untitled2/screens/topics_screen/topics_7_8_tab.dart';
+import 'package:untitled2/screens/topics_screen/topics_8_9_tab.dart';
+import 'package:untitled2/screens/topics_screen/topics_9_10_tab.dart';
 import 'package:untitled2/ui_elements/main_app_bar.dart';
 import 'package:untitled2/ui_elements/main_bottom_nav.dart';
 
@@ -60,11 +67,24 @@ class _MainScreenState extends State<MainScreen> {
     _MainTabConfig(
       title: 'Themen',
       subTabs: [
-        _SubTabConfig(label: '1.–2. Klasse', view: const Topics12Tab()),
-        _SubTabConfig(label: '2.–3. Klasse', view: const Topics23Tab()),
-        _SubTabConfig(label: '3.–4. Klasse', view: const Topics34Tab()),
-        _SubTabConfig(label: '4.–5. Klasse', view: const Topics45Tab()),
-      ],
+        // 1–4
+        _SubTabConfig(label: '1.–2. Klasse', view: Topics12Tab()),
+        _SubTabConfig(label: '2.–3. Klasse', view: Topics23Tab()),
+        _SubTabConfig(label: '3.–4. Klasse', view: Topics34Tab()),
+        _SubTabConfig(label: '4.–5. Klasse', view: Topics45Tab()),
+
+        // 5–8
+        _SubTabConfig(label: '5.–6. Klasse', view: Topics56Tab()),
+        _SubTabConfig(label: '6.–7. Klasse', view: Topics67Tab()),
+        _SubTabConfig(label: '7.–8. Klasse', view: Topics78Tab()),
+        _SubTabConfig(label: '8.–9. Klasse', view: Topics89Tab()),
+
+        // 9–12
+        _SubTabConfig(label: '9.–10. Klasse', view: Topics910Tab()),
+        _SubTabConfig(label: '10.–11. Klasse', view: Topics1011Tab()),
+        _SubTabConfig(label: '11.–12. Klasse', view: Topics1112Tab()),
+      ]
+      ,
     ),
     _MainTabConfig(
       title: 'Üben',

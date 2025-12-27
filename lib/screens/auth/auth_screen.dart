@@ -14,7 +14,7 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  AuthMode _mode = AuthMode.register;
+  AuthMode _mode = AuthMode.login;
 
   void _setMode(AuthMode mode) {
     setState(() => _mode = mode);

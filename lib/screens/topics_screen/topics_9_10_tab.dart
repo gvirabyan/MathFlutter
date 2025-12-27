@@ -3,14 +3,14 @@ import '../../models/topic_progress_item.dart';
 import '../../services/category_service.dart';
 import '../../ui_elements/topic_progress_item.dart';
 
-class Topics12Tab extends StatefulWidget {
-  const Topics12Tab({super.key});
+class Topics910Tab extends StatefulWidget {
+  const Topics910Tab({super.key});
 
   @override
-  State<Topics12Tab> createState() => _Topics12TabState();
+  State<Topics910Tab> createState() => _Topics910TabState();
 }
 
-class _Topics12TabState extends State<Topics12Tab> {
+class _Topics910TabState extends State<Topics910Tab> {
   bool isLoading = true;
   List<TopicProgressItem> items = [];
 
@@ -23,7 +23,7 @@ class _Topics12TabState extends State<Topics12Tab> {
   Future<void> _load() async {
     try {
       final categories = await CategoryService.getCategoriesByClass(
-        categoryClassId: 1, // 1.–2. Klasse
+        categoryClassId: 9, // 3.–4. Klasse
         isAdmin: false,
       );
 
@@ -56,7 +56,7 @@ class _Topics12TabState extends State<Topics12Tab> {
           done: e.done,
           total: e.total,
           onTap: () {
-            // TODO: переход внутрь темы
+            // TODO: переход внутрь темы 3.–4. Klasse
           },
         );
       }).toList(),

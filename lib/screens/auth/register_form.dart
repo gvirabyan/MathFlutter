@@ -21,6 +21,8 @@ class _RegisterFormState extends State<RegisterForm> {
   final _passwordController = TextEditingController();
 
   bool _loading = false;
+  bool _obscure = true;              // 👁 show/hide password
+  bool _rememberMe = false;          // ⭕ checkbox
 
   bool get _isValid =>
       _nicknameController.text.trim().isNotEmpty &&
@@ -80,31 +82,75 @@ class _RegisterFormState extends State<RegisterForm> {
           decoration: authInput('Spitzname'),
         ),
         const SizedBox(height: 20),
+
         TextField(
           controller: _emailController,
           decoration: authInput('E-Mail'),
         ),
         const SizedBox(height: 20),
+
+        // ===== PASSWORD WITH EYE ICON =====
         TextField(
           controller: _passwordController,
-          obscureText: true,
-          decoration: authInput('Passwort'),
+          obscureText: _obscure,
+          decoration: authInput('Passwort').copyWith(
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscure ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () => setState(() => _obscure = !_obscure),
+            ),
+          ),
+        ),
+
+        // ===== CHECKBOX =====
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _rememberMe = !_rememberMe;
+                });
+              },
+              child: Icon(
+                _rememberMe
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Angemeldet bleiben',
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
         ),
 
         const SizedBox(height: 24),
+
         PrimaryButton(
           text: _loading ? 'Bitte warten…' : 'Anmelden',
           enabled: _isValid && !_loading,
           onPressed: _submit,
         ),
-        const Spacer(),
 
+        const Spacer(),
+        Text('Ich habe schon einen Account'),
+        // ===== SWITCH TO LOGIN =====
         GestureDetector(
           onTap: () => widget.onSwitch(AuthMode.login),
-          child: const Text('Ich habe schon einen Account'),
+          child: const Text(
+            'Einloggen',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
         ),
-        const SizedBox(height: 16),
 
+        const SizedBox(height: 16),
       ],
     );
   }
