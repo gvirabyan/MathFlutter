@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/topic_progress_item.dart';
 import '../../services/category_service.dart';
 import '../../ui_elements/topic_progress_item.dart';
+import '../practice_screen/quiz_question_screen.dart';
 
 class Topics12Tab extends StatefulWidget {
   const Topics12Tab({super.key});
@@ -56,10 +57,27 @@ class _Topics12TabState extends State<Topics12Tab> {
           done: e.done,
           total: e.total,
           onTap: () {
-            // TODO: переход внутрь темы
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => QuizQuestionScreen(
+                  categoryId: e.categoryId,
+                  learningMode: true,
+                  totalQuestions: e.total,
+                  rival: 'learning',
+                  rivalLabel: '',
+                  showTimer: false,
+                  showScores: false,
+                  awardPoints: false,
+                  saveResult: false,
+                ),
+
+              ),
+            );
           },
         );
       }).toList(),
     );
+
   }
 }

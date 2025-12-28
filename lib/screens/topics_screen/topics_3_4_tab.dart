@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/topic_progress_item.dart';
 import '../../services/category_service.dart';
 import '../../ui_elements/topic_progress_item.dart';
+import '../practice_screen/quiz_question_screen.dart';
 
 class Topics34Tab extends StatefulWidget {
   const Topics34Tab({super.key});
@@ -27,14 +28,15 @@ class _Topics34TabState extends State<Topics34Tab> {
         isAdmin: false,
       );
 
-      final result = categories.map<TopicProgressItem>((cat) {
-        return TopicProgressItem(
-          categoryId: cat['id'],
-          title: cat['attributes']['name'],
-          done: cat['answers'] ?? 0,
-          total: cat['questions'] ?? 0,
-        );
-      }).toList();
+      final result =
+          categories.map<TopicProgressItem>((cat) {
+            return TopicProgressItem(
+              categoryId: cat['id'],
+              title: cat['attributes']['name'],
+              done: cat['answers'] ?? 0,
+              total: cat['questions'] ?? 0,
+            );
+          }).toList();
 
       setState(() => items = result);
     } finally {
@@ -50,16 +52,33 @@ class _Topics34TabState extends State<Topics34Tab> {
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      children: items.map((e) {
-        return TopicProgressItemWidget(
-          title: e.title,
-          done: e.done,
-          total: e.total,
-          onTap: () {
-            // TODO: переход внутрь темы 3.–4.
-          },
-        );
-      }).toList(),
+      children:
+          items.map((e) {
+            return TopicProgressItemWidget(
+              title: e.title,
+              done: e.done,
+              total: e.total,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => QuizQuestionScreen(
+                          categoryId: e.categoryId,
+                          learningMode: true,
+                          totalQuestions: e.total,
+                          rival: 'learning',
+                          rivalLabel: '',
+                          showTimer: false,
+                          showScores: false,
+                          awardPoints: false,
+                          saveResult: false,
+                        ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
     );
   }
 }

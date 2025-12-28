@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'api_service.dart';
 
 class QuestionsService {
@@ -10,9 +12,22 @@ class QuestionsService {
           '?filters[category][id][\$eq]=$categoryId'
           '&pagination[limit]=100',
     );
-
     return res;
   }
+  static Future<Map<String, dynamic>> getTopicQuestions({
+    required int categoryId,
+    int page = 1,
+  }) async {
+    final endpoint =
+        'topic-questions'
+        '?categoryId=$categoryId'
+        '&pagination[page]=$page';
+
+    final res = await ApiService.get(endpoint);
+    return res;
+  }
+
+
 
   /// Вопросы для админа
   static Future<Map<String, dynamic>> getQuestionsForAdmin({

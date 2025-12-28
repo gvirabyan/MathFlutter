@@ -141,7 +141,7 @@ class _MainScreenState extends State<MainScreen> {
           view: PracticeVsMachineTab(),
         ),
         _SubTabConfig(
-          label: 'Mit Freunden',
+          label: 'Speiler vs Speiler',
           view: PracticeVsPlayerTab(),
         ),
       ],
