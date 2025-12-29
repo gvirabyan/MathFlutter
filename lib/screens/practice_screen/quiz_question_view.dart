@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ui_elements/primary_button.dart';
+
 class QuizQuestionView extends StatelessWidget {
   final int currentIndex;
   final int total;
@@ -22,9 +24,14 @@ class QuizQuestionView extends StatelessWidget {
 
   final void Function(int index)? onSelect;
   final VoidCallback? onSubmit;
+  final VoidCallback? onSkip;
+  final VoidCallback? onShowSolution;
+  final void Function(int index)? onCircleTap;
 
-   QuizQuestionView({
+
+  QuizQuestionView({
     super.key,
+    this.onCircleTap,
     required this.currentIndex,
     required this.total,
     required this.myPoints,
@@ -40,12 +47,16 @@ class QuizQuestionView extends StatelessWidget {
     this.showScores = true,
     required this.onSelect,
     required this.onSubmit,
+    this.onSkip,
+    this.onShowSolution,
+
   });
 
   final ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
-// Авто-прокрутка к текущему индексу
+    // Авто-прокрутка к текущему индексу
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -63,12 +74,7 @@ class QuizQuestionView extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            Expanded(
-              child: Text(
-                title,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+            Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
             const SizedBox(width: 10),
 
             // ✅ timer (optional)
@@ -116,7 +122,7 @@ class QuizQuestionView extends StatelessWidget {
                   borderColor = Colors.green; // Правильный — зеленый ободок
                   textColor = Colors.green;
                 } else if (res == false) {
-                  borderColor = Colors.red;   // Неправильный — красный ободок
+                  borderColor = Colors.red; // Неправильный — красный ободок
                   textColor = Colors.red;
                 }
 
@@ -190,10 +196,7 @@ class QuizQuestionView extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              question,
-              style: const TextStyle(fontSize: 32),
-            ),
+            child: Text(question, style: const TextStyle(fontSize: 32)),
           ),
 
           const SizedBox(height: 24),
@@ -201,49 +204,129 @@ class QuizQuestionView extends StatelessWidget {
           ...List.generate(answers.length, (i) {
             final selected = selectedIndex == i;
 
+            String letter = String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
+
             return GestureDetector(
-              onTap: onSelect == null ? null : () => onSelect!(i),
+              onTap: () => onCircleTap?.call(i),
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: selected
-                      ? Colors.deepPurple.withOpacity(0.08)
-                      : Colors.white,
+                  color:
+                      selected
+                          ? Colors.deepPurple.withOpacity(0.08)
+                          : Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: selected ? Colors.deepPurple : Colors.grey.shade300,
-                    width: 1,
+                    width: 1.5, // Немного увеличим толщину для четкости
                   ),
                 ),
-                child: Text(
-                  answers[i],
-                  style: const TextStyle(fontSize: 18),
+                child: Row(
+                  children: [
+                    // Блок с буквой
+                    Text(
+                      letter,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: selected ? Colors.deepPurple : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(width: 12), // Отступ между буквой и текстом
+                    // Текст ответа
+                    Expanded(
+                      child: Text(
+                        answers[i],
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
           }),
 
           const Spacer(),
+          // ... после Spacer()
 
+          if(!showTimer)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            child: SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: onShowSolution,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.deepPurple,
+                  padding: EdgeInsets.zero,
+                ),
+                child: const Text(
+                  'Erklärung',
+                  style: TextStyle(
+                    fontSize: 16,
+                    decoration: TextDecoration.underline,
+                    // Подчеркивание как в вебе
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                onPressed: onSubmit,
-                child: const Text(
-                  'Senden',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
               ),
+            ),
+          ),
+
+          const SizedBox(height: 8), // Отступ между ссылкой и кнопками
+          // Ваши кнопки Skip и Senden (Row из предыдущего шага)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Row(
+              children: [
+                // ... код кнопок Skip и Senden
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                if(!showTimer)
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 54,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Colors.deepPurple,
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: onSkip,
+                      child: const Text(
+                        'Überspringen',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Кнопка Senden (Отправить)
+                Expanded(
+                  flex: 3,
+                  child: PrimaryButton(
+                    text: 'abgeben', // Текст из твоего примера
+                    enabled: selectedIndex != null, // Твоя логика активации
+                    onPressed: onSubmit,
+                     color: Colors.yellow,
+                    // Если хочешь желтый, раскомментируй
+                  ),
+                ),
+              ],
             ),
           ),
         ],

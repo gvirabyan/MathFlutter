@@ -26,6 +26,8 @@ class PrimaryButton extends StatelessWidget {
           backgroundColor: enabled
               ? baseColor
               : baseColor.withOpacity(0.2),
+          disabledBackgroundColor:
+          Colors.amber.withOpacity(0.4),
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(

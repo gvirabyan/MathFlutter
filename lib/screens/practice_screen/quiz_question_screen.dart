@@ -290,6 +290,44 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
           selectedIndex == null || submitted
               ? null
               : () => _submitAnswer(selectedIndex),
+      onSkip: () {
+        _nextQuestion();
+      },
+      onShowSolution: () {
+       // _showSolutionDialog(q.id); // Вызываем метод показа решения
+      },
+    );
+  }
+  void _showSolutionDialog(int questionId) async {
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Lösungsweg',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Text(
+                  "Здесь будет текст решения из API...", // Сюда подставить данные из сервиса
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
