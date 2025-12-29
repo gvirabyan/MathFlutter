@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'quiz_question_screen.dart';
+import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
+import '../topics_screen/learning_quiz_question_screen.dart';
 
 class PracticeVsMachineTab extends StatelessWidget {
   const PracticeVsMachineTab({super.key});
@@ -8,7 +9,7 @@ class PracticeVsMachineTab extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => QuizQuestionScreen(totalQuestions: count),
+        builder: (_) => PracticeQuizQuestionScreen(totalQuestions: count),
       ),
     );
   }

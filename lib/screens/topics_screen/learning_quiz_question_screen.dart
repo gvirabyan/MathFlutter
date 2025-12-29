@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled2/screens/topics_screen/learning_quiz_question_view.dart';
 import 'package:untitled2/services/questions_service.dart';
 
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
 import '../../services/quiz_service.dart';
-import 'quiz_question_view.dart';
 
-class QuizQuestionScreen extends StatefulWidget {
+class LearningQuizQuestionScreen extends StatefulWidget {
   final int totalQuestions;
 
   /// learning mode
   final int? categoryId;
   final bool learningMode;
 
-  /// backend params / mode
+   /// backend params / mode
   final String rival;
   final String rivalLabel;
 
@@ -30,7 +30,7 @@ class QuizQuestionScreen extends StatefulWidget {
   /// timer
   final int timeLimitSeconds;
 
-  const QuizQuestionScreen({
+  const LearningQuizQuestionScreen({
     super.key,
     required this.totalQuestions,
     this.categoryId,
@@ -45,17 +45,27 @@ class QuizQuestionScreen extends StatefulWidget {
   });
 
   @override
-  State<QuizQuestionScreen> createState() => _QuizQuestionScreenState();
+  State<LearningQuizQuestionScreen> createState() => _LearningQuizQuestionScreenState();
 }
 
-class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
+class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen> {
   bool loading = true;
   bool submitted = false;
+
+  bool showSecondAnswerDialog = false;
+  String? secondAnswerValue;
 
   List<QuestionModel> questions = [];
   List<bool?> answersResult = []; // для цветов сверху
 
+  // ✅ NEW: Store history of answered questions
+  List<QuestionModel> historyQuestions = [];
+
   int index = 0;
+
+  // ✅ NEW: Flag to show if we're viewing history
+  bool viewingHistory = false;
+  int? historyIndex;
 
   int myPoints = 0;
   int machinePoints = 0;
@@ -95,7 +105,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
 
       questions = resultsList.map((e) => QuestionModel.fromJson(e)).toList();
 
-      // 2. ЗАГРУЖАЕМ СТАТУСЫ СТАРЫХ ОТВЕТОВ (Зеленый/Красный)
+      // 2. ЗАГРУЖАЕМ СТАТУСЫ СТАРЫХ ОТВЕТОВ (История)
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id') ?? 0;
 
@@ -104,6 +114,17 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
         userId: userId,
       );
       final List answeredData = answeredRes['answers'] ?? [];
+
+      // ✅ Create history questions from answered data
+      historyQuestions = answeredData.map((item) {
+        final questionData = item['attributes']['question']['data'];
+        final q = QuestionModel.fromJson({
+          'id': questionData['id'],
+          ...questionData['attributes'],
+          'user_answer': item['attributes'],
+        });
+        return q;
+      }).toList();
 
       // Создаем список булевых значений из ответов в базе
       List<bool> oldStatuses = answeredData.map((item) {
@@ -117,7 +138,6 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
       // 4. ЗАПОЛНЯЕМ КРУЖОЧКИ РЕАЛЬНЫМИ ЦВЕТАМИ
       answersResult = List.generate(widget.totalQuestions, (i) {
         if (i < completedCount) {
-          // Если индекс есть в списке отвеченных — берем его статус, иначе true
           return i < oldStatuses.length ? oldStatuses[i] : true;
         }
         return null; // Еще не отвеченные
@@ -131,14 +151,22 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
       }
     } else {
       // Обычный режим без изменений
-      res = await QuizService.getQuizQuestions(limit: widget.totalQuestions, rival: widget.rival);
-      final List list = res['questions'] is List ? List.from(res['questions']) : [];
+      res = await QuizService.getQuizQuestions(
+        limit: widget.totalQuestions,
+        rival: widget.rival,
+      );
+      final List list = res['questions'] is List
+          ? List.from(res['questions'])
+          : [];
       questions = list.map((e) => QuestionModel.fromJson(e)).toList();
       answersResult = List.filled(questions.length, null);
-      setState(() { index = 0; loading = false; });
+      setState(() {
+        index = 0;
+        loading = false;
+      });
     }
 
-    if (widget.showTimer) _startTimer();
+    if (widget.showTimer && !viewingHistory) _startTimer();
   }
 
   void _startTimer() {
@@ -155,31 +183,26 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
   }
 
   void _submitAnswer(int? selected) async {
-    // 1. Базовые проверки
     if (submitted || selected == null) return;
 
     final q = questions[index];
     final bool isCorrect = selected == q.correctIndex;
 
-    // Вычисляем смещение для UI-кружочков
-    int offset = widget.learningMode ? (widget.totalQuestions - questions.length) : 0;
+    int offset = widget.learningMode
+        ? (widget.totalQuestions - questions.length)
+        : 0;
     if (offset < 0) offset = 0;
 
     timer?.cancel();
 
     setState(() {
       submitted = true;
-
-      // ✅ ПРАВИЛЬНО: Обновляем статус вопроса в текущем списке
       questions[index].userAnswerStatus = isCorrect ? 'correct' : 'wrong';
 
-      // ✅ ПРАВИЛЬНО: Обновляем кружочек в UI (с учетом смещения)
-      // Это закрасит именно 5-й кружок, если 4 уже пройдено
       if ((index + offset) < answersResult.length) {
         answersResult[index + offset] = isCorrect;
       }
 
-      // Начисляем очки (только один раз!)
       if (widget.awardPoints) {
         if (isCorrect) {
           myPoints++;
@@ -188,8 +211,7 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
         }
       }
     });
-
-    // ✅ LEARNING MODE — отправка на бэкенд
+    // ✅ Learning mode - save to backend and add to history
     if (widget.learningMode && widget.categoryId != null) {
       final answerText = q.answers[selected];
       final prefs = await SharedPreferences.getInstance();
@@ -204,20 +226,28 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
         'answer_type': 'topic',
       };
 
-      // Отправляем данные
       await CategoryAnswerService.updateUserAnsweredQuestion(
         answerData: answerData,
       );
+
+      // Add to history
+      final answeredQuestion = QuestionModel(
+        id: q.id,
+        title: q.title,
+        question: q.question,
+        answers: q.answers,
+        correctIndex: q.correctIndex,
+      );
+      answeredQuestion.userAnswerStatus = isCorrect ? 'correct' : 'wrong';
+      historyQuestions.add(answeredQuestion);
+    }
+    if (widget.learningMode && isCorrect) {
+      await _openSecondAnswerDialog(q.answers[selected]);
     }
 
-    // Переход к следующему вопросу
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      if (mounted) _nextQuestion();
-    });
   }
 
   void _nextQuestion() {
-    // Ищем следующий неотвеченный во всем списке
     final nextIndex = questions.indexWhere((q) => q.userAnswerStatus == null);
 
     if (nextIndex == -1) {
@@ -229,9 +259,49 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
       index = nextIndex;
       selectedIndex = null;
       submitted = false;
+      viewingHistory = false;
+      historyIndex = null;
     });
 
     if (widget.showTimer) _startTimer();
+  }
+
+  // ✅ NEW: Show history question
+  void _showHistoryQuestion(int circleIndex) {
+    // Calculate offset
+    int offset = widget.learningMode
+        ? (widget.totalQuestions - questions.length)
+        : 0;
+    if (offset < 0) offset = 0;
+
+    // Can only view answered questions or current question
+    final currentQuestionIndex = index + offset;
+
+    if (circleIndex < offset) {
+      // It's a history question
+      timer?.cancel();
+      setState(() {
+        viewingHistory = true;
+        historyIndex = circleIndex;
+      });
+    } else if (circleIndex == currentQuestionIndex) {
+      // It's the current question - go back to it
+      _returnToPresentQuestion();
+    } else if (circleIndex > currentQuestionIndex) {
+      // Future question - can't view
+      return;
+    }
+  }
+
+  // ✅ NEW: Return to present question
+  void _returnToPresentQuestion() {
+    setState(() {
+      viewingHistory = false;
+      historyIndex = null;
+    });
+    if (widget.showTimer && !submitted) {
+      _startTimer();
+    }
   }
 
   Future<void> _finishQuiz() async {
@@ -257,77 +327,114 @@ class _QuizQuestionScreenState extends State<QuizQuestionScreen> {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
-    if (questions.isEmpty) {
+    if (questions.isEmpty && historyQuestions.isEmpty) {
       return const Scaffold(
         body: Center(child: Text('Keine Fragen verfügbar')),
       );
     }
 
-    final q = questions[index];
-    int offset = widget.learningMode ? (widget.totalQuestions - questions.length) : 0;
+    // Calculate current position
+    int offset = widget.learningMode
+        ? (widget.totalQuestions - questions.length)
+        : 0;
     if (offset < 0) offset = 0;
 
-    return QuizQuestionView(
-      key: ValueKey(index),
-      currentIndex: index + offset,
+    // Determine which question to show
+    QuestionModel displayQuestion;
+    int displayIndex;
+    bool isHistory = false;
+
+    if (viewingHistory && historyIndex != null) {
+      displayQuestion = historyQuestions[historyIndex!];
+      displayIndex = historyIndex!;
+      isHistory = true;
+    } else {
+      displayQuestion = questions[index];
+      displayIndex = index + offset;
+    }
+
+    return LearningQuizQuestionView(
+      key: ValueKey('${displayIndex}_${isHistory ? 'history' : 'current'}'),
+      currentIndex: displayIndex,
+      submitted: submitted,
+      learningMode: widget.learningMode,
       total: widget.totalQuestions,
       results: answersResult,
       myPoints: myPoints,
       machinePoints: machinePoints,
       rivalLabel: widget.rivalLabel,
-      title: q.title,
-      question: q.question,
-      answers: q.answers,
+      title: displayQuestion.title,
+      question: displayQuestion.question,
+      answers: displayQuestion.answers,
+      correctAnswerIndex:
+      (isHistory || submitted) ? displayQuestion.correctIndex : null,
+      userAnswerStatus: isHistory ? displayQuestion.userAnswerStatus : null,
       secondsLeft: secondsLeft,
       selectedIndex: selectedIndex,
-      showTimer: widget.showTimer,
+      showTimer: widget.showTimer && !isHistory,
       showScores: widget.showScores,
-      onSelect: submitted ? null : (i) => setState(() => selectedIndex = i),
-      onSubmit:
-          selectedIndex == null || submitted
-              ? null
-              : () => _submitAnswer(selectedIndex),
-      onSkip: () {
+      isViewingHistory: isHistory,
+      onSelect: (submitted || isHistory) ? null : (i) {
+        setState(() => selectedIndex = i);
+      },
+      onSubmit: (selectedIndex == null || submitted || isHistory)
+          ? null
+          : () => _submitAnswer(selectedIndex),
+      onSkip: isHistory ? null : () {
         _nextQuestion();
       },
       onShowSolution: () {
-       // _showSolutionDialog(q.id); // Вызываем метод показа решения
+        // Implement solution dialog
       },
+      onCircleTap: _showHistoryQuestion,
+      onReturnToPresent: _returnToPresentQuestion,
     );
   }
-  void _showSolutionDialog(int questionId) async {
+  Future<void> _openSecondAnswerDialog(String firstAnswer) async {
+    final controller = TextEditingController();
 
-    showModalBottomSheet(
+    await showDialog<void>(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text('Zusatzantwort'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Lösungsweg',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Text(
-                  "Здесь будет текст решения из API...", // Сюда подставить данные из сервиса
-                  style: const TextStyle(fontSize: 16),
-                ),
+            Text('Erste Antwort: $firstAnswer'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Antwort eingeben',
               ),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              secondAnswerValue = null;
+              Navigator.pop(context);
+            },
+            child: const Text('Überspringen'),
+          ),
+          TextButton(
+            onPressed: () {
+              secondAnswerValue = controller.text;
+              Navigator.pop(context);
+            },
+            child: const Text('Weiter'),
+          ),
+        ],
       ),
     );
   }
+
 }
+

@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'quiz_question_screen.dart';
+import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
+import '../topics_screen/learning_quiz_question_screen.dart';
 
 class PracticeVsPlayerTab extends StatefulWidget {
   const PracticeVsPlayerTab({super.key});
@@ -181,7 +182,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => QuizQuestionScreen(
+        builder: (_) => PracticeQuizQuestionScreen(
           totalQuestions: selectedQuestionsCount!,
         ),
 

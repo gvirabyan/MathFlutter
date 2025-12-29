@@ -12,7 +12,7 @@ class CategoryService {
   }
 
   /// Категории по классу
-  static Future<List<dynamic>> getCategoriesByClass({
+  static Future<List<dynamic>> getCategoriesByClass( {
     required int categoryClassId,
     required bool isAdmin,
   }) async {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/topic_progress_item.dart';
 import '../../services/category_service.dart';
 import '../../ui_elements/topic_progress_item.dart';
-import '../practice_screen/quiz_question_screen.dart';
+import 'learning_quiz_question_screen.dart';
 
 class Topics1011Tab extends StatefulWidget {
   const Topics1011Tab({super.key});
@@ -63,7 +63,7 @@ class _Topics1011TabState extends State<Topics1011Tab> {
                   context,
                   MaterialPageRoute(
                     builder:
-                        (_) => QuizQuestionScreen(
+                        (_) => LearningQuizQuestionScreen(
                           categoryId: e.categoryId,
                           learningMode: true,
                           totalQuestions: e.total,
