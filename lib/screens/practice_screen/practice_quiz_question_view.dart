@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:untitled2/ui_elements/math_or_text.dart';
 import '../../ui_elements/primary_button.dart';
 
 class PracticeQuizQuestionView extends StatelessWidget {
@@ -15,10 +15,8 @@ class PracticeQuizQuestionView extends StatelessWidget {
   final String question;
   final List<String> answers;
 
-  // ✅ NEW: For history display
+  // correct answer shown only after submit
   final int? correctAnswerIndex;
-  final String? userAnswerStatus;
-  final bool isViewingHistory;
 
   final int secondsLeft;
 
@@ -27,6 +25,9 @@ class PracticeQuizQuestionView extends StatelessWidget {
 
   final void Function(int index)? onSelect;
   final VoidCallback? onSubmit;
+
+  // ✅ NEW: next action after submit (Weiter)
+  final VoidCallback? onNext;
 
   PracticeQuizQuestionView({
     super.key,
@@ -39,14 +40,13 @@ class PracticeQuizQuestionView extends StatelessWidget {
     required this.title,
     required this.question,
     required this.answers,
-    this.correctAnswerIndex, // ✅ NEW
-    this.userAnswerStatus, // ✅ NEW
-    this.isViewingHistory = false, // ✅ NEW
+    this.correctAnswerIndex,
     required this.secondsLeft,
     required this.selectedIndex,
     required this.results,
     required this.onSelect,
     required this.onSubmit,
+    required this.onNext,
   });
 
   final ScrollController _scrollController = ScrollController();
@@ -72,13 +72,13 @@ class PracticeQuizQuestionView extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
+            Expanded(
+              child: Text("Player VS Machine", overflow: TextOverflow.ellipsis),
+            ),
             const SizedBox(width: 10),
-
-            // ✅ timer (optional)
             Row(
               children: [
-                const Icon(Icons.timer, size: 18),
+                const Icon(Icons.timer_outlined, size: 18),
                 const SizedBox(width: 6),
                 Text(
                   '0:${secondsLeft.toString().padLeft(2, '0')}',
@@ -93,7 +93,6 @@ class PracticeQuizQuestionView extends StatelessWidget {
         children: [
           const SizedBox(height: 14),
 
-          // ✅ TOP CIRCLES WITH CLICK HANDLERS
           SizedBox(
             height: 42,
             child: ListView.separated(
@@ -103,8 +102,9 @@ class PracticeQuizQuestionView extends StatelessWidget {
               itemCount: total,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (context, i) {
-                final res = results[i];
-                final isCurrent = i == currentIndex && !isViewingHistory;
+                final bool? res =
+                    (i >= 0 && i < results.length) ? results[i] : null;
+                final isCurrent = i == currentIndex;
 
                 Color borderColor = Colors.grey.shade300;
                 Color backgroundColor = Colors.transparent;
@@ -122,11 +122,10 @@ class PracticeQuizQuestionView extends StatelessWidget {
                   textColor = Colors.red;
                 }
 
-                // ✅ Make circles clickable
                 return GestureDetector(
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: 40,
+                    height: 40,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -148,9 +147,6 @@ class PracticeQuizQuestionView extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ✅ "ZURÜCK ZUR AKTUELLEN FRAGE" BUTTON (when viewing history)
-
-          // ✅ scores (optional)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -164,10 +160,11 @@ class PracticeQuizQuestionView extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.deepPurple),
                       borderRadius: BorderRadius.circular(12),
+                      color: Colors.deepPurple,
                     ),
                     child: Text(
                       'Deine Punkte: $myPoints',
-                      style: const TextStyle(color: Colors.deepPurple),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -194,29 +191,35 @@ class PracticeQuizQuestionView extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // ✅ QUESTION TEXT
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(question, style: const TextStyle(fontSize: 32)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                SmartMathText(text: question),
+              ],
+            ),
           ),
 
           const SizedBox(height: 24),
 
-          // ✅ ANSWERS LIST
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: answers.length,
               itemBuilder: (context, i) {
                 final selected = selectedIndex == i;
-                final isCorrect = correctAnswerIndex == i;
-
-                // ✅ History mode: find user's answer
-                int? userAnswerIndex;
-                if (isViewingHistory && userAnswerStatus != null) {
-                  // In history, selectedIndex represents the user's choice
-                  userAnswerIndex = selectedIndex;
-                }
+                final isCorrectAnswer = correctAnswerIndex == i;
 
                 String letter =
                     String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
@@ -225,26 +228,34 @@ class PracticeQuizQuestionView extends StatelessWidget {
                 Color? borderColor;
                 Color? textColor;
 
-                debugPrint(
-                  '[ANSWER ITEM] i=$i | '
-                  'selectedIndex=$selectedIndex | '
-                  'correctAnswerIndex=$correctAnswerIndex | '
-                  'submitted=$submitted | '
-                  'isViewingHistory=$isViewingHistory',
-                );
-
-                // ✅ NORMAL MODE: Just show selection
-                if (selected) {
-                  backgroundColor = Colors.deepPurple.withOpacity(0.08);
-                  borderColor = Colors.deepPurple;
-                  textColor = Colors.deepPurple;
+                if (submitted && correctAnswerIndex != null) {
+                  // ✅ After submit: show green correct, red selected wrong
+                  if (isCorrectAnswer) {
+                    backgroundColor = Colors.green.withOpacity(0.1);
+                    borderColor = Colors.green;
+                    textColor = Colors.green;
+                  } else if (selected && !isCorrectAnswer) {
+                    backgroundColor = Colors.red.withOpacity(0.1);
+                    borderColor = Colors.red;
+                    textColor = Colors.red;
+                  } else {
+                    borderColor = Colors.grey.shade300;
+                    textColor = Colors.black54;
+                  }
                 } else {
-                  borderColor = Colors.grey.shade300;
-                  textColor = Colors.black;
+                  // ✅ Before submit: same design as you had
+                  if (selected) {
+                    backgroundColor = Colors.deepPurple.withOpacity(0.08);
+                    borderColor = Colors.deepPurple;
+                    textColor = Colors.deepPurple;
+                  } else {
+                    borderColor = Colors.grey.shade300;
+                    textColor = Colors.black;
+                  }
                 }
 
                 return GestureDetector(
-                  onTap: isViewingHistory ? null : () => onSelect?.call(i),
+                  onTap: () => onSelect?.call(i),
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(14),
@@ -267,23 +278,7 @@ class PracticeQuizQuestionView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            answers[i],
-                            style: TextStyle(fontSize: 18, color: textColor),
-                          ),
-                        ),
-                        // ✅ Show checkmark or X in history mode
-                        if (isViewingHistory && isCorrect)
-                          const Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                            size: 24,
-                          )
-                        else if (isViewingHistory &&
-                            userAnswerIndex == i &&
-                            !isCorrect)
-                          const Icon(Icons.cancel, color: Colors.red, size: 24),
+                        Expanded(child: SmartMathText(text: answers[i])),
                       ],
                     ),
                   ),
@@ -292,27 +287,24 @@ class PracticeQuizQuestionView extends StatelessWidget {
             ),
           ),
 
-          // ✅ SOLUTION LINK (only if not showing timer)
           const SizedBox(height: 8),
 
-          // ✅ ACTION BUTTONS (skip/submit) - only in normal mode
-          if (!isViewingHistory)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: PrimaryButton(
-                      text: (submitted) ? 'Weiter' : 'abgeben',
-                      enabled: selectedIndex != null,
-                      onPressed: onSubmit,
-                    ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: PrimaryButton(
+                    color: Colors.yellow,
+                    text: submitted ? 'nächstes' : 'abgeben',
+                    enabled: submitted ? true : (selectedIndex != null),
+                    onPressed: submitted ? onNext : onSubmit,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          // ✅ CONTINUE BUTTON (only in history mode)
+          ),
         ],
       ),
     );

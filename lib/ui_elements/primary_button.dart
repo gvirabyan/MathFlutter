@@ -4,38 +4,35 @@ class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool enabled;
-  final Color? color; // 👈 необязательный цвет
+  final Color? color;
 
   const PrimaryButton({
     super.key,
     required this.text,
     required this.onPressed,
     required this.enabled,
-    this.color, // 👈 необязательный
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = color ?? Colors.deepPurple;
+    final Color baseColor = color ?? Colors.deepPurple;
 
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: enabled
-              ? baseColor
-              : baseColor.withOpacity(0.2),
-          disabledBackgroundColor:
-          Colors.amber.withOpacity(0.4),
+          backgroundColor:
+              enabled ? baseColor : baseColor.withOpacity(0.5), // 🔥 ключ
           foregroundColor: Colors.white,
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        onPressed: enabled ? onPressed : null,
-        child: Text(text),
+        onPressed: () {
+          if (!enabled) return;
+          onPressed?.call();
+        },        child: Text(text),
       ),
     );
   }
