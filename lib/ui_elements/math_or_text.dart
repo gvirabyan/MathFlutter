@@ -1,42 +1,76 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_tex/flutter_tex.dart';
-
-class SmartMathText extends StatelessWidget {
-  final String text;
-  final TextStyle? style;
-
-  const SmartMathText({Key? key, required this.text, this.style}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // 1. Обычный текст @@@
-    if (text.startsWith('@@@')) {
-      return Text(text.substring(3), style: style ?? const TextStyle(fontSize: 18));
-    }
-
-    // 2. Моноширинный текст @@
-    if (text.startsWith('@@')) {
-      return Text(
-        text.substring(2),
-        style: const TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, fontSize: 18),
-      );
-    }
-
-    // 3. LaTeX рендеринг
-    String content = text.startsWith('@') ? text.substring(1) : text;
-
-    // Оборачиваем в стандартные теги TeXView
-    return TeXView(
-      loadingWidgetBuilder: (context) => const Center(child: CircularProgressIndicator()),
-      child: TeXViewDocument(
-        r'$$' + content + r'$$',
-        style: TeXViewStyle(
-          contentColor: style?.color ?? Colors.black,
-          backgroundColor: Colors.transparent,
-        ),
-      ),
-      // Это важно для работы внутри списков
-      style: const TeXViewStyle(elevation: 0, backgroundColor: Colors.transparent),
-    );
-  }
-}
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_math_fork/flutter_math.dart';
+//
+// class LatexText extends StatelessWidget {
+//   final String latex;
+//   final bool block;
+//
+//   const LatexText({
+//     super.key,
+//     required this.latex,
+//     this.block = false,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Math.tex(
+//       latex,
+//       mathStyle: block ? MathStyle.display : MathStyle.text,
+//       textStyle: const TextStyle(fontSize: 20),
+//       onErrorFallback: (err) => Text(latex),
+//     );
+//   }
+// }
+// Widget buildQuestionText(String text) {
+//   if (text.startsWith('@@@')) {
+//     return Text(
+//       text.substring(3),
+//     );
+//   }
+//
+//   if (text.startsWith('@@')) {
+//     return Text(
+//       text.substring(2),
+//       style: const TextStyle(
+//         fontFamily: 'monospace',
+//         fontSize: 20,
+//         letterSpacing: 4,
+//         fontWeight: FontWeight.bold,
+//       ),
+//     );
+//   }
+//
+//   if (text.startsWith('@emoji@')) {
+//     return Text(
+//       text.substring(7),
+//       style: const TextStyle(fontSize: 24),
+//     );
+//   }
+//
+//   if (text.startsWith('@pre@')) {
+//     return Container(
+//       width: double.infinity,
+//       padding: const EdgeInsets.all(8),
+//       color: Colors.grey.shade200,
+//       child: Text(
+//         text.substring(5),
+//         style: const TextStyle(fontFamily: 'monospace'),
+//       ),
+//     );
+//   }
+//
+//   if (text.startsWith('@')) {
+//     return Text(
+//       text.substring(1),
+//       style: const TextStyle(fontSize: 20),
+//     );
+//   }
+//
+//   // 🔥 DEFAULT → REAL LaTeX
+//   return LatexText(
+//     latex: text,
+//     block: true,
+//   );
+// }
+//

@@ -111,10 +111,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_tex
-      sha256: "05df1f862832a3785640ff0377863b26bde85a2fac8edad532a179226e5888c5"
+      sha256: "0753310ba5d7ab5fd405f060f285149bf2e6f3a45f3be2f9faf4edab7eb8a93e"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.3"
+    version: "5.1.10"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

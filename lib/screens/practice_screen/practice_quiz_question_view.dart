@@ -72,9 +72,7 @@ class PracticeQuizQuestionView extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            Expanded(
-              child: Text("Player VS Machine", overflow: TextOverflow.ellipsis),
-            ),
+            Expanded(child: Text("Player VS Machine", overflow: TextOverflow.ellipsis)),
             const SizedBox(width: 10),
             Row(
               children: [
@@ -102,8 +100,7 @@ class PracticeQuizQuestionView extends StatelessWidget {
               itemCount: total,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (context, i) {
-                final bool? res =
-                    (i >= 0 && i < results.length) ? results[i] : null;
+                final bool? res = (i >= 0 && i < results.length) ? results[i] : null;
                 final isCurrent = i == currentIndex;
 
                 Color borderColor = Colors.grey.shade300;
@@ -153,10 +150,7 @@ class PracticeQuizQuestionView extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 12,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.deepPurple),
                       borderRadius: BorderRadius.circular(12),
@@ -171,10 +165,7 @@ class PracticeQuizQuestionView extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 12,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.deepPurple),
                       borderRadius: BorderRadius.circular(12),
@@ -206,10 +197,13 @@ class PracticeQuizQuestionView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                SmartMathText(text: question),
-              ],
+                 Text(
+                  question,
+                  style: TextStyle(fontSize: 18, color: Colors.black),
+                ),              ],
             ),
           ),
+
 
           const SizedBox(height: 24),
 
@@ -221,8 +215,7 @@ class PracticeQuizQuestionView extends StatelessWidget {
                 final selected = selectedIndex == i;
                 final isCorrectAnswer = correctAnswerIndex == i;
 
-                String letter =
-                    String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
+                String letter = String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
 
                 Color? backgroundColor;
                 Color? borderColor;
@@ -278,7 +271,12 @@ class PracticeQuizQuestionView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Expanded(child: SmartMathText(text: answers[i])),
+                        Expanded(
+                          child: Text(
+                            answers[i],
+                            style: TextStyle(fontSize: 18, color: textColor),
+                          ),
+                        ),
                       ],
                     ),
                   ),
