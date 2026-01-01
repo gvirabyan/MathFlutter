@@ -24,8 +24,10 @@ import 'package:untitled2/screens/topics_screen/topics_6_7_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_7_8_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_8_9_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_9_10_tab.dart';
+import 'package:untitled2/services/auth_service.dart';
 import 'package:untitled2/ui_elements/main_app_bar.dart';
 import 'package:untitled2/ui_elements/main_bottom_nav.dart';
+import 'package:untitled2/ui_elements/notification_panel.dart';
 
 
 class AppStart extends StatefulWidget {
@@ -53,14 +55,11 @@ class _AppStartState extends State<AppStart> {
         ? 'null'
         : '${token.substring(0, 6)}…${token.substring(token.length - 4)}';
 
-    debugPrint('AUTH CHECK → user_id: $userId, token: $shortToken');
     if (token != null && token.isNotEmpty && userId != null) {
 
-      // ✅ авторизован
       _go(const MainScreen());
 
     } else {
-      // ❌ не авторизован
       _go(const AuthScreen());
     }
   }
@@ -97,15 +96,28 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  int? _dailyGoal;
+  bool _goalLoaded = false;
 
-  // Данные для режима практики (имитация состояния)
+  void _onGoalChanged(int newGoal) {
+    setState(() {
+      _dailyGoal = newGoal;
+      _goalLoaded = true;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDailyGoal();
+  }
   bool startPracticeVsFriend = false;
 
   late final List<_MainTabConfig> _tabs = [
     _MainTabConfig(
       title: 'Aktivität',
       subTabs: [
-        _SubTabConfig(label: 'Mein Status', view: const StatusTab()),
+        _SubTabConfig(label: 'Mein Status', view: StatusTab(onGoalUpdated: _onGoalChanged)),
         _SubTabConfig(label: 'Top List', view: const TopListTab()),
         _SubTabConfig(label: 'Meine Antworten', view: const AnswersTab()),
         _SubTabConfig(label: 'Progress', view: const ProgressTab()),
@@ -168,7 +180,12 @@ class _MainScreenState extends State<MainScreen> {
       appBar: MainAppBar(
         title: current.title,
         tabs: current.subTabs?.map((e) => Tab(text: e.label)).toList(),
+        dailyGoal: _goalLoaded ? _dailyGoal : -1,
+
       ),
+      endDrawer: const NotificationPanel(),
+
+
       body: current.subTabs == null
           ? current.view!
           : TabBarView(
@@ -195,6 +212,47 @@ class _MainScreenState extends State<MainScreen> {
 
     return page;
   }
+  Future<void> _loadDailyGoal() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 1️⃣ пробуем локально
+    final localGoal = prefs.getInt('daily_goal');
+    if (localGoal != null) {
+      setState(() {
+        _dailyGoal = localGoal;
+        _goalLoaded = true;
+      });
+      return;
+    }
+
+    // 2️⃣ идём на backend
+    final res = await AuthService.getUser();
+
+    if (res['status'] == 'success') {
+      final user = res['user'];
+      final backendGoal = user['everyday_goal'];
+
+      if (backendGoal is int) {
+        await prefs.setInt('daily_goal', backendGoal);
+
+        setState(() {
+          _dailyGoal = backendGoal;
+          _goalLoaded = true;
+        });
+        return;
+      }
+    }
+
+    // 3️⃣ fallback = 10
+    const fallback = 10;
+    await prefs.setInt('daily_goal', fallback);
+
+    setState(() {
+      _dailyGoal = fallback;
+      _goalLoaded = true;
+    });
+  }
+
 }
 
 class _MainTabConfig {
@@ -215,3 +273,4 @@ class _SubTabConfig {
 
   _SubTabConfig({required this.label, required this.view});
 }
+

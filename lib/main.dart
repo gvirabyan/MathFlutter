@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'app_start.dart';
+import 'app_text_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +14,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AppStart(),
+      home: const AppStart(),
+      theme: ThemeData(
+        fontFamily: 'Rubik',
+        textTheme: AppTextTheme.textTheme,
+      ),
     );
+
   }
 }

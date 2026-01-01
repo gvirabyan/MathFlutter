@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app_colors.dart';
 import '../../services/auth_service.dart';
 
 class ProfileSoundTab extends StatefulWidget {
@@ -47,7 +48,7 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
       if (!value) {
         soundVolume = 0;
       } else if (soundVolume == 0) {
-        soundVolume = 10;
+        soundVolume = 50;
       }
     });
 
@@ -93,7 +94,7 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Sound',
+                'Ton',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -102,6 +103,7 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
               Switch(
                 value: soundEnabled,
                 onChanged: _toggleSound,
+
               ),
             ],
           ),
@@ -119,7 +121,6 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              Text('${soundVolume.toInt()}%'),
             ],
           ),
 
@@ -128,7 +129,20 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
             min: 0,
             max: 100,
             divisions: 100,
-            onChanged: _updateVolume,
+            onChanged: (value) {
+              setState(() {
+                soundVolume = value;
+
+                if (value == 0) {
+                  soundEnabled = false;
+                } else if (!soundEnabled) {
+                  soundEnabled = true;
+                }
+              });
+            },
+
+            onChangeEnd: _updateVolume,            activeColor: AppColors.primaryPurple,
+            inactiveColor: Colors.grey.withOpacity(0.4),
           ),
         ],
       ),

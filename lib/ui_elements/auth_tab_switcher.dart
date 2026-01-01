@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/app_colors.dart';
 import '../screens/auth/auth_screen.dart';
 
 class AuthTabSwitcher extends StatelessWidget {
@@ -31,10 +32,10 @@ class AuthTabSwitcher extends StatelessWidget {
             const SizedBox(height: 6),
             if (selected)
               Container(
-                width: 40,
-                height: 3,
+                width: 100,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple,
+                  color: AppColors.primaryPurple,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

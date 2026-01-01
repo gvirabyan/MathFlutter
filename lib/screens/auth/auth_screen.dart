@@ -35,16 +35,19 @@ class _AuthScreenState extends State<AuthScreen> {
                 _mode == AuthMode.login ? 'Einloggen' : 'Anmelden',
                 style: const TextStyle(
                   fontSize: 28,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 48),
 
-              AuthTabSwitcher(
-                current: _mode,
-                onChanged: _setMode,
-              ),
+              if (_mode != AuthMode.login) ...[
+                AuthTabSwitcher(
+                  current: _mode,
+                  onChanged: _setMode,
+                ),
+                const SizedBox(height: 32),
+              ],
 
               const SizedBox(height: 32),
 

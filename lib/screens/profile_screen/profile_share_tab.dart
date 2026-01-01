@@ -152,9 +152,12 @@ class _ProfileShareTabState extends State<ProfileShareTab>
                       ),
                     ),
                   ] else ...[
+                    const SizedBox(height: 10,),
                     const Text(
                       'Du hast keine E-Mail-Adresse gespeichert',
-                      style: TextStyle(color: Colors.black54),
+                      style: TextStyle( fontSize: 13,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400),
                     ),
                   ],
 
@@ -176,6 +179,9 @@ class _ProfileShareTabState extends State<ProfileShareTab>
                           const InputDecoration(
                             hintText:
                             'E-Mail Adresse angeben',
+                            hintStyle: TextStyle(
+                              color: Colors.black38,
+                            ),
                             border:
                             UnderlineInputBorder(),
                           ),

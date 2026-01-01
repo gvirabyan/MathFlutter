@@ -108,13 +108,13 @@ class _AnswersTabState extends State<AnswersTab> {
         children: [
           const Text(
             'Zusammenfassung',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 6),
           if (answersStats['last_update'] != null)
             Text(
-              'Letztes Update: ${answersStats['last_update']}',
-              style: const TextStyle(color: Colors.black54),
+              'Letztes Update:${answersStats['last_update']}',
+              style: const TextStyle(color: Colors.black,fontSize: 12),
             ),
           const SizedBox(height: 32),
 

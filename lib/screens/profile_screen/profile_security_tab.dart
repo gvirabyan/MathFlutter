@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app_colors.dart';
 import '../../services/auth_service.dart';
 import '../../ui_elements/primary_button.dart';
 
@@ -92,6 +93,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
             onToggle: () =>
                 setState(() => _hideConfirm = !_hideConfirm),
           ),
+          _divider(),
 
           const Spacer(),
 
@@ -100,7 +102,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
             text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
             enabled: !_saving,
             onPressed: _changePassword,
-            color: Colors.yellow,
+            color: AppColors.primaryYellow,
           ),
         ],
       ),
@@ -115,8 +117,9 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 13,
-          color: Colors.black54,
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.w300
         ),
       ),
     );

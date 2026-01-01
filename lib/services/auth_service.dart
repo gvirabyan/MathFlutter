@@ -111,7 +111,6 @@ class AuthService {
       ) async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
-    debugPrint('user_id ================ = $userId');
 
     final data = await ApiService.put('users/$userId', body);
 

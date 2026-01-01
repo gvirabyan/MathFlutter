@@ -231,7 +231,7 @@ class _ProgressTabState extends State<ProgressTab> {
                 child: Column(
                   children: [
                     Text(
-                      "Данные за ${DateFormat('dd.MM.yyyy').format(DateTime.parse(selectedDay!))}",
+                      DateFormat('dd-MM-yyyy').format(DateTime.parse(selectedDay!)),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
@@ -399,8 +399,7 @@ class _ProgressTabState extends State<ProgressTab> {
     final day = days[selectedIndex!];
     final data = userProgress[day] ?? {};
 
-    // Рассчитываем положение (X) в зависимости от индекса
-    // 48 = 40 (шкала) + 8 (отступ)
+
     return Positioned(
       bottom: 60, // Высота над датами
       left:
@@ -592,7 +591,6 @@ class _ProgressTabState extends State<ProgressTab> {
           value.toString(),
           style: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.bold,
             color: color,
           ),
         ),
@@ -608,9 +606,9 @@ class _ProgressTabState extends State<ProgressTab> {
       children: [
         if (isAtFirstPeriod && registeredAt != null)
           Text(
-            'Sie sind registriert seit '
-            '${DateFormat('dd.MM.yyyy').format(registeredAt!)}',
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
+            'Du hast dich registriert am '
+            '${DateFormat('yyyy-MM-dd').format(registeredAt!)}',
+            style: const TextStyle(fontSize: 14, color: Colors.black),
           )
         else
           TextButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/app_colors.dart';
 import '../../services/auth_service.dart';
 import '../../ui_elements/primary_button.dart';
 import '../../screens/auth/auth_screen.dart';
@@ -57,7 +58,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
       emailCtrl.text = (u['email'] ?? '').toString();
       nameCtrl.text = (u['name'] ?? '').toString();
       surnameCtrl.text = (u['surname'] ?? '').toString();
-      nicknameCtrl.text = (u['nickname'] ?? '').toString();
+      nicknameCtrl.text = (u['username'] ?? '').toString();
       birthCtrl.text = (u['birthDate'] ?? '').toString();
       countryCtrl.text = (u['country'] ?? '').toString();
       cityCtrl.text = (u['city'] ?? '').toString();
@@ -77,7 +78,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
     final body = {
       'name': nameCtrl.text.trim(),
       'surname': surnameCtrl.text.trim(),
-      'nickname': nicknameCtrl.text.trim(),
+      'username': nicknameCtrl.text.trim(),
       'birthDate': birthCtrl.text.trim(),
       'country': countryCtrl.text.trim(),
       'city': cityCtrl.text.trim(),
@@ -216,7 +217,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
             text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
             enabled: !_saving && !_processing,
             onPressed: _saveProfile,
-            color: Colors.yellow,
+            color: AppColors.primaryYellow,
           ),
 
           const SizedBox(height: 24),
@@ -269,9 +270,9 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 13,
-          color: Colors.black54,
-        ),
+          fontSize: 12,
+          color: Colors.black,
+fontWeight: FontWeight.w300        ),
       ),
     );
   }

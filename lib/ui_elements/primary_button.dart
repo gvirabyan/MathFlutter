@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/app_colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -16,7 +17,7 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color baseColor = color ?? Colors.deepPurple;
+    final Color baseColor = color ?? AppColors.primaryPurple;
 
     return SizedBox(
       width: double.infinity,

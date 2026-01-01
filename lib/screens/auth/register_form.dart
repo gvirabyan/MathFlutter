@@ -22,13 +22,13 @@ class _RegisterFormState extends State<RegisterForm> {
   final _passwordController = TextEditingController();
 
   bool _loading = false;
-  bool _obscure = true;              // 👁 show/hide password
-  bool _rememberMe = false;          // ⭕ checkbox
+  bool _obscure = true; // 👁 show/hide password
+  bool _rememberMe = false; // ⭕ checkbox
 
   bool get _isValid =>
       _nicknameController.text.trim().isNotEmpty &&
-          _emailController.text.trim().isNotEmpty &&
-          _passwordController.text.isNotEmpty;
+      _emailController.text.trim().isNotEmpty &&
+      _passwordController.text.isNotEmpty;
 
   @override
   void initState() {
@@ -96,9 +96,7 @@ class _RegisterFormState extends State<RegisterForm> {
           obscureText: _obscure,
           decoration: authInput('Passwort').copyWith(
             suffixIcon: IconButton(
-              icon: Icon(
-                _obscure ? Icons.visibility_off : Icons.visibility,
-              ),
+              icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
               onPressed: () => setState(() => _obscure = !_obscure),
             ),
           ),
@@ -122,10 +120,7 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
-              'Angemeldet bleiben',
-              style: TextStyle(fontSize: 14),
-            ),
+            const Text('Angemeldet bleiben', style: TextStyle(fontSize: 14)),
           ],
         ),
 
@@ -138,17 +133,22 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
 
         const Spacer(),
-        Text('Ich habe schon einen Account'),
-        // ===== SWITCH TO LOGIN =====
-        GestureDetector(
-          onTap: () => widget.onSwitch(AuthMode.login),
-          child: const Text(
-            'Einloggen',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+
+          children: [
+            Text(
+              'Ich habe schon einen Account ',
+              style: TextStyle(fontSize: 16),
             ),
-          ),
+            GestureDetector(
+              onTap: () => widget.onSwitch(AuthMode.login),
+              child: const Text(
+                'Einloggen',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+            ),
+          ],
         ),
 
         const SizedBox(height: 16),

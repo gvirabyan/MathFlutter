@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled2/ui_elements/math_or_text.dart';
+import '../../app_colors.dart';
 import '../../ui_elements/primary_button.dart';
 
 class PracticeQuizQuestionView extends StatelessWidget {
@@ -294,7 +295,7 @@ class PracticeQuizQuestionView extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: PrimaryButton(
-                    color: Colors.yellow,
+                    color: AppColors.primaryYellow,
                     text: submitted ? 'nächstes' : 'abgeben',
                     enabled: submitted ? true : (selectedIndex != null),
                     onPressed: submitted ? onNext : onSubmit,

@@ -90,7 +90,7 @@ class _NicknameFormState extends State<NicknameForm> {
                 fontSize: 14,
               ),
               children: [
-                TextSpan(text: 'Ich habe schon einen Account\n'),
+                TextSpan(text: 'Ich habe schon einen Account'),
                 TextSpan(
                   text: 'Einloggen',
                   style: TextStyle(

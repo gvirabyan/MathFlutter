@@ -2,10 +2,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/services/auth_service.dart';
+import '../../app_colors.dart';
 import '../../services/user_stats_service.dart';
 
 class StatusTab extends StatefulWidget {
-  const StatusTab({super.key});
+  final Function(int)? onGoalUpdated;
+
+  const StatusTab({super.key, this.onGoalUpdated});
 
   @override
   State<StatusTab> createState() => _StatusTabState();
@@ -101,6 +104,9 @@ class _StatusTabState extends State<StatusTab> {
         await prefs.setInt('daily_goal', value);
 
         setState(() => dailyGoal = value);
+        if (widget.onGoalUpdated != null) {
+          widget.onGoalUpdated!(value);
+        }
       }
     } finally {
       if (mounted) setState(() => disableSelect = false);
@@ -174,7 +180,7 @@ class _StatusTabState extends State<StatusTab> {
 
           _FooterText(timeInApp: timeInApp),
 
-          const SizedBox(height: 100),
+          const SizedBox(height: 50),
         ],
       ),
     );
@@ -236,13 +242,30 @@ class _LastQuiz extends StatelessWidget {
       children: [
         const Text(
           'Letztes Quiz',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
-        Text(lastQuiz!["lastCategory"]["name"] ?? ''),
-        Text(
-          '${lastQuiz!["answeredQuestions"]} / ${lastQuiz!["totalQuestions"]}',
-          style: const TextStyle(color: Colors.purple),
+        const SizedBox(height: 24),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              lastQuiz!["lastCategory"]["name"] ?? '',
+              style: const TextStyle(
+                fontSize: 16, // ← увеличь тут
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '${lastQuiz!["answeredQuestions"]} / ${lastQuiz!["totalQuestions"]}',
+              style: const TextStyle(
+                fontSize: 14, // ← и тут
+                color: AppColors.primaryPurple,
+                  fontWeight: FontWeight.w600              ),
+            ),
+          ],
         ),
+
       ],
     );
   }
@@ -355,22 +378,22 @@ class _PointsSection extends StatelessWidget {
       children: [
         const Text(
           'Punkte',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         if (lastUpdate != null)
           Text(
             'Letztes Update: $lastUpdate',
-            style: const TextStyle(color: Colors.black54),
+            style: const TextStyle(color: Colors.black,fontSize: 12),
           ),
         const SizedBox(height: 20),
         SizedBox(
-          width: 190,
-          height: 190,
+          width: 220,
+          height: 220,
           child: Stack(
             alignment: Alignment.center,
             children: [
               CustomPaint(
-                size: const Size(190, 190),
+                size: const Size(220, 220),
                 painter: _OpenCirclePainter(
                   percent: 100,
                   gapDegrees: 0,
@@ -409,12 +432,12 @@ class _FooterText extends StatelessWidget {
         children: [
           const TextSpan(
             text: 'Du bist in Mathe App ',
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
           ),
           TextSpan(
             text: timeInApp,
             style: const TextStyle(
-              color: Colors.purple,
+              color: AppColors.primaryPurple,
               fontWeight: FontWeight.bold,
             ),
           ),

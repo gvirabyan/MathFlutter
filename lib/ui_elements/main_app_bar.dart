@@ -1,71 +1,83 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../app_colors.dart';
+import '../app_text_theme.dart';
 
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Tab>? tabs;
+  final int? dailyGoal;
 
-  const MainAppBar({super.key, required this.title, this.tabs});
+  const MainAppBar({super.key, required this.title, this.tabs, this.dailyGoal});
+  static const double _myToolbarHeight = 100.0;
 
-  Future<int?> _loadDailyGoal() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('daily_goal');
-  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 0,
-
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
+      titleSpacing: 32,
+      centerTitle: false,
+      toolbarHeight: _myToolbarHeight,
+      actions: [
+        Builder(
+          builder: (context) => Padding(
+            padding: const EdgeInsets.only(right: 24),
+            child: IconButton(
+              icon: const Icon(Icons.notifications_none_outlined,size: 26,),
               color: Colors.white,
-              fontWeight: FontWeight.bold,
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+
             ),
           ),
-          FutureBuilder<int?>(
-            future: _loadDailyGoal(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox.shrink();
-              }
+        ),
+      ],
 
-              return RichText(
+      title: Padding(
+        padding: const EdgeInsets.only(top: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 28
+              ),
+            ),
+            if (dailyGoal != null)
+              RichText(
                 text: TextSpan(
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 13,
+                    color: Colors.white70, // основной цвет
                   ),
                   children: [
-                    const TextSpan(text: 'Dein Ziel heute: '),
-
+                    const TextSpan(text: 'Dein Ziel heute '),
                     TextSpan(
-                      text: '${snapshot.data} Fragen',
+                      text: dailyGoal == -1 ? '…' : '$dailyGoal Fragen',
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.yellow,
+                        color: AppColors.primaryYellow,
+                        fontWeight: FontWeight.bold
                       ),
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-        ],
+              ),
+
+          ],
+        ),
       ),
 
-      // 🎨 GRADIENT BACKGROUND
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.purple, Color(0xFF5B12C9)],
+            colors: [AppColors.primaryPurple, Color(0xFF5B12C9)],
           ),
         ),
       ),
@@ -79,14 +91,15 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white70,
                 tabs: tabs!,
-              ),
+            labelStyle: AppTextTheme.textTheme.titleMedium,
+
+          ),
     );
   }
 
   @override
   Size get preferredSize {
-    return Size.fromHeight(
-      kToolbarHeight + (tabs == null ? 0 : kTextTabBarHeight),
-    );
+    double tabsHeight = tabs == null ? 0 : kTextTabBarHeight;
+    return Size.fromHeight(_myToolbarHeight + tabsHeight);
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app_colors.dart';
+
 class TopicProgressItemWidget extends StatelessWidget {
   final String title;
   final int done;
@@ -32,7 +34,7 @@ class TopicProgressItemWidget extends StatelessWidget {
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -40,9 +42,9 @@ class TopicProgressItemWidget extends StatelessWidget {
             Text(
               '$done/$total',
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.purple,
+                color: AppColors.primaryPurple,
               ),
             ),
           ],
