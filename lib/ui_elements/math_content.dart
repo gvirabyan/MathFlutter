@@ -18,72 +18,88 @@ class MathContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔹 Единый масштаб (можно легко подкрутить)
+    final double scale = isQuestion ? 1.0 : 0.9;
+
     if (content.startsWith('@@@')) {
       return Html(
         data: content.substring(3),
         style: {
           "body": Style(
-            fontSize: FontSize(isQuestion ? 20 : fontSize),
+            fontSize: FontSize((isQuestion ? 18 : fontSize) * scale),
             lineHeight: LineHeight.number(1),
             fontFamily: 'Rubik',
             color: color,
           ),
         },
       );
-    } else if (content.startsWith('@emoji@')) {
+    }
+    else if (content.startsWith('@emoji@')) {
       return Text(
         content.substring(7),
         style: TextStyle(
-          fontSize: isQuestion ? 20 : fontSize,
-          height: 1.5,
+          fontSize: (isQuestion ? 18 : fontSize) * scale,
+          height: 1.4,
           color: color,
         ),
       );
-    } else if (content.startsWith('@@')) {
+    }
+    else if (content.startsWith('@@')) {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Text(
           content.substring(2),
           style: TextStyle(
-            fontSize: isQuestion ? 20 : fontSize,
+            fontSize: (isQuestion ? 18 : fontSize) * scale,
             height: 1,
             fontFamily: 'monospace',
             fontWeight: FontWeight.bold,
-            letterSpacing: 5,
+            letterSpacing: 4,
             color: color,
           ),
         ),
       );
-    } else if (content.startsWith('@pre@')) {
+    }
+    else if (content.startsWith('@pre@')) {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Text(
           content.substring(5),
           style: TextStyle(
             fontFamily: 'monospace',
-            fontSize: isQuestion ? 20 : fontSize,
+            fontSize: (isQuestion ? 18 : fontSize) * scale,
             color: color,
           ),
         ),
       );
-    } else if (content.startsWith('@')) {
+    }
+    else if (content.startsWith('@')) {
       return Text(
         content.substring(1),
         style: TextStyle(
-          fontSize: isQuestion ? 20 : fontSize,
+          fontSize: (isQuestion ? 18 : fontSize) * scale,
           fontWeight: FontWeight.bold,
           color: color,
         ),
       );
-    } else {
+    }
+    else {
       final processedContent = _preprocessLatex(content);
-      return TeXWidget(
-        math: '\\( \\sf $processedContent \\)',
-        teXStyle: TeXStyle(
-          normalColor: color,
-          fontStyle: TeXViewFontStyle(
-            fontSize: isQuestion ? 20 : 18,
-          ),
+
+      return TeXView(
+        child: TeXViewColumn(
+          children: [
+            TeXViewDocument(
+              r'\( \sf ' + processedContent + r' \)',
+              style: TeXViewStyle(
+                contentColor: color,
+                fontStyle: TeXViewFontStyle(
+                  // 🔹 УМЕНЬШЕННЫЙ и аккуратный размер LaTeX
+                  fontSize: ((isQuestion ? 22 : 20) * scale).toInt(),
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -91,11 +107,16 @@ class MathContent extends StatelessWidget {
 
   String _preprocessLatex(String input) {
     String result = input.replaceAll('pi', r'\pi');
-    // More robust sqrt replacement
-    result = result.replaceAllMapped(RegExp(r'sqrt\((.*?)\)'), (match) {
-      return r'\sqrt{' + (match.group(1) ?? '') + '}';
-    });
+
+    // sqrt(x) -> \sqrt{x}
+    result = result.replaceAllMapped(
+      RegExp(r'sqrt\((.*?)\)'),
+          (match) => r'\sqrt{' + (match.group(1) ?? '') + '}',
+    );
+
+    // делаем дроби визуально нормальными
     result = result.replaceAll(r'\frac', r'\dfrac');
+
     return result;
   }
 }
