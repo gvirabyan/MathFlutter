@@ -76,15 +76,13 @@ class MathContent extends StatelessWidget {
         ),
       );
     } else {
-      return TeXView(
-        child: TeXViewDocument(
-          isQuestion
-              ? '\\( \\Large \\sf ${content} \\)'
-              : '\\( \\sf ${content} \\)',
-        ),
-        style: TeXViewStyle(
-          contentColor: color,
-          fontStyle: TeXViewFontStyle(fontSize: isQuestion ? 20 : 18),
+      return TeXWidget(
+        math: isQuestion
+            ? '\\( \\Large \\sf ${content} \\)'
+            : '\\( \\sf ${content} \\)',
+        style: TextStyle(
+          color: color,
+          fontSize: isQuestion ? 20 : 18,
         ),
       );
     }
