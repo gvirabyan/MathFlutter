@@ -76,15 +76,25 @@ class MathContent extends StatelessWidget {
         ),
       );
     } else {
+      final processedContent = _preprocessLatex(content);
       return TeXWidget(
         math: isQuestion
-            ? '\\( \\Large \\sf ${content} \\)'
-            : '\\( \\sf ${content} \\)',
+            ? '\\( \\Large \\sf $processedContent \\)'
+            : '\\( \\sf $processedContent \\)',
         style: TextStyle(
           color: color,
           fontSize: isQuestion ? 20 : 18,
         ),
       );
     }
+  }
+
+  String _preprocessLatex(String input) {
+    String result = input.replaceAll('pi', r'\pi');
+    // More robust sqrt replacement
+    result = result.replaceAllMapped(RegExp(r'sqrt\((.*?)\)'), (match) {
+      return r'\sqrt{' + (match.group(1) ?? '') + '}';
+    });
+    return result;
   }
 }
