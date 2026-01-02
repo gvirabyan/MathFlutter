@@ -78,12 +78,12 @@ class MathContent extends StatelessWidget {
     } else {
       final processedContent = _preprocessLatex(content);
       return TeXWidget(
-        math: isQuestion
-            ? '\\( \\Large \\sf $processedContent \\)'
-            : '\\( \\sf $processedContent \\)',
-        style: TextStyle(
-          color: color,
-          fontSize: isQuestion ? 20 : 18,
+        math: '\\( \\sf $processedContent \\)',
+        teXStyle: TeXStyle(
+          normalColor: color,
+          fontStyle: TeXViewFontStyle(
+            fontSize: isQuestion ? 20 : 18,
+          ),
         ),
       );
     }
@@ -95,6 +95,7 @@ class MathContent extends StatelessWidget {
     result = result.replaceAllMapped(RegExp(r'sqrt\((.*?)\)'), (match) {
       return r'\sqrt{' + (match.group(1) ?? '') + '}';
     });
+    result = result.replaceAll(r'\frac', r'\dfrac');
     return result;
   }
 }
