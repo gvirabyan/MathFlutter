@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:untitled2/ui_elements/math_or_text.dart';
 import '../../app_colors.dart';
 import '../../ui_elements/primary_button.dart';
 
