@@ -65,10 +65,7 @@ class _Topics56TabState extends State<Topics56Tab> {
                       categoryId: e.categoryId,
                       learningMode: true,
                       totalQuestions: e.total,
-                      rival: 'learning',
-                      rivalLabel: '',
-                      showTimer: false,
-                      showScores: false,
+
                       awardPoints: false,
                       saveResult: false,
                     ),

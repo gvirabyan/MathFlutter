@@ -15,13 +15,7 @@ class LearningQuizQuestionScreen extends StatefulWidget {
   final int? categoryId;
   final bool learningMode;
 
-   /// backend params / mode
-  final String rival;
-  final String rivalLabel;
-
-  /// UI toggles
-  final bool showTimer;
-  final bool showScores;
+  /// backend params / mode
 
   /// logic toggles
   final bool awardPoints;
@@ -35,20 +29,18 @@ class LearningQuizQuestionScreen extends StatefulWidget {
     required this.totalQuestions,
     this.categoryId,
     this.learningMode = false,
-    this.rival = 'machine',
-    this.rivalLabel = 'Punkte der Maschine',
-    this.showTimer = true,
-    this.showScores = true,
     this.awardPoints = true,
     this.saveResult = true,
     this.timeLimitSeconds = 60,
   });
 
   @override
-  State<LearningQuizQuestionScreen> createState() => _LearningQuizQuestionScreenState();
+  State<LearningQuizQuestionScreen> createState() =>
+      _LearningQuizQuestionScreenState();
 }
 
-class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen> {
+class _LearningQuizQuestionScreenState
+    extends State<LearningQuizQuestionScreen> {
   bool loading = true;
   bool submitted = false;
 
@@ -66,9 +58,6 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
   // ✅ NEW: Flag to show if we're viewing history
   bool viewingHistory = false;
   int? historyIndex;
-
-  int myPoints = 0;
-  int machinePoints = 0;
 
   late int secondsLeft;
   Timer? timer;
@@ -92,9 +81,10 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
         page: 1,
       );
       final data = res['data'];
-      final List resultsList = data != null && data['results'] is List
-          ? List.from(data['results'])
-          : [];
+      final List resultsList =
+          data != null && data['results'] is List
+              ? List.from(data['results'])
+              : [];
 
       questions = resultsList.map((e) => QuestionModel.fromJson(e)).toList();
 
@@ -109,20 +99,22 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
       final List answeredData = answeredRes['answers'] ?? [];
 
       // ✅ Create history questions from answered data
-      historyQuestions = answeredData.map((item) {
-        final questionData = item['attributes']['question']['data'];
-        final q = QuestionModel.fromJson({
-          'id': questionData['id'],
-          ...questionData['attributes'],
-          'user_answer': item['attributes'],
-        });
-        return q;
-      }).toList();
+      historyQuestions =
+          answeredData.map((item) {
+            final questionData = item['attributes']['question']['data'];
+            final q = QuestionModel.fromJson({
+              'id': questionData['id'],
+              ...questionData['attributes'],
+              'user_answer': item['attributes'],
+            });
+            return q;
+          }).toList();
 
       // Создаем список булевых значений из ответов в базе
-      List<bool> oldStatuses = answeredData.map((item) {
-        return item['attributes']['status'] == 'correct';
-      }).toList();
+      List<bool> oldStatuses =
+          answeredData.map((item) {
+            return item['attributes']['status'] == 'correct';
+          }).toList();
 
       // 3. ВЫЧИСЛЯЕМ СМЕЩЕНИЕ
       int completedCount = widget.totalQuestions - questions.length;
@@ -144,13 +136,9 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
       }
     } else {
       // Обычный режим без изменений
-      res = await QuizService.getQuizQuestions(
-        limit: widget.totalQuestions,
-        rival: widget.rival,
-      );
-      final List list = res['questions'] is List
-          ? List.from(res['questions'])
-          : [];
+      res = await QuizService.getQuizQuestions(limit: widget.totalQuestions);
+      final List list =
+          res['questions'] is List ? List.from(res['questions']) : [];
       questions = list.map((e) => QuestionModel.fromJson(e)).toList();
       answersResult = List.filled(questions.length, null);
       setState(() {
@@ -158,8 +146,6 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
         loading = false;
       });
     }
-
-    if (widget.showTimer && !viewingHistory) _startTimer();
   }
 
   void _startTimer() {
@@ -181,9 +167,8 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
     final q = questions[index];
     final bool isCorrect = selected == q.correctIndex;
 
-    int offset = widget.learningMode
-        ? (widget.totalQuestions - questions.length)
-        : 0;
+    int offset =
+        widget.learningMode ? (widget.totalQuestions - questions.length) : 0;
     if (offset < 0) offset = 0;
 
     timer?.cancel();
@@ -194,14 +179,6 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
 
       if ((index + offset) < answersResult.length) {
         answersResult[index + offset] = isCorrect;
-      }
-
-      if (widget.awardPoints) {
-        if (isCorrect) {
-          myPoints++;
-        } else {
-          machinePoints++;
-        }
       }
     });
     // ✅ Learning mode - save to backend and add to history
@@ -237,7 +214,6 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
     if (widget.learningMode && isCorrect) {
       await _openSecondAnswerDialog(q.answers[selected]);
     }
-
   }
 
   void _nextQuestion() {
@@ -255,16 +231,13 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
       viewingHistory = false;
       historyIndex = null;
     });
-
-    if (widget.showTimer) _startTimer();
   }
 
   // ✅ NEW: Show history question
   void _showHistoryQuestion(int circleIndex) {
     // Calculate offset
-    int offset = widget.learningMode
-        ? (widget.totalQuestions - questions.length)
-        : 0;
+    int offset =
+        widget.learningMode ? (widget.totalQuestions - questions.length) : 0;
     if (offset < 0) offset = 0;
 
     // Can only view answered questions or current question
@@ -292,22 +265,9 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
       viewingHistory = false;
       historyIndex = null;
     });
-    if (widget.showTimer && !submitted) {
-      _startTimer();
-    }
   }
 
   Future<void> _finishQuiz() async {
-    if (widget.saveResult) {
-      await QuizService.saveQuizResult(
-        data: {
-          'my_points': myPoints,
-          'machine_points': machinePoints,
-          'rival': widget.rival,
-        },
-      );
-    }
-
     if (mounted) Navigator.pop(context);
   }
 
@@ -320,9 +280,7 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (questions.isEmpty && historyQuestions.isEmpty) {
@@ -332,9 +290,8 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
     }
 
     // Calculate current position
-    int offset = widget.learningMode
-        ? (widget.totalQuestions - questions.length)
-        : 0;
+    int offset =
+        widget.learningMode ? (widget.totalQuestions - questions.length) : 0;
     if (offset < 0) offset = 0;
 
     // Determine which question to show
@@ -355,30 +312,34 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
       key: ValueKey('${displayIndex}_${isHistory ? 'history' : 'current'}'),
       currentIndex: displayIndex,
       submitted: submitted,
-      learningMode: widget.learningMode,
       total: widget.totalQuestions,
       results: answersResult,
-      myPoints: myPoints,
-      machinePoints: machinePoints,
-      rivalLabel: widget.rivalLabel,
+
       title: displayQuestion.title,
       question: displayQuestion.question,
       answers: displayQuestion.answers,
       correctAnswerIndex:
-      (isHistory || submitted) ? displayQuestion.correctIndex : null,
+          (isHistory || submitted) ? displayQuestion.correctIndex : null,
       userAnswerStatus: isHistory ? displayQuestion.userAnswerStatus : null,
       secondsLeft: secondsLeft,
       selectedIndex: selectedIndex,
       isViewingHistory: isHistory,
-      onSelect: (submitted || isHistory) ? null : (i) {
-        setState(() => selectedIndex = i);
-      },
-      onSubmit: (selectedIndex == null || submitted || isHistory)
-          ? null
-          : () => _submitAnswer(selectedIndex),
-      onSkip: isHistory ? null : () {
-        _nextQuestion();
-      },
+      onSelect:
+          (submitted || isHistory)
+              ? null
+              : (i) {
+                setState(() => selectedIndex = i);
+              },
+      onSubmit:
+          (selectedIndex == null || submitted || isHistory)
+              ? null
+              : () => _submitAnswer(selectedIndex),
+      onSkip:
+          isHistory
+              ? null
+              : () {
+                _nextQuestion();
+              },
       onShowSolution: () {
         // Implement solution dialog
       },
@@ -386,54 +347,53 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
       onReturnToPresent: _returnToPresentQuestion,
     );
   }
-  Future<void> _openSecondAnswerDialog(String firstAnswer)
-  async {
+
+  Future<void> _openSecondAnswerDialog(String firstAnswer) async {
     final controller = TextEditingController();
 
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text('Zusatzantwort'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Zusatzantwort'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Erste Antwort:'),
-                const SizedBox(height: 8),
-                Text(firstAnswer, style: const TextStyle(fontSize: 22)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Erste Antwort:'),
+                    const SizedBox(height: 8),
+                    Text(firstAnswer, style: const TextStyle(fontSize: 22)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    hintText: 'Antwort eingeben',
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'Antwort eingeben',
+            actions: [
+              TextButton(
+                onPressed: () {
+                  secondAnswerValue = null;
+                  Navigator.pop(context);
+                },
+                child: const Text('Überspringen'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              secondAnswerValue = null;
-              Navigator.pop(context);
-            },
-            child: const Text('Überspringen'),
+              TextButton(
+                onPressed: () {
+                  secondAnswerValue = controller.text;
+                  Navigator.pop(context);
+                },
+                child: const Text('Weiter'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              secondAnswerValue = controller.text;
-              Navigator.pop(context);
-            },
-            child: const Text('Weiter'),
-          ),
-        ],
-      ),
     );
   }
-
 }
-

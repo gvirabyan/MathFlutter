@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/app_colors.dart';
 
 import '../../ui_elements/math_content.dart';
 import '../../ui_elements/primary_button.dart';
 
 class LearningQuizQuestionView extends StatelessWidget {
   final bool submitted;
-  final bool learningMode;
   final int currentIndex;
   final int total;
-  final int myPoints;
-  final int machinePoints;
 
   final String rivalLabel;
 
@@ -27,7 +25,6 @@ class LearningQuizQuestionView extends StatelessWidget {
   final int? selectedIndex;
   final List<bool?> results;
 
-
   final void Function(int index)? onSelect;
   final VoidCallback? onSubmit;
   final VoidCallback? onSkip;
@@ -39,12 +36,9 @@ class LearningQuizQuestionView extends StatelessWidget {
     super.key,
     this.onCircleTap,
     required this.submitted,
-    required this.learningMode,
     this.onReturnToPresent, // ✅ NEW
     required this.currentIndex,
     required this.total,
-    required this.myPoints,
-    required this.machinePoints,
     this.rivalLabel = 'Punkte der Maschine',
     required this.title,
     required this.question,
@@ -79,7 +73,7 @@ class LearningQuizQuestionView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: AppColors.primaryPurple,
         foregroundColor: Colors.white,
         elevation: 0,
         title: Row(
@@ -88,7 +82,6 @@ class LearningQuizQuestionView extends StatelessWidget {
             const SizedBox(width: 10),
 
             // ✅ timer (optional)
-
           ],
         ),
       ),
@@ -97,91 +90,94 @@ class LearningQuizQuestionView extends StatelessWidget {
           children: [
             const SizedBox(height: 14),
 
-          // ✅ TOP CIRCLES WITH CLICK HANDLERS
-          SizedBox(
-            height: 42,
-            child: ListView.separated(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              scrollDirection: Axis.horizontal,
-              itemCount: total,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (context, i) {
-                final res = results[i];
-                final isCurrent = i == currentIndex && !isViewingHistory;
+            // ✅ TOP CIRCLES WITH CLICK HANDLERS
+            SizedBox(
+              height: 48,
+              child: ListView.separated(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                scrollDirection: Axis.horizontal,
+                itemCount: total,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, i) {
+                  final res = results[i];
+                  final isCurrent = i == currentIndex && !isViewingHistory;
 
-                Color borderColor = Colors.grey.shade300;
-                Color backgroundColor = Colors.transparent;
-                Color textColor = Colors.black;
+                  Color borderColor = Colors.grey.shade300;
+                  Color backgroundColor = Colors.transparent;
+                  Color textColor = Colors.black38;
 
-                if (isCurrent) {
-                  backgroundColor = Colors.black;
-                  borderColor = Colors.black;
-                  textColor = Colors.white;
-                } else if (res == true) {
-                  borderColor = Colors.green;
-                  textColor = Colors.green;
-                } else if (res == false) {
-                  borderColor = Colors.red;
-                  textColor = Colors.red;
-                }
+                  if (isCurrent) {
+                    backgroundColor = Colors.black;
+                    borderColor = Colors.black;
+                    textColor = Colors.white;
+                  } else if (res == true) {
+                    borderColor = AppColors.greenCorrect;
+                    textColor = AppColors.greenCorrect;
+                  } else if (res == false) {
+                    borderColor = AppColors.redWrong;
+                    textColor = AppColors.redWrong;
+                  }
 
-                // ✅ Make circles clickable
-                return GestureDetector(
-                  onTap: () => onCircleTap?.call(i),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: backgroundColor,
-                      border: Border.all(color: borderColor, width: 2),
-                    ),
-                    child: Text(
-                      '${i + 1}',
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
+                  // ✅ Make circles clickable
+                  return GestureDetector(
+                    onTap: () => onCircleTap?.call(i),
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: backgroundColor,
+                        border: Border.all(color: borderColor, width: 2),
+                      ),
+                      child: Text(
+                        '${i + 1}',
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
 
-          const SizedBox(height: 12),
-
-          // ✅ "ZURÜCK ZUR AKTUELLEN FRAGE" BUTTON (when viewing history)
-
-          // ✅ scores (optional)
-
-          const SizedBox(height: 8),
-
-          // ✅ QUESTION TEXT
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: MathContent(
-              content: question,
-              isQuestion: true,
-              fontSize: 32,
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Colors.grey.shade300,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 36),
 
-          // ✅ ANSWERS LIST
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: answers.length,
+            // ✅ QUESTION TEXT
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: MathContent(
+                content: question,
+                isQuestion: true,
+                fontSize: 32,
+              ),
+            ),
+
+            const SizedBox(height: 36),
+
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: answers.length,
               itemBuilder: (context, i) {
                 final selected = selectedIndex == i;
                 final isCorrect = correctAnswerIndex == i;
 
-                // ✅ History mode: find user's answer
                 int? userAnswerIndex;
                 if (isViewingHistory && userAnswerStatus != null) {
                   // In history, selectedIndex represents the user's choice
@@ -194,31 +190,17 @@ class LearningQuizQuestionView extends StatelessWidget {
                 Color? backgroundColor;
                 Color? borderColor;
                 Color? textColor;
+                Color answersColor = Colors.black;
 
-                debugPrint(
-                    '[ANSWER ITEM] i=$i | '
-                        'selectedIndex=$selectedIndex | '
-                        'correctAnswerIndex=$correctAnswerIndex | '
-                        'submitted=$submitted | '
-                        'isViewingHistory=$isViewingHistory'
-                );
-
-                if (isViewingHistory || (learningMode && submitted)) {
+                if (isViewingHistory || (submitted)) {
                   final bool isUserChoice = selectedIndex == i;
                   final bool isCorrectAnswer = correctAnswerIndex == i;
 
-                  debugPrint(
-                      '→ paint i=$i | '
-                          'isUserChoice=$isUserChoice | '
-                          'isCorrectAnswer=$isCorrectAnswer'
-                  );
                   if (isCorrectAnswer) {
-                    // ✅ правильный ответ — ВСЕГДА зелёный
                     backgroundColor = Colors.green.withOpacity(0.1);
                     borderColor = Colors.green;
                     textColor = Colors.green;
                   } else if (isUserChoice && !isCorrectAnswer) {
-                    // ❌ выбранный, но неправильный
                     backgroundColor = Colors.red.withOpacity(0.1);
                     borderColor = Colors.red;
                     textColor = Colors.red;
@@ -227,14 +209,13 @@ class LearningQuizQuestionView extends StatelessWidget {
                     textColor = Colors.black54;
                   }
                 } else {
-                  // ✅ NORMAL MODE: Just show selection
                   if (selected) {
-                    backgroundColor = Colors.deepPurple.withOpacity(0.08);
-                    borderColor = Colors.deepPurple;
-                    textColor = Colors.deepPurple;
+                    backgroundColor = AppColors.primaryPurple;
+                    textColor = Colors.white;
+                    answersColor = Colors.white;
                   } else {
                     borderColor = Colors.grey.shade300;
-                    textColor = Colors.black;
+                    textColor = Colors.black38;
                   }
                 }
 
@@ -255,20 +236,16 @@ class LearningQuizQuestionView extends StatelessWidget {
                       children: [
                         Text(
                           letter,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
+                          style: TextStyle(fontSize: 18, color: textColor),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: MathContent(
                             content: answers[i],
                             fontSize: 18,
+                            color: answersColor,
                           ),
                         ),
-                        // ✅ Show checkmark or X in history mode
                         if (isViewingHistory && isCorrect)
                           const Icon(
                             Icons.check_circle,
@@ -285,8 +262,7 @@ class LearningQuizQuestionView extends StatelessWidget {
                 );
               },
             ),
-
-          // ✅ SOLUTION LINK (only if not showing timer)
+            const SizedBox(height: 54),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Align(
@@ -294,13 +270,13 @@ class LearningQuizQuestionView extends StatelessWidget {
                 child: TextButton(
                   onPressed: onShowSolution,
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.deepPurple,
+                    foregroundColor: AppColors.primaryPurple,
                     padding: EdgeInsets.zero,
                   ),
                   child: const Text(
                     'Erklärung',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       decoration: TextDecoration.underline,
                       fontWeight: FontWeight.w600,
                     ),
@@ -309,68 +285,64 @@ class LearningQuizQuestionView extends StatelessWidget {
               ),
             ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          // ✅ ACTION BUTTONS (skip/submit) - only in normal mode
-          if (!isViewingHistory)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
+            // ✅ ACTION BUTTONS (skip/submit) - only in normal mode
+            if (!isViewingHistory)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
                     Expanded(
                       flex: 2,
                       child: SizedBox(
                         height: 54,
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: Colors.deepPurple,
-                              width: 1.5,
-                            ),
+                            side: const BorderSide(color: Colors.black),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                           ),
                           onPressed: onSkip,
                           child: const Text(
-                            'Überspringen',
+                            'überspringen',
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
                             ),
                           ),
                         ),
                       ),
                     ),
-                  Expanded(
-                    flex: 3,
-                    child: PrimaryButton(
-                      text: (learningMode && submitted) ? 'Weiter' : 'abgeben',
-                      enabled:
-                          learningMode
-                              ? (submitted || selectedIndex != null)
-                              : selectedIndex != null,
-                      onPressed: learningMode && submitted ? onSkip : onSubmit,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 8,
+                      child: PrimaryButton(
+                        color: AppColors.primaryYellow,
+                        text: (submitted) ? 'Weiter' : 'abgeben',
+                        enabled: (submitted || selectedIndex != null),
+                        onPressed: submitted ? onSkip : onSubmit,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          // ✅ CONTINUE BUTTON (only in history mode)
-          if (isViewingHistory)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SizedBox(
-                height: 54,
-                width: double.infinity,
-                child: PrimaryButton(
-                  text: 'Weiter', // или 'Continue'
-                  enabled: true,
-                  color: Colors.amber,
-                  onPressed: onReturnToPresent,
+                  ],
                 ),
               ),
-            ),
+            // ✅ CONTINUE BUTTON (only in history mode)
+            if (isViewingHistory)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  height: 54,
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    text: 'Weiter', // или 'Continue'
+                    enabled: true,
+                    color: Colors.amber,
+                    onPressed: onReturnToPresent,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

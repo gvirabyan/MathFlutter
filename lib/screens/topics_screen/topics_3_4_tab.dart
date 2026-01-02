@@ -24,7 +24,7 @@ class _Topics34TabState extends State<Topics34Tab> {
   Future<void> _load() async {
     try {
       final categories = await CategoryService.getCategoriesByClass(
-        categoryClassId: 3, // 3.–4. Klasse
+        categoryClassId: 3,
         isAdmin: false,
       );
 
@@ -67,10 +67,7 @@ class _Topics34TabState extends State<Topics34Tab> {
                           categoryId: e.categoryId,
                           learningMode: true,
                           totalQuestions: e.total,
-                          rival: 'learning',
-                          rivalLabel: '',
-                          showTimer: false,
-                          showScores: false,
+
                           awardPoints: false,
                           saveResult: false,
                         ),

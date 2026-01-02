@@ -64,10 +64,8 @@ class _Topics910TabState extends State<Topics910Tab> {
                   categoryId: e.categoryId,
                   learningMode: true,
                   totalQuestions: e.total,
-                  rival: 'learning',
-                  rivalLabel: '',
-                  showTimer: false,
-                  showScores: false,
+
+
                   awardPoints: false,
                   saveResult: false,
                 ),
