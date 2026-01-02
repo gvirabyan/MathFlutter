@@ -92,9 +92,10 @@ class LearningQuizQuestionView extends StatelessWidget {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 14),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 14),
 
           // ✅ TOP CIRCLES WITH CLICK HANDLERS
           SizedBox(
@@ -171,10 +172,11 @@ class LearningQuizQuestionView extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ✅ ANSWERS LIST
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: answers.length,
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: answers.length,
               itemBuilder: (context, i) {
                 final selected = selectedIndex == i;
                 final isCorrect = correctAnswerIndex == i;
@@ -283,7 +285,6 @@ class LearningQuizQuestionView extends StatelessWidget {
                 );
               },
             ),
-          ),
 
           // ✅ SOLUTION LINK (only if not showing timer)
             Padding(
@@ -370,7 +371,8 @@ class LearningQuizQuestionView extends StatelessWidget {
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
