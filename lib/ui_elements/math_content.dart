@@ -35,7 +35,7 @@ class MathContent extends StatelessWidget {
         content.substring(7),
         style: TextStyle(
           fontSize: isQuestion ? 20 : fontSize,
-          lineHeight: 1.5,
+          height: 1.5,
           color: color,
         ),
       );
@@ -46,7 +46,7 @@ class MathContent extends StatelessWidget {
           content.substring(2),
           style: TextStyle(
             fontSize: isQuestion ? 20 : fontSize,
-            lineHeight: 1,
+            height: 1,
             fontFamily: 'monospace',
             fontWeight: FontWeight.bold,
             letterSpacing: 5,
