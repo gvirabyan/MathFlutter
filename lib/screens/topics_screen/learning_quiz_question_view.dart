@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../models/math_renderer.dart';
+import '../../ui_elements/math_content.dart';
 import '../../ui_elements/primary_button.dart';
 
 class LearningQuizQuestionView extends StatelessWidget {
@@ -14,8 +14,8 @@ class LearningQuizQuestionView extends StatelessWidget {
   final String rivalLabel;
 
   final String title;
-  final MathNode question;
-  final List<MathNode> answers;
+  final String question;
+  final List<String> answers;
 
   // ✅ NEW: For history display
   final int? correctAnswerIndex;
@@ -161,8 +161,11 @@ class LearningQuizQuestionView extends StatelessWidget {
           // ✅ QUESTION TEXT
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: buildMath(question, fontSize: 32),
-
+            child: MathContent(
+              content: question,
+              isQuestion: true,
+              fontSize: 32,
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -258,8 +261,10 @@ class LearningQuizQuestionView extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child:buildMath(answers[i], fontSize: 18),
-
+                          child: MathContent(
+                            content: answers[i],
+                            fontSize: 18,
+                          ),
                         ),
                         // ✅ Show checkmark or X in history mode
                         if (isViewingHistory && isCorrect)

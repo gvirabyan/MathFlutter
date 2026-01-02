@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/screens/topics_screen/learning_quiz_question_view.dart';
 import 'package:untitled2/services/questions_service.dart';
 
-import '../../models/math_renderer.dart';
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
 import '../../services/quiz_service.dart';
@@ -81,13 +80,6 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
     super.initState();
     secondsLeft = widget.timeLimitSeconds;
     _loadQuiz();
-  }
-
-  String normalizeQuestion(String raw) {
-    return raw
-        .replaceAll(r'\div', '÷')
-        .replaceAll(r'\times', '×')
-        .replaceAll(r'\_', '_');
   }
 
   Future<void> _loadQuiz() async {
@@ -214,7 +206,7 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
     });
     // ✅ Learning mode - save to backend and add to history
     if (widget.learningMode && widget.categoryId != null) {
-      final answerText = mathNodeToPlainText(q.answers[selected]);
+      final answerText = q.answers[selected];
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
 
@@ -247,24 +239,7 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
     }
 
   }
-  String mathNodeToPlainText(MathNode node) {
-    if (node is MathText) return node.text;
 
-    if (node is MathRow) {
-      return node.children.map(mathNodeToPlainText).join('');
-    }
-
-    if (node is MathFraction) {
-      return '${mathNodeToPlainText(node.numerator)}/'
-          '${mathNodeToPlainText(node.denominator)}';
-    }
-
-    if (node is MathSqrt) {
-      return 'sqrt(${mathNodeToPlainText(node.value)})';
-    }
-
-    return '';
-  }
   void _nextQuestion() {
     final nextIndex = questions.indexWhere((q) => q.userAnswerStatus == null);
 
@@ -411,7 +386,7 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
       onReturnToPresent: _returnToPresentQuestion,
     );
   }
-  Future<void> _openSecondAnswerDialog(MathNode firstAnswer)
+  Future<void> _openSecondAnswerDialog(String firstAnswer)
   async {
     final controller = TextEditingController();
 
@@ -428,7 +403,7 @@ class _LearningQuizQuestionScreenState extends State<LearningQuizQuestionScreen>
               children: [
                 const Text('Erste Antwort:'),
                 const SizedBox(height: 8),
-                buildMath(firstAnswer, fontSize: 22),
+                Text(firstAnswer, style: const TextStyle(fontSize: 22)),
               ],
             ),
             const SizedBox(height: 12),
