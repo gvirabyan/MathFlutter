@@ -148,14 +148,14 @@ class _MainScreenState extends State<MainScreen> {
     _MainTabConfig(
       title: 'Üben',
       subTabs: [
-        _SubTabConfig(
+        /*_SubTabConfig(
           label: 'Spiel vs Maschine',
           view: PracticeVsMachineTab(),
         ),
         _SubTabConfig(
           label: 'Speiler vs Speiler',
           view: PracticeVsPlayerTab(),
-        ),
+        )*/
       ],
     ),
 

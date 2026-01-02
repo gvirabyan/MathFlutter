@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/math_renderer.dart';
 import '../../ui_elements/primary_button.dart';
 
 class LearningQuizQuestionView extends StatelessWidget {
@@ -13,8 +14,8 @@ class LearningQuizQuestionView extends StatelessWidget {
   final String rivalLabel;
 
   final String title;
-  final String question;
-  final List<String> answers;
+  final MathNode question;
+  final List<MathNode> answers;
 
   // ✅ NEW: For history display
   final int? correctAnswerIndex;
@@ -26,8 +27,6 @@ class LearningQuizQuestionView extends StatelessWidget {
   final int? selectedIndex;
   final List<bool?> results;
 
-  final bool showTimer;
-  final bool showScores;
 
   final void Function(int index)? onSelect;
   final VoidCallback? onSubmit;
@@ -56,8 +55,6 @@ class LearningQuizQuestionView extends StatelessWidget {
     required this.secondsLeft,
     required this.selectedIndex,
     required this.results,
-    this.showTimer = true,
-    this.showScores = true,
     required this.onSelect,
     required this.onSubmit,
     this.onSkip,
@@ -91,17 +88,7 @@ class LearningQuizQuestionView extends StatelessWidget {
             const SizedBox(width: 10),
 
             // ✅ timer (optional)
-            if (showTimer && !isViewingHistory)
-              Row(
-                children: [
-                  const Icon(Icons.timer, size: 18),
-                  const SizedBox(width: 6),
-                  Text(
-                    '0:${secondsLeft.toString().padLeft(2, '0')}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+
           ],
         ),
       ),
@@ -168,54 +155,14 @@ class LearningQuizQuestionView extends StatelessWidget {
           // ✅ "ZURÜCK ZUR AKTUELLEN FRAGE" BUTTON (when viewing history)
 
           // ✅ scores (optional)
-          if (showScores && !isViewingHistory)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.deepPurple),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'Deine Punkte: $myPoints',
-                        style: const TextStyle(color: Colors.deepPurple),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.deepPurple),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$rivalLabel: $machinePoints',
-                        style: const TextStyle(color: Colors.deepPurple),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
           const SizedBox(height: 8),
 
           // ✅ QUESTION TEXT
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(question, style: const TextStyle(fontSize: 32)),
+            child: buildMath(question, fontSize: 32),
+
           ),
 
           const SizedBox(height: 24),
@@ -311,10 +258,8 @@ class LearningQuizQuestionView extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            answers[i],
-                            style: TextStyle(fontSize: 18, color: textColor),
-                          ),
+                          child:buildMath(answers[i], fontSize: 18),
+
                         ),
                         // ✅ Show checkmark or X in history mode
                         if (isViewingHistory && isCorrect)
@@ -336,7 +281,6 @@ class LearningQuizQuestionView extends StatelessWidget {
           ),
 
           // ✅ SOLUTION LINK (only if not showing timer)
-          if (!showTimer)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Align(
@@ -367,7 +311,6 @@ class LearningQuizQuestionView extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  if (!showTimer)
                     Expanded(
                       flex: 2,
                       child: SizedBox(
@@ -393,7 +336,6 @@ class LearningQuizQuestionView extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (!showTimer) const SizedBox(width: 12),
                   Expanded(
                     flex: 3,
                     child: PrimaryButton(

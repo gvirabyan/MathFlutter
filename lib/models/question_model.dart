@@ -1,10 +1,14 @@
 import 'dart:math';
 
+import 'math_renderer.dart';
+
 class QuestionModel {
   final int id;
   final String title;
-  final String question;
-  final List<String> answers;
+
+  final MathNode question;
+  final List<MathNode> answers;
+
   final int correctIndex;
   String? userAnswerStatus;
 
@@ -17,79 +21,45 @@ class QuestionModel {
   });
 
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
-    final String correct = normalizeQuestion(
+    final MathNode correct = parseMath(
       (json['answer'] ?? '').toString(),
     );
 
-    final List<String> wrong =
+    final List<MathNode> wrong =
     (json['wrong_answers'] as List? ?? [])
-        .map((e) => normalizeQuestion(e.toString()))
+        .map((e) => parseMath(e.toString()))
         .toList();
 
-    final List<String> allAnswers = [
-      correct,
-      ...wrong,
-    ]..removeWhere((e) => e.isEmpty);
+    final allAnswers = <MathNode>[correct, ...wrong]..shuffle(Random());
 
-    allAnswers.shuffle(Random());
+    final int correctIndex = allAnswers.indexWhere(
+          (a) => mathNodeToPlainText(a) == mathNodeToPlainText(correct),
+    );
 
-    final int correctIndex = allAnswers.indexOf(correct);
     return QuestionModel(
       id: json['id'],
       title: (json['category_name'] ?? '').toString(),
-      question: normalizeQuestion(
-        (json['question'] ?? '').toString(),
-      ),
+      question: parseMath((json['question'] ?? '').toString()),
       answers: allAnswers,
       correctIndex: correctIndex,
-    )
-    ..userAnswerStatus = json['user_answer']?['status'];
+    )..userAnswerStatus = json['user_answer']?['status'];
+  }
+}
+String mathNodeToPlainText(MathNode node) {
+  if (node is MathText) return node.text;
 
+  if (node is MathRow) {
+    return node.children.map(mathNodeToPlainText).join('');
   }
 
+  if (node is MathFraction) {
+    return '${mathNodeToPlainText(node.numerator)}/'
+        '${mathNodeToPlainText(node.denominator)}';
+  }
+
+  if (node is MathSqrt) {
+    return 'sqrt(${mathNodeToPlainText(node.value)})';
+  }
+
+  return '';
 }
-
-String normalizeQuestion(String raw) {
-  var s = raw;
-
-  // убрать переносы строк
-  s = s.replaceAll('\n', ' ');
-
-  // степени
-  s = s.replaceAll('^2', '²');
-  s = s.replaceAll('^3', '³');
-
-  // \sqrt{n} → √n
-  s = s.replaceAllMapped(
-    RegExp(r'\\sqrt\{([^}]+)\}'),
-        (m) => '√${m.group(1)}',
-  );
-
-  // a\sqrt{b} → a√b
-  s = s.replaceAllMapped(
-    RegExp(r'(\d+)\\sqrt\{([^}]+)\}'),
-        (m) => '${m.group(1)}√${m.group(2)}',
-  );
-
-  // \sqrt n (без фигурных скобок)
-  s = s.replaceAllMapped(
-    RegExp(r'\\sqrt\s*([0-9]+)'),
-        (m) => '√${m.group(1)}',
-  );
-
-  // знаки
-  s = s.replaceAll(r'\times', '×');
-  s = s.replaceAll(r'\div', '÷');
-
-  // подчёркивания
-  s = s.replaceAll(r'\_', '_');
-
-  // минус → математический
-  s = s.replaceAll('-', '−');
-
-  // лишние пробелы
-  s = s.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-  return s;
-}
-
