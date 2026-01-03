@@ -20,7 +20,6 @@ class LearningQuizQuestionView extends StatelessWidget {
   final String? userAnswerStatus;
   final bool isViewingHistory;
 
-  final int secondsLeft;
 
   final int? selectedIndex;
   final List<bool?> results;
@@ -46,7 +45,6 @@ class LearningQuizQuestionView extends StatelessWidget {
     this.correctAnswerIndex, // ✅ NEW
     this.userAnswerStatus, // ✅ NEW
     this.isViewingHistory = false, // ✅ NEW
-    required this.secondsLeft,
     required this.selectedIndex,
     required this.results,
     required this.onSelect,
@@ -192,18 +190,19 @@ class LearningQuizQuestionView extends StatelessWidget {
                 Color? textColor;
                 Color answersColor = Colors.black;
 
-                if (isViewingHistory || (submitted)) {
+                if (isViewingHistory || (submitted && correctAnswerIndex != null)) {
                   final bool isUserChoice = selectedIndex == i;
                   final bool isCorrectAnswer = correctAnswerIndex == i;
 
                   if (isCorrectAnswer) {
-                    backgroundColor = Colors.green.withOpacity(0.1);
-                    borderColor = Colors.green;
+                    backgroundColor = AppColors.greenCorrect;
                     textColor = Colors.green;
+                    answersColor = Colors.white;
                   } else if (isUserChoice && !isCorrectAnswer) {
-                    backgroundColor = Colors.red.withOpacity(0.1);
-                    borderColor = Colors.red;
+                    backgroundColor = AppColors.redWrong;
                     textColor = Colors.red;
+                    answersColor = Colors.white;
+
                   } else {
                     borderColor = Colors.grey.shade300;
                     textColor = Colors.black54;
