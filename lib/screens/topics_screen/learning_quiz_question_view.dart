@@ -4,7 +4,7 @@ import 'package:untitled2/app_colors.dart';
 import '../../ui_elements/math_content.dart';
 import '../../ui_elements/primary_button.dart';
 
-class LearningQuizQuestionView extends StatelessWidget {
+class LearningQuizQuestionView extends StatefulWidget {
   final bool submitted;
   final int currentIndex;
   final int total;
@@ -20,7 +20,6 @@ class LearningQuizQuestionView extends StatelessWidget {
   final String? userAnswerStatus;
   final bool isViewingHistory;
 
-
   final int? selectedIndex;
   final List<bool?> results;
 
@@ -31,7 +30,7 @@ class LearningQuizQuestionView extends StatelessWidget {
   final void Function(int index)? onCircleTap;
   final VoidCallback? onReturnToPresent; // ✅ NEW
 
-  LearningQuizQuestionView({
+  const LearningQuizQuestionView({
     super.key,
     this.onCircleTap,
     required this.submitted,
@@ -53,21 +52,63 @@ class LearningQuizQuestionView extends StatelessWidget {
     this.onShowSolution,
   });
 
+  @override
+  State<LearningQuizQuestionView> createState() =>
+      _LearningQuizQuestionViewState();
+}
+
+class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
   final ScrollController _scrollController = ScrollController();
 
   @override
-  Widget build(BuildContext context) {
-    // Auto-scroll to current index
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          currentIndex * 46.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
+      _scrollToIndex(widget.currentIndex);
     });
+  }
 
+  @override
+  void didUpdateWidget(LearningQuizQuestionView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToIndex(widget.currentIndex);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToIndex(int index) {
+    if (_scrollController.hasClients) {
+      final double itemWidth = 64.0;
+      final double itemSpacing = 10.0;
+      final double itemWithSpacing = itemWidth + itemSpacing;
+      final double viewportWidth = _scrollController.position.viewportDimension;
+
+      double targetOffset =
+          (index * itemWithSpacing) - (viewportWidth / 2) + (itemWidth / 2);
+
+      targetOffset = targetOffset.clamp(
+        _scrollController.position.minScrollExtent,
+        _scrollController.position.maxScrollExtent,
+      );
+
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -76,7 +117,13 @@ class LearningQuizQuestionView extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
+            Expanded(
+              child: Text(
+                widget.title,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),
+              ),
+            ),
             const SizedBox(width: 10),
 
             // ✅ timer (optional)
@@ -90,16 +137,17 @@ class LearningQuizQuestionView extends StatelessWidget {
 
             // ✅ TOP CIRCLES WITH CLICK HANDLERS
             SizedBox(
-              height: 48,
+              height: 44,
               child: ListView.separated(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
-                itemCount: total,
+                itemCount: widget.total,
                 separatorBuilder: (_, __) => const SizedBox(width: 10),
                 itemBuilder: (context, i) {
-                  final res = results[i];
-                  final isCurrent = i == currentIndex && !isViewingHistory;
+                  final res = widget.results[i];
+                  final isCurrent =
+                      i == widget.currentIndex && !widget.isViewingHistory;
 
                   Color borderColor = Colors.grey.shade300;
                   Color backgroundColor = Colors.transparent;
@@ -119,7 +167,7 @@ class LearningQuizQuestionView extends StatelessWidget {
 
                   // ✅ Make circles clickable
                   return GestureDetector(
-                    onTap: () => onCircleTap?.call(i),
+                    onTap: () => widget.onCircleTap?.call(i),
                     child: Container(
                       width: 64,
                       height: 64,
@@ -159,7 +207,7 @@ class LearningQuizQuestionView extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: MathContent(
-                content: question,
+                content: widget.question,
                 isQuestion: true,
                 fontSize: 32,
               ),
@@ -171,15 +219,16 @@ class LearningQuizQuestionView extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: answers.length,
+              itemCount: widget.answers.length,
               itemBuilder: (context, i) {
-                final selected = selectedIndex == i;
-                final isCorrect = correctAnswerIndex == i;
+                final selected = widget.selectedIndex == i;
+                final isCorrect = widget.correctAnswerIndex == i;
 
                 int? userAnswerIndex;
-                if (isViewingHistory && userAnswerStatus != null) {
+                if (widget.isViewingHistory &&
+                    widget.userAnswerStatus != null) {
                   // In history, selectedIndex represents the user's choice
-                  userAnswerIndex = selectedIndex;
+                  userAnswerIndex = widget.selectedIndex;
                 }
 
                 String letter =
@@ -190,9 +239,10 @@ class LearningQuizQuestionView extends StatelessWidget {
                 Color? textColor;
                 Color answersColor = Colors.black;
 
-                if (isViewingHistory || (submitted && correctAnswerIndex != null)) {
-                  final bool isUserChoice = selectedIndex == i;
-                  final bool isCorrectAnswer = correctAnswerIndex == i;
+                if (widget.isViewingHistory ||
+                    (widget.submitted && widget.correctAnswerIndex != null)) {
+                  final bool isUserChoice = widget.selectedIndex == i;
+                  final bool isCorrectAnswer = widget.correctAnswerIndex == i;
 
                   if (isCorrectAnswer) {
                     backgroundColor = AppColors.greenCorrect;
@@ -202,7 +252,6 @@ class LearningQuizQuestionView extends StatelessWidget {
                     backgroundColor = AppColors.redWrong;
                     textColor = Colors.red;
                     answersColor = Colors.white;
-
                   } else {
                     borderColor = Colors.grey.shade300;
                     textColor = Colors.black54;
@@ -219,7 +268,10 @@ class LearningQuizQuestionView extends StatelessWidget {
                 }
 
                 return GestureDetector(
-                  onTap: isViewingHistory ? null : () => onSelect?.call(i),
+                  onTap:
+                      widget.isViewingHistory
+                          ? null
+                          : () => widget.onSelect?.call(i),
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(14),
@@ -232,29 +284,45 @@ class LearningQuizQuestionView extends StatelessWidget {
                       ),
                     ),
                     child: Row(
+                      // ✅ Оставляем center, чтобы буквы были четко по середине высоты контейнера
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          letter,
-                          style: TextStyle(fontSize: 18, color: textColor),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: MathContent(
-                            content: answers[i],
-                            fontSize: 18,
-                            color: answersColor,
+                        SizedBox(
+                          width: 25, // Фиксированная ширина для букв a., b., c.
+                          child: Text(
+                            letter,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: textColor,
+                              height: 1.0,
+                            ),
                           ),
                         ),
-                        if (isViewingHistory && isCorrect)
-                          const Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                            size: 24,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Padding(
+                            // ✅ РЕГУЛИРОВКА ЗДЕСЬ:
+                            // Увеличивай число в top, чтобы опустить ответ ниже.
+                            // Начни с 4.0 или 5.0, пока визуально ответ не встанет на одну линию с буквой.
+                            padding: const EdgeInsets.only(top: 4.5),
+                            child: MathContent(
+                              content: widget.answers[i],
+                              fontSize: 18,
+                              color: answersColor,
+                            ),
+                          ),
+                        ),
+                        // Иконки для режима истории
+                        if (widget.isViewingHistory && widget.correctAnswerIndex == i)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4.0), // Иконку тоже чуть спустим в тон ответу
+                            child: Icon(Icons.check_circle, color: Colors.green, size: 24),
                           )
-                        else if (isViewingHistory &&
-                            userAnswerIndex == i &&
-                            !isCorrect)
-                          const Icon(Icons.cancel, color: Colors.red, size: 24),
+                        else if (widget.isViewingHistory && userAnswerIndex == i && !isCorrect)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4.0),
+                            child: Icon(Icons.cancel, color: Colors.red, size: 24),
+                          ),
                       ],
                     ),
                   ),
@@ -267,7 +335,7 @@ class LearningQuizQuestionView extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton(
-                  onPressed: onShowSolution,
+                  onPressed: widget.onShowSolution,
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.primaryPurple,
                     padding: EdgeInsets.zero,
@@ -287,7 +355,7 @@ class LearningQuizQuestionView extends StatelessWidget {
             const SizedBox(height: 8),
 
             // ✅ ACTION BUTTONS (skip/submit) - only in normal mode
-            if (!isViewingHistory)
+            if (!widget.isViewingHistory)
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -303,7 +371,7 @@ class LearningQuizQuestionView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: onSkip,
+                          onPressed: widget.onSkip,
                           child: const Text(
                             'überspringen',
                             style: TextStyle(
@@ -319,26 +387,28 @@ class LearningQuizQuestionView extends StatelessWidget {
                       flex: 8,
                       child: PrimaryButton(
                         color: AppColors.primaryYellow,
-                        text: (submitted) ? 'Weiter' : 'abgeben',
-                        enabled: (submitted || selectedIndex != null),
-                        onPressed: submitted ? onSkip : onSubmit,
+                        text: (widget.submitted) ? 'nächstes' : 'abgeben',
+                        enabled:
+                            (widget.submitted || widget.selectedIndex != null),
+                        onPressed:
+                            widget.submitted ? widget.onSkip : widget.onSubmit,
                       ),
                     ),
                   ],
                 ),
               ),
             // ✅ CONTINUE BUTTON (only in history mode)
-            if (isViewingHistory)
+            if (widget.isViewingHistory)
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
                   height: 54,
                   width: double.infinity,
                   child: PrimaryButton(
-                    text: 'Weiter', // или 'Continue'
+                    text: 'Weitermachen', // или 'Continue'
                     enabled: true,
                     color: Colors.amber,
-                    onPressed: onReturnToPresent,
+                    onPressed: widget.onReturnToPresent,
                   ),
                 ),
               ),

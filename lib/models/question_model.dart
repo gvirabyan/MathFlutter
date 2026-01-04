@@ -9,6 +9,8 @@ class QuestionModel {
 
   final int correctIndex;
   String? userAnswerStatus;
+  final String? secondAnswer;
+  final String? solution;
 
   QuestionModel({
     required this.id,
@@ -16,13 +18,16 @@ class QuestionModel {
     required this.question,
     required this.answers,
     required this.correctIndex,
+    this.secondAnswer,
+    this.solution,
   });
 
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
     final String correct = (json['answer'] ?? '').toString();
-    final List<String> wrong = (json['wrong_answers'] as List? ?? [])
-        .map((e) => e.toString())
-        .toList();
+    final List<String> wrong =
+        (json['wrong_answers'] as List? ?? [])
+            .map((e) => e.toString())
+            .toList();
 
     final allAnswers = <String>[correct, ...wrong]..shuffle(Random());
 
@@ -34,6 +39,8 @@ class QuestionModel {
       question: (json['question'] ?? '').toString(),
       answers: allAnswers,
       correctIndex: correctIndex,
+      solution: json['solution']?.toString(), // ✅ 3. Вытаскиваем из JSON
+      secondAnswer: json['second_answer'],
     )..userAnswerStatus = json['user_answer']?['status'];
   }
 }

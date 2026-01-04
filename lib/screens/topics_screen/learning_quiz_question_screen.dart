@@ -7,10 +7,13 @@ import 'package:untitled2/services/questions_service.dart';
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
 import '../../services/quiz_service.dart';
+import '../../ui_elements/second_answer_dialog.dart';
+import '../../ui_elements/solution_viewer.dart';
+import '../../ui_elements/whiteboard_service.dart';
 
 class LearningQuizQuestionScreen extends StatefulWidget {
   final int totalQuestions;
-
+  final String categoryName;
   /// learning mode
   final int? categoryId;
   final bool learningMode;
@@ -25,6 +28,7 @@ class LearningQuizQuestionScreen extends StatefulWidget {
     super.key,
     required this.totalQuestions,
     this.categoryId,
+    required this.categoryName, // ✅ Добавлено в обязательные параметры
     this.learningMode = false,
     this.awardPoints = true,
     this.saveResult = true,
@@ -58,11 +62,34 @@ class _LearningQuizQuestionScreenState
   late int secondsLeft;
 
   int? selectedIndex;
+  void _handleShowSolution() {
+    final currentQuestion = viewingHistory && historyIndex != null
+        ? historyQuestions[historyIndex!]
+        : questions[index];
 
+    final sol = currentQuestion.solution;
+
+    if (sol != null && sol.isNotEmpty) {
+      // ✅ Показываем наше созданное окно
+      SolutionViewer.show(context, sol);
+    } else {
+      // Если решения нет, показываем небольшое уведомление (как f7.dialog.alert в Vue)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Keine Erklärung für эту задачу verfügbar'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
   @override
   void initState() {
     super.initState();
     _loadQuiz();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WhiteboardService.showButton(context);
+    });
   }
 
   Future<void> _loadQuiz() async {
@@ -120,16 +147,19 @@ class _LearningQuizQuestionScreenState
 
     setState(() {
       submitted = true;
-      questions[index].userAnswerStatus = isCorrect ? 'correct' : 'wrong';
 
-      final circleIndex = historyQuestions.length + index;
-      if (circleIndex < answersResult.length) {
-        answersResult[circleIndex] = isCorrect;
+      if (q.secondAnswer == null) {
+        questions[index].userAnswerStatus = isCorrect ? 'correct' : 'wrong';
+      } else {
+        questions[index].userAnswerStatus = null;
       }
-
     });
+
     // ✅ Learning mode - save to backend and add to history
-    if (widget.learningMode && widget.categoryId != null) {
+    if (widget.learningMode && widget.categoryId != null && q.secondAnswer == null) {
+      final circleIndex = historyQuestions.length + index;
+      answersResult[circleIndex] = isCorrect;
+
       final answerText = q.answers[selected];
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
@@ -157,15 +187,34 @@ class _LearningQuizQuestionScreenState
       );
       answeredQuestion.userAnswerStatus = isCorrect ? 'correct' : 'wrong';
     }
-    if (widget.learningMode && isCorrect) {
-      await _openSecondAnswerDialog(q.answers[selected]);
+    if (q.secondAnswer != null && isCorrect) {
+      final result = await SecondAnswerDialog.show(
+        context,
+        title: 'Errechne das Ergebnis',
+        expression: q.answers[selected],
+        correctSecondAnswer: q.secondAnswer!,
+      );
+
+      if (result != null) {
+        _finishSecondAnswer(
+          result.value,
+          result.isCorrect,
+        );
+      }
+    }else if (q.secondAnswer != null && !isCorrect) {
+      // ❗ НЕТ second answer → сразу финальный wrong
+      _finishSecondAnswer(null, false);
     }
+
+
   }
 
   void _nextQuestion() {
-    final nextIndex = questions.indexWhere((q) => q.userAnswerStatus == null);
+    // Ищем только те, где статус совсем пустой (еще не видели)
+    int nextIndex = questions.indexWhere((q) => q.userAnswerStatus == null);
 
     if (nextIndex == -1) {
+      // Если новых нет, можно закончить или пойти по второму кругу по 'skipped'
       _finishQuiz();
       return;
     }
@@ -175,7 +224,6 @@ class _LearningQuizQuestionScreenState
       selectedIndex = null;
       submitted = false;
       viewingHistory = false;
-      historyIndex = null;
     });
   }
 
@@ -205,6 +253,7 @@ class _LearningQuizQuestionScreenState
 
   @override
   void dispose() {
+    WhiteboardService.hideButton();
     super.dispose();
   }
 
@@ -244,7 +293,7 @@ class _LearningQuizQuestionScreenState
       total: widget.totalQuestions,
       results: answersResult,
 
-      title: displayQuestion.title,
+      title: widget.categoryName,
       question: displayQuestion.question,
       answers: displayQuestion.answers,
       correctAnswerIndex:
@@ -268,65 +317,54 @@ class _LearningQuizQuestionScreenState
               : () {
                 _skipQuestion();
               },
-      onShowSolution: () {
-        // Implement solution dialog
-      },
+      onShowSolution: _handleShowSolution, // ✅ Теперь используется созданная логика
       onCircleTap: _showHistoryQuestion,
       onReturnToPresent: _returnToPresentQuestion,
     );
   }
 
-  Future<void> _openSecondAnswerDialog(String firstAnswer) async {
-    final controller = TextEditingController();
+  void _finishSecondAnswer(String? value, bool isCorrect) async {
+    final q = questions[index];
 
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('Zusatzantwort'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Erste Antwort:'),
-                    const SizedBox(height: 8),
-                    Text(firstAnswer, style: const TextStyle(fontSize: 22)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Antwort eingeben',
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  secondAnswerValue = null;
-                  Navigator.pop(context);
-                },
-                child: const Text('Überspringen'),
-              ),
-              TextButton(
-                onPressed: () {
-                  secondAnswerValue = controller.text;
-                  Navigator.pop(context);
-                },
-                child: const Text('Weiter'),
-              ),
-            ],
-          ),
+    final finalStatus = isCorrect ? 'correct' : 'wrong';
+
+    setState(() {
+      q.userAnswerStatus = finalStatus;
+
+      final circleIndex = historyQuestions.length + index;
+      answersResult[circleIndex] = isCorrect;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+
+    await CategoryAnswerService.updateUserAnsweredQuestion(
+      answerData: {
+        'users_permissions_user': userId,
+        'question': q.id,
+        'category': widget.categoryId.toString(),
+        'answer': q.answers[selectedIndex!],
+        'second_answer': value ?? '',
+        'status': finalStatus,
+        'answer_type': 'topic',
+      },
     );
+
+    _nextQuestion(); // ✅ обычный next, как ты хотел
   }
+
+
+
 
   Future<void> _skipQuestion() async {
     final q = questions[index];
+    final circleIndex = historyQuestions.length + index;
+
+    setState(() {
+      q.userAnswerStatus = 'skipped';
+      // Устанавливаем null, чтобы кружок остался серым/нейтральным
+      answersResult[circleIndex] = null;
+    });
 
     if (widget.learningMode && widget.categoryId != null) {
       final prefs = await SharedPreferences.getInstance();
@@ -345,8 +383,8 @@ class _LearningQuizQuestionScreenState
         answerData: answerData,
       );
     }
-    await _loadQuiz();
 
+    _nextQuestion(); // Переход к следующему согласно вашей новой логике
   }
 
 }

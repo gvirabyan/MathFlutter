@@ -62,6 +62,7 @@ class _Topics12TabState extends State<Topics12Tab> {
               MaterialPageRoute(
                 builder: (_) => LearningQuizQuestionScreen(
                   categoryId: e.categoryId,
+                  categoryName: e.title,
                   learningMode: true,
                   totalQuestions: e.total,
 

@@ -65,6 +65,7 @@ class _Topics67TabState extends State<Topics67Tab> {
                       categoryId: e.categoryId,
                       learningMode: true,
                       totalQuestions: e.total,
+                      categoryName: e.title,
 
                       awardPoints: false,
                       saveResult: false,

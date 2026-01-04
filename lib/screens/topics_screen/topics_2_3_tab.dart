@@ -64,6 +64,7 @@ class _Topics23TabState extends State<Topics23Tab> {
                     LearningQuizQuestionScreen(
                       categoryId: e.categoryId,
                       learningMode: true,
+                      categoryName: e.title,
                       totalQuestions: e.total,
 
                       awardPoints: false,
