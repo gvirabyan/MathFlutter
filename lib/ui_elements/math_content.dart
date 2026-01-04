@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -18,23 +20,24 @@ class MathContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 🔹 Единый масштаб (можно легко подкрутить)
     final double scale = isQuestion ? 1.0 : 0.9;
 
+    // ✅ Обработка специальных форматов (работает везде одинаково)
     if (content.startsWith('@@@')) {
       return Html(
         data: content.substring(3),
         style: {
           "body": Style(
             fontSize: FontSize((isQuestion ? 18 : fontSize) * scale),
-            lineHeight: LineHeight.number(1),
+            lineHeight: LineHeight.number(1.4),
             fontFamily: 'Rubik',
             color: color,
           ),
         },
       );
     }
-    else if (content.startsWith('@emoji@')) {
+
+    if (content.startsWith('@emoji@')) {
       return Text(
         content.substring(7),
         style: TextStyle(
@@ -44,14 +47,15 @@ class MathContent extends StatelessWidget {
         ),
       );
     }
-    else if (content.startsWith('@@')) {
+
+    if (content.startsWith('@@')) {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Text(
           content.substring(2),
           style: TextStyle(
             fontSize: (isQuestion ? 18 : fontSize) * scale,
-            height: 1,
+            height: 1.2,
             fontFamily: 'monospace',
             fontWeight: FontWeight.bold,
             letterSpacing: 4,
@@ -60,7 +64,8 @@ class MathContent extends StatelessWidget {
         ),
       );
     }
-    else if (content.startsWith('@pre@')) {
+
+    if (content.startsWith('@pre@')) {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Text(
@@ -73,49 +78,145 @@ class MathContent extends StatelessWidget {
         ),
       );
     }
-    else if (content.startsWith('@')) {
+
+    if (content.startsWith('@')) {
       return Text(
         content.substring(1),
         style: TextStyle(
           fontSize: (isQuestion ? 18 : fontSize) * scale,
           fontWeight: FontWeight.bold,
           color: color,
+          height: 1.3,
         ),
       );
     }
-    else {
-      final processedContent = _preprocessLatex(content);
 
-      return TeXView(
-        child: TeXViewColumn(
-          children: [
-            TeXViewDocument(
-              r'\( \sf ' + processedContent + r' \)',
-              style: TeXViewStyle(
-                contentColor: color,
-                fontStyle: TeXViewFontStyle(
-                  // 🔹 УМЕНЬШЕННЫЙ и аккуратный размер LaTeX
-                  fontSize: ((isQuestion ? 22 : 20) * scale).toInt(),
-                ),
+    // ✅ LaTeX контент
+    final processedContent = _preprocessLatex(content);
+
+    // ✅ КРИТИЧЕСКОЕ: На Android используем упрощённый рендеринг
+    if (!kIsWeb && Platform.isAndroid) {
+      return _buildAndroidMath(processedContent, scale);
+    }
+
+    // ✅ На Web и iOS используем TeXView
+    return _buildTeXView(processedContent, scale);
+  }
+
+  // ✅ Метод для Android - преобразуем LaTeX в Unicode
+  Widget _buildAndroidMath(String content, double scale) {
+    String readable = _convertLatexToUnicode(content);
+
+    return SelectableText(
+      readable,
+      style: TextStyle(
+        fontSize: (isQuestion ? 20 : fontSize) * scale,
+        fontFamily: 'Rubik',
+        color: color,
+        height: 1.3,
+      ),
+    );
+  }
+
+  // ✅ Метод для Web/iOS - используем TeXView
+  Widget _buildTeXView(String content, double scale) {
+    return TeXView(
+      loadingWidgetBuilder: (context) => Center(
+        child: SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(color.withOpacity(0.5)),
+          ),
+        ),
+      ),
+      child: TeXViewColumn(
+        children: [
+          TeXViewDocument(
+            r'\( \sf ' + content + r' \)',
+            style: TeXViewStyle(
+              contentColor: color,
+              backgroundColor: Colors.transparent,
+              padding: const TeXViewPadding.all(0),
+              margin: const TeXViewMargin.all(0),
+              fontStyle: TeXViewFontStyle(
+                fontSize: ((isQuestion ? 22 : 20) * scale).toInt(),
               ),
             ),
-          ],
-        ),
-      );
-    }
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ✅ Конвертация LaTeX в Unicode для Android
+  String _convertLatexToUnicode(String latex) {
+    String result = latex
+    // Греческие буквы
+        .replaceAll(r'\pi', 'π')
+        .replaceAll(r'\alpha', 'α')
+        .replaceAll(r'\beta', 'β')
+        .replaceAll(r'\gamma', 'γ')
+        .replaceAll(r'\delta', 'δ')
+        .replaceAll(r'\theta', 'θ')
+        .replaceAll(r'\lambda', 'λ')
+        .replaceAll(r'\mu', 'μ')
+        .replaceAll(r'\sigma', 'σ')
+        .replaceAll(r'\omega', 'ω')
+
+    // Математические операторы
+        .replaceAll(r'\times', '×')
+        .replaceAll(r'\div', '÷')
+        .replaceAll(r'\pm', '±')
+        .replaceAll(r'\leq', '≤')
+        .replaceAll(r'\geq', '≥')
+        .replaceAll(r'\neq', '≠')
+        .replaceAll(r'\approx', '≈')
+        .replaceAll(r'\infty', '∞')
+
+    // Корень
+        .replaceAllMapped(
+      RegExp(r'\\sqrt\{([^}]+)\}'),
+          (m) => '√(${m.group(1)})',
+    )
+
+    // Дроби: \dfrac{a}{b} → (a)/(b)
+        .replaceAllMapped(
+      RegExp(r'\\d?frac\{([^}]+)\}\{([^}]+)\}'),
+          (m) => '(${m.group(1)})/(${m.group(2)})',
+    )
+
+    // Степени: x^{2} → x²
+        .replaceAllMapped(
+      RegExp(r'([a-zA-Z0-9]+)\^\{?([0-9])\}?'),
+          (m) {
+        final base = m.group(1);
+        final exp = m.group(2);
+        final superscripts = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'];
+        return '$base${superscripts[int.parse(exp!)]}';
+      },
+    )
+
+    // Убираем лишние команды
+        .replaceAll(r'\left', '')
+        .replaceAll(r'\right', '')
+        .replaceAll(r'\cdot', '·')
+        .replaceAll(r'\,', ' ');
+
+    return result;
   }
 
   String _preprocessLatex(String input) {
-    String result = input.replaceAll('pi', r'\pi');
+    String result = input
+        .replaceAll('pi', r'\pi')
+        .replaceAll(r'\frac', r'\dfrac');
 
     // sqrt(x) -> \sqrt{x}
     result = result.replaceAllMapped(
-      RegExp(r'sqrt\((.*?)\)'),
+      RegExp(r'sqrt\(([^)]+)\)'),
           (match) => r'\sqrt{' + (match.group(1) ?? '') + '}',
     );
-
-    // делаем дроби визуально нормальными
-    result = result.replaceAll(r'\frac', r'\dfrac');
 
     return result;
   }

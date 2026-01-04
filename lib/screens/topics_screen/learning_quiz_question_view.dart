@@ -143,7 +143,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 itemCount: widget.total,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                separatorBuilder: (_, __) => const SizedBox(width: 1),
                 itemBuilder: (context, i) {
                   final res = widget.results[i];
                   final isCurrent =
@@ -273,7 +273,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                           ? null
                           : () => widget.onSelect?.call(i),
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
+                    margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: backgroundColor ?? Colors.white,
@@ -361,7 +361,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 2,
+                      flex: 4,
                       child: SizedBox(
                         height: 54,
                         child: OutlinedButton(
@@ -375,16 +375,16 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                           child: const Text(
                             'überspringen',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 12,
                               color: Colors.black87,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 14),
                     Expanded(
-                      flex: 8,
+                      flex: 5,
                       child: PrimaryButton(
                         color: AppColors.primaryYellow,
                         text: (widget.submitted) ? 'nächstes' : 'abgeben',

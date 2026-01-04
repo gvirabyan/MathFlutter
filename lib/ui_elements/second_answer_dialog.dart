@@ -93,9 +93,10 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
         : (_isCorrect ? Colors.green : Colors.red);
 
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,7 +126,6 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
               style: const TextStyle(fontSize: 22),
             ),
 
-            const SizedBox(height: 16),
 
             TextField(
               controller: _controller,
@@ -158,15 +158,16 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: buttonColor,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onPressed: _onButtonPressed,
-              child: const Text(
-                'Nächstes',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+              child: Text(
+                // ✅ Меняем текст в зависимости от состояния
+                _state == SecondAnswerState.idle ? 'abgeben' : 'nächstes',
+                style: const TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
           ],
