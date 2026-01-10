@@ -101,19 +101,38 @@ class MathContent extends StatelessWidget {
       );
     }
     else {
-      final processedContent = _preprocessLatex(content);
-
-      return TeX2SVG(
-        math: r'\displaystyle ' + processedContent,
-        teXInputType: TeXInputType.teX,
-        formulaWidgetBuilder: (context, svg) {
-          final double finalFontSize = (isQuestion ? 22 : 20) * scale;
-          return SvgPicture.string(
-            svg,
-            height: finalFontSize,
-            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-          );
-        },
+      final lines = content.split('\n');
+      return Column(
+        crossAxisAlignment:
+        isQuestion ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: lines.map((line) {
+          if (line.startsWith(r'$$') && line.endsWith(r'$$')) {
+            // It's a plain text line
+            return Text(
+              line.substring(2, line.length - 2),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: (isQuestion ? 16 : 14) * scale,
+                color: color,
+              ),
+            );
+          } else {
+            // It's a LaTeX line
+            final processedContent = _preprocessLatex(line);
+            return TeX2SVG(
+              math: r'\displaystyle ' + processedContent,
+              teXInputType: TeXInputType.teX,
+              formulaWidgetBuilder: (context, svg) {
+                final double finalFontSize = (isQuestion ? 22 : 20) * scale;
+                return SvgPicture.string(
+                  svg,
+                  height: finalFontSize,
+                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                );
+              },
+            );
+          }
+        }).toList(),
       );
     }
   }
