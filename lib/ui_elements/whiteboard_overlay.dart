@@ -26,7 +26,7 @@ class _WhiteboardOverlayState extends State<WhiteboardOverlay> {
 
   final List<Color> _colors = [
     Colors.white, Colors.yellow, Colors.orange,
-    Colors.red, Colors.green, Colors.blue, Colors.purple
+
   ];
   Color _selectedColor = Colors.white;
 
@@ -75,13 +75,12 @@ class _WhiteboardOverlayState extends State<WhiteboardOverlay> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Stack(
-                alignment: Alignment.center,
+                alignment: Alignment.centerLeft,
                 children: [
                   // Селектор цветов по центру
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.black45,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Row(
@@ -94,8 +93,8 @@ class _WhiteboardOverlayState extends State<WhiteboardOverlay> {
                           decoration: BoxDecoration(
                             color: c, shape: BoxShape.circle,
                             border: Border.all(
-                                color: _selectedColor == c ? Colors.white : Colors.transparent,
-                                width: 1
+                                color: _selectedColor == c ? Colors.white : Colors.black54,
+                                width: 2
                             ),
                           ),
                         ),

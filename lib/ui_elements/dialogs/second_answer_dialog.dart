@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../math_content.dart';
+
 enum SecondAnswerState { idle, answered }
 
 class SecondAnswerResult {
@@ -120,10 +122,10 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
 
             const SizedBox(height: 16),
 
-            Text(
-              widget.expression,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 22),
+             MathContent(
+              content: widget.expression,
+              isQuestion: true,
+              fontSize: 32,
             ),
 
 

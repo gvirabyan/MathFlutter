@@ -7,7 +7,7 @@ import 'package:untitled2/services/questions_service.dart';
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
 import '../../services/quiz_service.dart';
-import '../../ui_elements/second_answer_dialog.dart';
+import '../../ui_elements/dialogs/second_answer_dialog.dart';
 import '../../ui_elements/solution_viewer.dart';
 import '../../ui_elements/whiteboard_service.dart';
 
