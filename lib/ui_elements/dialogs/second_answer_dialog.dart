@@ -132,9 +132,9 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
             TextField(
               controller: _controller,
               enabled: !isAnswered,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(signed: true),
               inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
+                FilteringTextInputFormatter.allow(RegExp(r'^-?\d*$')),
               ],
               decoration: InputDecoration(
                 hintText: 'Ergebnis eingeben',

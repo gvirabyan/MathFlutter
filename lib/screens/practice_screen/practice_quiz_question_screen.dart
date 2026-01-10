@@ -5,6 +5,7 @@ import 'package:untitled2/screens/practice_screen/practice_quiz_question_view.da
 import '../../models/question_model.dart';
 import '../../services/quiz_service.dart';
 import '../../ui_elements/dialogs/practice_quiz_complete_dialog.dart';
+import '../../ui_elements/dialogs/second_answer_dialog.dart';
 
 class PracticeQuizQuestionScreen extends StatefulWidget {
   final int totalQuestions;
@@ -91,7 +92,7 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (secondsLeft <= 0) {
         t.cancel();
-        _submitTimeout(); // ✅ instead of _submitAnswer(null)
+        _submitTimeout();
         return;
       }
 
@@ -106,7 +107,6 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
 
     timer?.cancel();
 
-    // timeout = wrong
     setState(() {
       submitted = true;
       questions[index].userAnswerStatus = 'wrong';
@@ -126,21 +126,36 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
     if (submitted) return;
 
     final q = questions[index];
-    final bool isCorrect = selected == q.correctIndex;
+    bool isPrimaryCorrect = selected == q.correctIndex;
+    bool isFinalCorrect = isPrimaryCorrect;
 
     timer?.cancel();
 
+    if (isPrimaryCorrect && q.secondAnswer != null && q.secondAnswer!.trim().isNotEmpty) {      final result = await SecondAnswerDialog.show(
+        context,
+        title: 'Errechne das Ergebnis',
+        expression: q.answers[selected],
+        correctSecondAnswer: q.secondAnswer!,
+      );
+
+
+      if (result != null) {
+        isFinalCorrect = result.isCorrect;
+      } else {
+        isFinalCorrect = false;
+      }
+    }
+
     setState(() {
       submitted = true;
-      questions[index].userAnswerStatus = isCorrect ? 'correct' : 'wrong';
+      questions[index].userAnswerStatus = isFinalCorrect ? 'correct' : 'wrong';
 
-      // mark circle
       if (index >= 0 && index < answersResult.length) {
-        answersResult[index] = isCorrect;
+        answersResult[index] = isFinalCorrect;
       }
 
       if (widget.awardPoints) {
-        if (isCorrect) {
+        if (isFinalCorrect) {
           myPoints++;
         } else {
           machinePoints++;

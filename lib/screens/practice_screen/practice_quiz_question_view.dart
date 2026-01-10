@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../app_colors.dart';
 import '../../ui_elements/math_content.dart';
 import '../../ui_elements/primary_button.dart';
@@ -42,7 +43,8 @@ class PracticeQuizQuestionView extends StatefulWidget {
   });
 
   @override
-  State<PracticeQuizQuestionView> createState() => _PracticeQuizQuestionViewState();
+  State<PracticeQuizQuestionView> createState() =>
+      _PracticeQuizQuestionViewState();
 }
 
 class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
@@ -52,7 +54,9 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
   void initState() {
     super.initState();
     // Скроллим к текущему индексу при старте
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToIndex(widget.currentIndex));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _scrollToIndex(widget.currentIndex),
+    );
   }
 
   @override
@@ -75,8 +79,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
       const double itemWidth = 64.0;
       const double spacing = 1.0;
       // Вычисляем смещение так, чтобы текущий кружок был по центру
-      final double targetOffset = (index * (itemWidth + spacing)) -
-          (_scrollController.position.viewportDimension / 2) + (itemWidth / 2);
+      final double targetOffset =
+          (index * (itemWidth + spacing)) -
+          (_scrollController.position.viewportDimension / 2) +
+          (itemWidth / 2);
 
       _scrollController.animateTo(
         targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
@@ -100,7 +106,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               child: Text(
                 "Spieler против Maschine",
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             Row(
@@ -109,7 +118,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 const SizedBox(width: 6),
                 Text(
                   '0:${widget.secondsLeft.toString().padLeft(2, '0')}',
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
                 ),
               ],
             ),
@@ -129,7 +141,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               itemCount: widget.total,
               separatorBuilder: (_, __) => const SizedBox(width: 1),
               itemBuilder: (context, i) {
-                final bool? res = (i < widget.results.length) ? widget.results[i] : null;
+                final bool? res =
+                    (i < widget.results.length) ? widget.results[i] : null;
                 final isCurrent = i == widget.currentIndex;
 
                 Color borderColor = Colors.grey.shade300;
@@ -159,7 +172,11 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   ),
                   child: Text(
                     '${i + 1}',
-                    style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.w400),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 );
               },
@@ -176,9 +193,19 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                _buildPointBox('Deine Punkte: ${widget.myPoints}', AppColors.primaryPurple, Colors.white, false),
+                _buildPointBox(
+                  'Deine Punkte: ${widget.myPoints}',
+                  AppColors.primaryPurple,
+                  Colors.white,
+                  false,
+                ),
                 const SizedBox(width: 10),
-                _buildPointBox('${widget.rivalLabel} ${widget.machinePoints}', Colors.white, AppColors.primaryPurple, true),
+                _buildPointBox(
+                  '${widget.rivalLabel} ${widget.machinePoints}',
+                  Colors.white,
+                  AppColors.primaryPurple,
+                  true,
+                ),
               ],
             ),
           ),
@@ -194,9 +221,19 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 16),
-                MathContent(content: widget.question, isQuestion: true, fontSize: 32),
+                MathContent(
+                  content: widget.question,
+                  isQuestion: true,
+                  fontSize: 32,
+                ),
               ],
             ),
           ),
@@ -212,7 +249,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
                 Color? cardBg;
                 Color? borderCol;
-                Color contentColor = Colors.black54;
+                Color contentColor = Colors.black;
 
                 if (widget.submitted && widget.correctAnswerIndex != null) {
                   if (isCorrect) {
@@ -242,7 +279,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                     decoration: BoxDecoration(
                       color: cardBg ?? Colors.white,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: borderCol ?? Colors.grey.shade300, width: 1.5),
+                      border: Border.all(
+                        color: borderCol ?? Colors.grey.shade300,
+                        width: 1.5,
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -250,7 +290,11 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                           width: 25,
                           child: Text(
                             String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
-                            style: TextStyle(fontSize: 18, color: contentColor, height: 1.0),
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.black54,
+                              height: 1.0,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -286,8 +330,12 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
     );
   }
 
-  // Вспомогательный метод для блоков баллов (чтобы не дублировать код)
-  Widget _buildPointBox(String text, Color bg, Color textColor, bool hasBorder) {
+  Widget _buildPointBox(
+    String text,
+    Color bg,
+    Color textColor,
+    bool hasBorder,
+  ) {
     return Expanded(
       child: Container(
         height: 44,
