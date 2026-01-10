@@ -13,6 +13,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
   final String rivalLabel;
   final String title;
   final String question;
+  final String appBarTitle;
   final List<String> answers;
   final int? correctAnswerIndex;
   final int secondsLeft;
@@ -29,6 +30,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
     required this.currentIndex,
     required this.total,
     required this.myPoints,
+    required this.appBarTitle,
     required this.machinePoints,
     this.rivalLabel = 'Punkte der Mas...',
     required this.title,
@@ -42,6 +44,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
     required this.onSubmit,
     required this.onNext,
     this.machineSelectedIndex,
+
   });
 
   @override
@@ -106,7 +109,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
           children: [
             Expanded(
               child: Text(
-                "Spieler gegen Maschine",
+                widget.appBarTitle,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,

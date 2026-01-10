@@ -15,11 +15,9 @@ class PracticeQuizQuestionScreen extends StatefulWidget {
   final String rival;
   final String rivalLabel;
 
-  /// logic toggles
   final bool awardPoints;
   final bool saveResult;
 
-  /// timer
   final int timeLimitSeconds;
 
   const PracticeQuizQuestionScreen({
@@ -45,6 +43,9 @@ class _PracticeQuizQuestionScreenState
   List<QuestionModel> questions = [];
   List<bool?> answersResult = [];
 
+  double rivalCoefficient = 0.7;
+  String currentRivalName = '';
+
   int index = 0;
 
   int myPoints = 0;
@@ -69,11 +70,18 @@ class _PracticeQuizQuestionScreenState
       rival: widget.rival,
     );
 
+    if (res['rival_user'] != null) {
+      setState(() {
+        currentRivalName = res['rival_user']['username'] ?? 'Gegner';
+        rivalCoefficient =
+            (res['rival_user']['coefficient'] as num?)?.toDouble() ?? 0.5;
+      });
+    }
+
     final List list =
         res['questions'] is List ? List.from(res['questions']) : [];
     questions = list.map((e) => QuestionModel.fromJson(e)).toList();
 
-    // IMPORTANT: results length must match "total" circles count
     answersResult = List.filled(widget.totalQuestions, null);
 
     if (!mounted) return;
@@ -110,8 +118,8 @@ class _PracticeQuizQuestionScreenState
     if (submitted) return;
     timer?.cancel();
 
-    final q = questions[index]; // берем текущий вопрос
-    bool machineGotItRight = Random().nextDouble() < 0.3;
+    final q = questions[index];
+    bool machineGotItRight = Random().nextDouble() < rivalCoefficient;
     int? mSelected;
 
     if (machineGotItRight) {
@@ -127,7 +135,7 @@ class _PracticeQuizQuestionScreenState
 
     setState(() {
       submitted = true;
-      machineSelectedIndex = mSelected; // теперь рамка покажется и при таймауте
+      machineSelectedIndex = mSelected;
       questions[index].userAnswerStatus = 'wrong';
 
       if (index >= 0 && index < answersResult.length) {
@@ -145,7 +153,6 @@ class _PracticeQuizQuestionScreenState
 
     timer?.cancel();
 
-    // 1. Логика второго ответа (если есть)
     if (isPrimaryCorrect &&
         q.secondAnswer != null &&
         q.secondAnswer!.trim().isNotEmpty) {
@@ -172,23 +179,23 @@ class _PracticeQuizQuestionScreenState
         if (isFinalCorrect) {
           myPoints++;
         }
-        bool machineGotItRight = Random().nextDouble() < 0.3;
+        bool machineGotItRight = Random().nextDouble() < rivalCoefficient;
         if (machineGotItRight) {
-          machineSelectedIndex = q.correctIndex; // Машина выбрала правильный
+          machineSelectedIndex = q.correctIndex;
           machinePoints++;
         } else {
           List<int> wrongIndices = [];
           for (int i = 0; i < q.answers.length; i++) {
             if (i != q.correctIndex) wrongIndices.add(i);
           }
-          machineSelectedIndex = wrongIndices[Random().nextInt(wrongIndices.length)];
+          machineSelectedIndex =
+              wrongIndices[Random().nextInt(wrongIndices.length)];
         }
       }
     });
   }
 
   void _nextQuestion() {
-    // If backend returned fewer questions than totalQuestions, finish by questions length
     if (index + 1 >= questions.length) {
       _finishQuiz();
       return;
@@ -206,7 +213,6 @@ class _PracticeQuizQuestionScreenState
 
   Future<void> _finishQuiz() async {
     timer?.cancel();
-
     if (widget.saveResult) {
       await QuizService.saveQuizResult(
         data: {
@@ -217,15 +223,12 @@ class _PracticeQuizQuestionScreenState
       );
     }
 
-    // ✅ вычисляем результат
     final PracticeQuizResult result =
         myPoints > machinePoints
             ? PracticeQuizResult.win
             : (myPoints < machinePoints
                 ? PracticeQuizResult.lose
                 : PracticeQuizResult.draw);
-
-    // ✅ points для текста (как пример)
     final int pointsText = (myPoints - machinePoints).abs();
 
     if (!mounted) return;
@@ -235,13 +238,9 @@ class _PracticeQuizQuestionScreenState
       result: result,
       points: pointsText,
       onMyStatus: () {
-        // закрываем экран квиза (диалог уже закроется сам внутри)
         Navigator.of(context).pop();
-        // тут можешь навигировать на статус, если нужно
-        // Navigator.pushNamed(context, '/activity');
       },
       onNewGame: () {
-        // повторить игру на тех же вопросах
         setState(() {
           index = 0;
           myPoints = 0;
@@ -280,21 +279,27 @@ class _PracticeQuizQuestionScreenState
 
     final displayQuestion = questions[index];
     final displayIndex = index;
+    final String appBarTitle = widget.rival == 'fake_user'
+        ? "Spieler vs $currentRivalName"
+        : "Spieler vs Maschine";
 
     return PracticeQuizQuestionView(
       key: ValueKey(displayIndex),
       currentIndex: displayIndex,
       submitted: submitted,
+      appBarTitle:appBarTitle,
       total: widget.totalQuestions,
       results: answersResult,
       myPoints: myPoints,
       machinePoints: machinePoints,
-      rivalLabel: widget.rivalLabel,
+      rivalLabel:
+          widget.rival == 'fake_user'
+              ? '$currentRivalName:'
+              : widget.rivalLabel,
       title: displayQuestion.title,
       question: displayQuestion.question,
       answers: displayQuestion.answers,
 
-      // show correct only after submit
       correctAnswerIndex: submitted ? displayQuestion.correctIndex : null,
       machineSelectedIndex: machineSelectedIndex,
       secondsLeft: secondsLeft,
@@ -306,14 +311,10 @@ class _PracticeQuizQuestionScreenState
               : (i) {
                 setState(() => selectedIndex = i);
               },
-
-      // submit only before submitted
       onSubmit:
           (selectedIndex == null || submitted)
               ? null
               : () => _submitAnswer(selectedIndex!),
-
-      // ✅ new: next button action when submitted
       onNext: submitted ? _nextQuestion : null,
     );
   }
