@@ -1,42 +1,34 @@
 import 'package:flutter/material.dart';
 import '../../app_colors.dart';
+import '../../ui_elements/math_content.dart';
 import '../../ui_elements/primary_button.dart';
 
-class PracticeQuizQuestionView extends StatelessWidget {
+class PracticeQuizQuestionView extends StatefulWidget {
   final bool submitted;
   final int currentIndex;
   final int total;
   final int myPoints;
   final int machinePoints;
-
   final String rivalLabel;
-
   final String title;
   final String question;
   final List<String> answers;
-
-  // correct answer shown only after submit
   final int? correctAnswerIndex;
-
   final int secondsLeft;
-
   final int? selectedIndex;
   final List<bool?> results;
-
   final void Function(int index)? onSelect;
   final VoidCallback? onSubmit;
-
-  // ✅ NEW: next action after submit (Weiter)
   final VoidCallback? onNext;
 
-  PracticeQuizQuestionView({
+  const PracticeQuizQuestionView({
     super.key,
     required this.submitted,
     required this.currentIndex,
     required this.total,
     required this.myPoints,
     required this.machinePoints,
-    this.rivalLabel = 'Punkte der Maschine',
+    this.rivalLabel = 'Punkte der Mas...',
     required this.title,
     required this.question,
     required this.answers,
@@ -49,38 +41,75 @@ class PracticeQuizQuestionView extends StatelessWidget {
     required this.onNext,
   });
 
+  @override
+  State<PracticeQuizQuestionView> createState() => _PracticeQuizQuestionViewState();
+}
+
+class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
   final ScrollController _scrollController = ScrollController();
 
   @override
-  Widget build(BuildContext context) {
-    // Auto-scroll to current index
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          currentIndex * 46.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
+  void initState() {
+    super.initState();
+    // Скроллим к текущему индексу при старте
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToIndex(widget.currentIndex));
+  }
 
+  @override
+  void didUpdateWidget(PracticeQuizQuestionView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Скроллим автоматически, если индекс изменился (перешли к следующему вопросу)
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _scrollToIndex(widget.currentIndex);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToIndex(int index) {
+    if (_scrollController.hasClients) {
+      const double itemWidth = 64.0;
+      const double spacing = 1.0;
+      // Вычисляем смещение так, чтобы текущий кружок был по центру
+      final double targetOffset = (index * (itemWidth + spacing)) -
+          (_scrollController.position.viewportDimension / 2) + (itemWidth / 2);
+
+      _scrollController.animateTo(
+        targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: AppColors.primaryPurple,
         foregroundColor: Colors.white,
         elevation: 0,
         title: Row(
           children: [
-            Expanded(child: Text("Player VS Machine", overflow: TextOverflow.ellipsis)),
-            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "Spieler против Maschine",
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+            ),
             Row(
               children: [
                 const Icon(Icons.timer_outlined, size: 18),
                 const SizedBox(width: 6),
                 Text(
-                  '0:${secondsLeft.toString().padLeft(2, '0')}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  '0:${widget.secondsLeft.toString().padLeft(2, '0')}',
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
                 ),
               ],
             ),
@@ -89,192 +118,150 @@ class PracticeQuizQuestionView extends StatelessWidget {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 14),
-
+          const SizedBox(height: 32),
+          // Кружки
           SizedBox(
-            height: 42,
+            height: 44,
             child: ListView.separated(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
-              itemCount: total,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemCount: widget.total,
+              separatorBuilder: (_, __) => const SizedBox(width: 1),
               itemBuilder: (context, i) {
-                final bool? res = (i >= 0 && i < results.length) ? results[i] : null;
-                final isCurrent = i == currentIndex;
+                final bool? res = (i < widget.results.length) ? widget.results[i] : null;
+                final isCurrent = i == widget.currentIndex;
 
                 Color borderColor = Colors.grey.shade300;
                 Color backgroundColor = Colors.transparent;
-                Color textColor = Colors.black;
+                Color textColor = Colors.black38;
 
                 if (isCurrent) {
                   backgroundColor = Colors.black;
                   borderColor = Colors.black;
                   textColor = Colors.white;
                 } else if (res == true) {
-                  borderColor = Colors.green;
-                  textColor = Colors.green;
+                  borderColor = AppColors.greenCorrect;
+                  textColor = AppColors.greenCorrect;
                 } else if (res == false) {
-                  borderColor = Colors.red;
-                  textColor = Colors.red;
+                  borderColor = AppColors.redWrong;
+                  textColor = AppColors.redWrong;
                 }
 
-                return GestureDetector(
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: backgroundColor,
-                      border: Border.all(color: borderColor, width: 2),
-                    ),
-                    child: Text(
-                      '${i + 1}',
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                return Container(
+                  width: 64,
+                  height: 64,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: backgroundColor,
+                    border: Border.all(color: borderColor, width: 2),
+                  ),
+                  child: Text(
+                    '${i + 1}',
+                    style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.w400),
                   ),
                 );
               },
             ),
           ),
-
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 18),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
+          ),
+          const SizedBox(height: 20),
+          // Баллы
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.deepPurple),
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.deepPurple,
-                    ),
-                    child: Text(
-                      'Deine Punkte: $myPoints',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
+                _buildPointBox('Deine Punkte: ${widget.myPoints}', AppColors.primaryPurple, Colors.white, false),
                 const SizedBox(width: 10),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.deepPurple),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '$rivalLabel: $machinePoints',
-                      style: const TextStyle(color: Colors.deepPurple),
-                    ),
-                  ),
-                ),
+                _buildPointBox('${widget.rivalLabel} ${widget.machinePoints}', Colors.white, AppColors.primaryPurple, true),
               ],
             ),
           ),
-
-          const SizedBox(height: 8),
-
+          const SizedBox(height: 24),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
+          ),
+          const SizedBox(height: 22),
+          // Вопрос
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                 Text(
-                  question,
-                  style: TextStyle(fontSize: 18, color: Colors.black),
-                ),              ],
+                Text(widget.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 16),
+                MathContent(content: widget.question, isQuestion: true, fontSize: 32),
+              ],
             ),
           ),
-
-
-          const SizedBox(height: 24),
-
+          const SizedBox(height: 34),
+          // Ответы
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: answers.length,
+              itemCount: widget.answers.length,
               itemBuilder: (context, i) {
-                final selected = selectedIndex == i;
-                final isCorrectAnswer = correctAnswerIndex == i;
+                final selected = widget.selectedIndex == i;
+                final isCorrect = widget.correctAnswerIndex == i;
 
-                String letter = String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
+                Color? cardBg;
+                Color? borderCol;
+                Color contentColor = Colors.black54;
 
-                Color? backgroundColor;
-                Color? borderColor;
-                Color? textColor;
-
-                if (submitted && correctAnswerIndex != null) {
-                  // ✅ After submit: show green correct, red selected wrong
-                  if (isCorrectAnswer) {
-                    backgroundColor = Colors.green.withOpacity(0.1);
-                    borderColor = Colors.green;
-                    textColor = Colors.green;
-                  } else if (selected && !isCorrectAnswer) {
-                    backgroundColor = Colors.red.withOpacity(0.1);
-                    borderColor = Colors.red;
-                    textColor = Colors.red;
+                if (widget.submitted && widget.correctAnswerIndex != null) {
+                  if (isCorrect) {
+                    cardBg = AppColors.greenCorrect;
+                    borderCol = AppColors.greenCorrect;
+                    contentColor = Colors.white;
+                  } else if (selected) {
+                    cardBg = AppColors.redWrong;
+                    borderCol = AppColors.redWrong;
+                    contentColor = Colors.white;
                   } else {
-                    borderColor = Colors.grey.shade300;
-                    textColor = Colors.black54;
+                    borderCol = Colors.grey.shade300;
                   }
+                } else if (selected) {
+                  cardBg = AppColors.primaryPurple;
+                  borderCol = AppColors.primaryPurple;
+                  contentColor = Colors.white;
                 } else {
-                  // ✅ Before submit: same design as you had
-                  if (selected) {
-                    backgroundColor = Colors.deepPurple.withOpacity(0.08);
-                    borderColor = Colors.deepPurple;
-                    textColor = Colors.deepPurple;
-                  } else {
-                    borderColor = Colors.grey.shade300;
-                    textColor = Colors.black;
-                  }
+                  borderCol = Colors.grey.shade300;
                 }
 
                 return GestureDetector(
-                  onTap: () => onSelect?.call(i),
+                  onTap: () => widget.onSelect?.call(i),
                   child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
+                    margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: backgroundColor ?? Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: borderColor ?? Colors.grey.shade300,
-                        width: 1.5,
-                      ),
+                      color: cardBg ?? Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: borderCol ?? Colors.grey.shade300, width: 1.5),
                     ),
                     child: Row(
                       children: [
-                        Text(
-                          letter,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
+                        SizedBox(
+                          width: 25,
+                          child: Text(
+                            String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
+                            style: TextStyle(fontSize: 18, color: contentColor, height: 1.0),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            answers[i],
-                            style: TextStyle(fontSize: 18, color: textColor),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4.5),
+                            child: MathContent(
+                              content: widget.answers[i],
+                              fontSize: 18,
+                              color: contentColor,
+                            ),
                           ),
                         ),
                       ],
@@ -284,26 +271,38 @@ class PracticeQuizQuestionView extends StatelessWidget {
               },
             ),
           ),
-
-          const SizedBox(height: 8),
-
+          // Кнопка
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: PrimaryButton(
-                    color: AppColors.primaryYellow,
-                    text: submitted ? 'nächstes' : 'abgeben',
-                    enabled: submitted ? true : (selectedIndex != null),
-                    onPressed: submitted ? onNext : onSubmit,
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            child: PrimaryButton(
+              color: AppColors.primaryYellow,
+              text: widget.submitted ? 'nächstes' : 'abgeben',
+              enabled: widget.submitted || widget.selectedIndex != null,
+              onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Вспомогательный метод для блоков баллов (чтобы не дублировать код)
+  Widget _buildPointBox(String text, Color bg, Color textColor, bool hasBorder) {
+    return Expanded(
+      child: Container(
+        height: 44,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(6),
+          border: hasBorder ? Border.all(color: AppColors.primaryPurple) : null,
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+        ),
       ),
     );
   }
