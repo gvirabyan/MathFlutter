@@ -36,8 +36,10 @@ class MathContent extends StatelessWidget {
       );
     }
     else if (content.startsWith('@emoji@')) {
+      final emojiContent = content.substring(7);
+      final plainText = emojiContent.replaceAll(RegExp(r'<[^>]*>'), '');
       return Text(
-        content.substring(7),
+        plainText,
         style: TextStyle(
           fontSize: (isQuestion ? 18 : fontSize) * scale,
           height: 1.4,
@@ -46,32 +48,46 @@ class MathContent extends StatelessWidget {
       );
     }
     else if (content.startsWith('@@')) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Text(
-          content.substring(2),
+      final monoContent = content.substring(2);
+      final plainText = monoContent
+          .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
+          .replaceAll('&nbsp;', ' '); // Replace &nbsp; with a space
+      final lines = plainText.trim().split('\n');
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: lines
+            .map((line) => Text(
+          line.trim(),
           style: TextStyle(
             fontSize: (isQuestion ? 18 : fontSize) * scale,
-            height: 1,
+            height: 1.2, // Adjust height for better spacing
             fontFamily: 'monospace',
             fontWeight: FontWeight.bold,
             letterSpacing: 4,
             color: color,
           ),
-        ),
+        ))
+            .toList(),
       );
     }
     else if (content.startsWith('@pre@')) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Text(
-          content.substring(5),
+      final preContent = content.substring(5);
+      final plainText = preContent.replaceAll('<br>', '\n');
+      final lines = plainText.trim().split('\n');
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: lines
+            .map((line) => Text(
+          line.trim(),
           style: TextStyle(
             fontFamily: 'monospace',
             fontSize: (isQuestion ? 18 : fontSize) * scale,
             color: color,
           ),
-        ),
+        ))
+            .toList(),
       );
     }
     else if (content.startsWith('@')) {
@@ -88,7 +104,7 @@ class MathContent extends StatelessWidget {
       final processedContent = _preprocessLatex(content);
 
       return TeX2SVG(
-        math: r'\(\displaystyle ' + processedContent + r'\)',
+        math: r'\displaystyle ' + processedContent,
         teXInputType: TeXInputType.teX,
         formulaWidgetBuilder: (context, svg) {
           final double finalFontSize = (isQuestion ? 22 : 20) * scale;
