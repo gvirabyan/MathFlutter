@@ -66,18 +66,29 @@ class MathContent extends StatelessWidget {
     }
 
     if (content.startsWith('@pre@')) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Text(
-          content.substring(5),
-          style: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: (isQuestion ? 18 : fontSize) * scale,
-            color: color,
-          ),
-        ),
+      // 1. Убираем @pre@
+      String raw = content.substring(5).trim();
+
+      // 2. Разбиваем по <br>
+      List<String> lines = raw.split('<br>');
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end, // числа выравниваются вправо
+        mainAxisSize: MainAxisSize.min,
+        children: lines.map((line) {
+          return Text(
+            line.trim(),
+            style: TextStyle(
+              fontFamily: 'monospace', // чтобы цифры ровно стояли
+              fontSize: (isQuestion ? 18 : fontSize) * scale,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          );
+        }).toList(),
       );
     }
+
 
     if (content.startsWith('@')) {
       return Text(
