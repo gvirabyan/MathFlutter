@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MathContent extends StatelessWidget {
   final String content;
@@ -86,21 +87,17 @@ class MathContent extends StatelessWidget {
     else {
       final processedContent = _preprocessLatex(content);
 
-      return TeXView(
-        child: TeXViewColumn(
-          children: [
-            TeXViewDocument(
-              r'\( \sf ' + processedContent + r' \)',
-              style: TeXViewStyle(
-                contentColor: color,
-                fontStyle: TeXViewFontStyle(
-                  // 🔹 УМЕНЬШЕННЫЙ и аккуратный размер LaTeX
-                  fontSize: ((isQuestion ? 22 : 20) * scale).toInt(),
-                ),
-              ),
-            ),
-          ],
-        ),
+      return TeX2SVG(
+        math: r'\(\displaystyle ' + processedContent + r'\)',
+        teXInputType: TeXInputType.teX,
+        formulaWidgetBuilder: (context, svg) {
+          final double finalFontSize = (isQuestion ? 22 : 20) * scale;
+          return SvgPicture.string(
+            svg,
+            height: finalFontSize,
+            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+          );
+        },
       );
     }
   }
