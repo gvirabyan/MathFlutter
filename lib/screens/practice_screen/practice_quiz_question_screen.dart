@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_view.dart';
 
@@ -35,8 +37,8 @@ class PracticeQuizQuestionScreen extends StatefulWidget {
       _PracticeQuizQuestionScreenState();
 }
 
-
-class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen> {
+class _PracticeQuizQuestionScreenState
+    extends State<PracticeQuizQuestionScreen> {
   bool loading = true;
   bool submitted = false;
 
@@ -52,6 +54,7 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
   Timer? timer;
 
   int? selectedIndex;
+  int? machineSelectedIndex;
 
   @override
   void initState() {
@@ -66,7 +69,8 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
       rival: widget.rival,
     );
 
-    final List list = res['questions'] is List ? List.from(res['questions']) : [];
+    final List list =
+        res['questions'] is List ? List.from(res['questions']) : [];
     questions = list.map((e) => QuestionModel.fromJson(e)).toList();
 
     // IMPORTANT: results length must match "total" circles count
@@ -104,20 +108,30 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
 
   void _submitTimeout() {
     if (submitted) return;
-
     timer?.cancel();
+
+    final q = questions[index]; // берем текущий вопрос
+    bool machineGotItRight = Random().nextDouble() < 0.3;
+    int? mSelected;
+
+    if (machineGotItRight) {
+      mSelected = q.correctIndex;
+      if (widget.awardPoints) machinePoints++;
+    } else {
+      List<int> wrongIndices = [];
+      for (int i = 0; i < q.answers.length; i++) {
+        if (i != q.correctIndex) wrongIndices.add(i);
+      }
+      mSelected = wrongIndices[Random().nextInt(wrongIndices.length)];
+    }
 
     setState(() {
       submitted = true;
+      machineSelectedIndex = mSelected; // теперь рамка покажется и при таймауте
       questions[index].userAnswerStatus = 'wrong';
 
-      // mark circle as wrong (only if within bounds)
       if (index >= 0 && index < answersResult.length) {
         answersResult[index] = false;
-      }
-
-      if (widget.awardPoints) {
-        machinePoints++;
       }
     });
   }
@@ -131,18 +145,18 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
 
     timer?.cancel();
 
-    if (isPrimaryCorrect && q.secondAnswer != null && q.secondAnswer!.trim().isNotEmpty) {      final result = await SecondAnswerDialog.show(
+    // 1. Логика второго ответа (если есть)
+    if (isPrimaryCorrect &&
+        q.secondAnswer != null &&
+        q.secondAnswer!.trim().isNotEmpty) {
+      final result = await SecondAnswerDialog.show(
         context,
         title: 'Errechne das Ergebnis',
         expression: q.answers[selected],
         correctSecondAnswer: q.secondAnswer!,
       );
-
-
       if (result != null) {
         isFinalCorrect = result.isCorrect;
-      } else {
-        isFinalCorrect = false;
       }
     }
 
@@ -157,8 +171,17 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
       if (widget.awardPoints) {
         if (isFinalCorrect) {
           myPoints++;
-        } else {
+        }
+        bool machineGotItRight = Random().nextDouble() < 0.3;
+        if (machineGotItRight) {
+          machineSelectedIndex = q.correctIndex; // Машина выбрала правильный
           machinePoints++;
+        } else {
+          List<int> wrongIndices = [];
+          for (int i = 0; i < q.answers.length; i++) {
+            if (i != q.correctIndex) wrongIndices.add(i);
+          }
+          machineSelectedIndex = wrongIndices[Random().nextInt(wrongIndices.length)];
         }
       }
     });
@@ -175,6 +198,7 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
       index++;
       selectedIndex = null;
       submitted = false;
+      machineSelectedIndex = null;
     });
 
     _startTimer();
@@ -195,9 +219,11 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
 
     // ✅ вычисляем результат
     final PracticeQuizResult result =
-    myPoints > machinePoints
-        ? PracticeQuizResult.win
-        : (myPoints < machinePoints ? PracticeQuizResult.lose : PracticeQuizResult.draw);
+        myPoints > machinePoints
+            ? PracticeQuizResult.win
+            : (myPoints < machinePoints
+                ? PracticeQuizResult.lose
+                : PracticeQuizResult.draw);
 
     // ✅ points для текста (как пример)
     final int pointsText = (myPoints - machinePoints).abs();
@@ -233,7 +259,6 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
       },
     );
   }
-
 
   @override
   void dispose() {
@@ -271,20 +296,22 @@ class _PracticeQuizQuestionScreenState extends State<PracticeQuizQuestionScreen>
 
       // show correct only after submit
       correctAnswerIndex: submitted ? displayQuestion.correctIndex : null,
-
+      machineSelectedIndex: machineSelectedIndex,
       secondsLeft: secondsLeft,
       selectedIndex: selectedIndex,
 
-      onSelect: submitted
-          ? null
-          : (i) {
-        setState(() => selectedIndex = i);
-      },
+      onSelect:
+          submitted
+              ? null
+              : (i) {
+                setState(() => selectedIndex = i);
+              },
 
       // submit only before submitted
-      onSubmit: (selectedIndex == null || submitted)
-          ? null
-          : () => _submitAnswer(selectedIndex!),
+      onSubmit:
+          (selectedIndex == null || submitted)
+              ? null
+              : () => _submitAnswer(selectedIndex!),
 
       // ✅ new: next button action when submitted
       onNext: submitted ? _nextQuestion : null,

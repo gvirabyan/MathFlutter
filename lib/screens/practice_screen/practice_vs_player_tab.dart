@@ -50,59 +50,131 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   }
 
   Widget _intro() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Du wirst mit einem zufälligen\nSpieler verbunden',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () => setState(() => started = true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: const Text(
-                'Los geht’s',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+
+            // Title
+            const Text(
+              'Du kannst mit jemandem üben, der\neine ähnliche Bewertung hat',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-        ],
+
+            const SizedBox(height: 12),
+
+            const Text(
+              'Anzahl der Fragen: 10–30',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black54,
+              ),
+            ),
+
+            const SizedBox(height: 36,),
+
+            // Start Button (yellow)
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => setState(() => started = true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFC107), // Yellow
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: const Text(
+                  'Start',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _selectionList() {
     return ListView(
       padding: const EdgeInsets.only(top: 24),
       children: [
-        _item(10, '+10, +5, -2'),
+        _item(
+          context,
+          title: '10 Fragen',
+          score: '+10, +5, -2',
+          count: 10,
+        ),
         _divider(),
-        _item(20, '+20, +10, -4'),
+        _item(
+          context,
+          title: '20 Fragen',
+          score: '+20, +10, -4',
+          count: 20,
+        ),
         _divider(),
-        _item(30, '+30, +15, -6'),
+        _item(
+          context,
+          title: '30 Fragen',
+          score: '+30, +15, -6',
+          count: 30,
+        ),
         _divider(),
       ],
     );
   }
 
-  Widget _item(int count, String score) {
-    return ListTile(
-      title: Text('$count Fragen', style: const TextStyle(fontSize: 18)),
-      subtitle: Text(score, style: const TextStyle(color: Colors.grey)),
-      trailing: const Icon(Icons.chevron_right),
+  Widget _item(
+      BuildContext context, {
+        required String title,
+        required String score,
+        required int count,
+      }) {
+    return InkWell(
       onTap: () => _startVsPlayer(count),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        child: Row(
+          children: [
+            /// LEFT
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            /// RIGHT
+            Text(
+              score,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF7C3AED), // фиолетовый как на скрине
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

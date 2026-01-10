@@ -21,6 +21,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
   final void Function(int index)? onSelect;
   final VoidCallback? onSubmit;
   final VoidCallback? onNext;
+  final int? machineSelectedIndex;
 
   const PracticeQuizQuestionView({
     super.key,
@@ -40,6 +41,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
     required this.onSelect,
     required this.onSubmit,
     required this.onNext,
+    this.machineSelectedIndex,
   });
 
   @override
@@ -104,8 +106,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
           children: [
             Expanded(
               child: Text(
-                "Spieler против Maschine",
-                overflow: TextOverflow.ellipsis,
+                "Spieler gegen Maschine",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -246,10 +247,21 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               itemBuilder: (context, i) {
                 final selected = widget.selectedIndex == i;
                 final isCorrect = widget.correctAnswerIndex == i;
+                final isMachineSelected = widget.machineSelectedIndex == i;
+                Color? machineBorderColor;
+                double borderWidth = 1.5;
+
 
                 Color? cardBg;
                 Color? borderCol;
                 Color contentColor = Colors.black;
+
+                if (widget.submitted && isMachineSelected) {
+                  machineBorderColor = (i == widget.correctAnswerIndex)
+                      ? AppColors.greenCorrect
+                      : AppColors.redWrong;
+                  borderWidth = 3.0;
+                }
 
                 if (widget.submitted && widget.correctAnswerIndex != null) {
                   if (isCorrect) {
@@ -280,8 +292,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                       color: cardBg ?? Colors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: borderCol ?? Colors.grey.shade300,
-                        width: 1.5,
+                        color: machineBorderColor ?? borderCol ?? Colors.grey.shade300,
+                        width: borderWidth,
                       ),
                     ),
                     child: Row(
