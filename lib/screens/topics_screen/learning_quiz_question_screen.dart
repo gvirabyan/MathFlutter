@@ -142,51 +142,23 @@ class _LearningQuizQuestionScreenState
     if (submitted || selected == null) return;
 
     final q = questions[index];
-    final bool isCorrect = selected == q.correctIndex;
+    final bool isFirstCorrect = selected == q.correctIndex;
 
-    setState(() {
-      submitted = true;
-
-      if (q.secondAnswer == null) {
-        questions[index].userAnswerStatus = isCorrect ? 'correct' : 'wrong';
-      } else {
-        questions[index].userAnswerStatus = null;
-      }
-    });
-
-    // ✅ Learning mode - save to backend and add to history
-    if (widget.learningMode && widget.categoryId != null && q.secondAnswer == null) {
-      final circleIndex = historyQuestions.length + index;
-      answersResult[circleIndex] = isCorrect;
-
-      final answerText = q.answers[selected];
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getInt('user_id');
-
-      final answerData = {
-        'users_permissions_user': userId,
-        'question': q.id,
-        'category': widget.categoryId.toString(),
-        'answer': answerText.toString(),
-        'status': isCorrect ? 'correct' : 'wrong',
-        'answer_type': 'topic',
-      };
-
-      await CategoryAnswerService.updateUserAnsweredQuestion(
-        answerData: answerData,
-      );
-
-      // Add to history
-      final answeredQuestion = QuestionModel(
-        id: q.id,
-        title: q.title,
-        question: q.question,
-        answers: q.answers,
-        correctIndex: q.correctIndex,
-      );
-      answeredQuestion.userAnswerStatus = isCorrect ? 'correct' : 'wrong';
+    // Если первого ответа нет или он неверный, то и второй не нужен — сразу Wrong
+    if (!isFirstCorrect) {
+      setState(() {
+        submitted = true;
+        q.userAnswerStatus = 'wrong';
+      });
+      _finalizeAnswer(selected, null, false); // Завершаем как неверный
+      return;
     }
-    if (q.secondAnswer != null && isCorrect) {
+
+    // Если первый верный, проверяем наличие Второго Ответа
+    bool hasSecondAnswer = q.secondAnswer != null && q.secondAnswer!.trim().isNotEmpty;
+
+    if (hasSecondAnswer) {
+      // Показываем диалог
       final result = await SecondAnswerDialog.show(
         context,
         title: 'Errechne das Ergebnis',
@@ -195,17 +167,25 @@ class _LearningQuizQuestionScreenState
       );
 
       if (result != null) {
-        _finishSecondAnswer(
-          result.value,
-          result.isCorrect,
-        );
+        // Результат всего вопроса теперь зависит только от Второго Ответа
+        // (так как первый мы уже проверили — он true)
+        setState(() {
+          submitted = true;
+          q.userAnswerStatus = result.isCorrect ? 'correct' : 'wrong';
+        });
+        _finalizeAnswer(selected, result.value, result.isCorrect);
+      } else {
+        // Если пользователь закрыл диалог, не ответив (нажал назад)
+        // Можно либо ничего не делать, либо считать как ошибку.
       }
-    }else if (q.secondAnswer != null && !isCorrect) {
-      // ❗ НЕТ second answer → сразу финальный wrong
-      _finishSecondAnswer(null, false);
+    } else {
+      // Второго ответа нет — значит результат зависит только от первого (который true)
+      setState(() {
+        submitted = true;
+        q.userAnswerStatus = 'correct';
+      });
+      _finalizeAnswer(selected, null, true);
     }
-
-
   }
 
   void _nextQuestion() {
@@ -274,11 +254,21 @@ class _LearningQuizQuestionScreenState
     QuestionModel displayQuestion;
     int displayIndex;
     bool isHistory = false;
+    int? historySelectedIndex; // Будет хранить индекс для отображения в истории
 
     if (viewingHistory && historyIndex != null) {
       displayQuestion = historyQuestions[historyIndex!];
       displayIndex = historyIndex!;
       isHistory = true;
+      if (displayQuestion.userAnswerStatus == 'correct') {
+        // Если правильно — выбираем правильный индекс
+        historySelectedIndex = displayQuestion.correctIndex;
+      } else if (displayQuestion.userAnswerStatus == 'wrong') {
+        // Если неправильно — нам нужно выбрать любой индекс, КРОМЕ правильного.
+        // Берем 0, если правильный не 0, иначе берем 1.
+        // Это гарантирует, что мы всегда покажем "ошибку" пользователя.
+        historySelectedIndex = (displayQuestion.correctIndex == 0) ? 1 : 0;
+      }
     } else {
       displayQuestion = questions[index];
       displayIndex =
@@ -298,7 +288,7 @@ class _LearningQuizQuestionScreenState
       correctAnswerIndex:
           (isHistory || submitted) ? displayQuestion.correctIndex : null,
       userAnswerStatus: isHistory ? displayQuestion.userAnswerStatus : null,
-      selectedIndex: selectedIndex,
+      selectedIndex: isHistory ? historySelectedIndex : selectedIndex,
       isViewingHistory: isHistory,
       onSelect:
           (submitted || isHistory)
@@ -384,6 +374,38 @@ class _LearningQuizQuestionScreenState
     }
 
     _nextQuestion(); // Переход к следующему согласно вашей новой логике
+  }
+  Future<void> _finalizeAnswer(int selectedIndex, String? secondAnswerVal, bool isFinalCorrect) async {
+    final q = questions[index];
+    final circleIndex = historyQuestions.length + index;
+
+    setState(() {
+      // 1. Мгновенно обновляем цвет кружка в массиве результатов
+      answersResult[circleIndex] = isFinalCorrect;
+
+      // 2. Устанавливаем статус в саму модель вопроса
+      q.userAnswerStatus = isFinalCorrect ? 'correct' : 'wrong';
+    });
+
+    // 3. Отправляем на бэкэнд
+    if (widget.learningMode && widget.categoryId != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      final answerData = {
+        'users_permissions_user': userId,
+        'question': q.id,
+        'category': widget.categoryId.toString(),
+        'answer': q.answers[selectedIndex].toString(),
+        'second_answer': secondAnswerVal ?? '',
+        'status': isFinalCorrect ? 'correct' : 'wrong',
+        'answer_type': 'topic',
+      };
+
+      await CategoryAnswerService.updateUserAnsweredQuestion(
+        answerData: answerData,
+      );
+    }
   }
 
 }

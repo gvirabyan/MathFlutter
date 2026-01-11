@@ -260,7 +260,7 @@ class _ProgressTabState extends State<ProgressTab> {
               ),
             ),
           _infoBlock(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           _navButtons(),
         ],
       ),
@@ -629,7 +629,7 @@ class _ProgressTabState extends State<ProgressTab> {
               style: const TextStyle(
                 fontSize: 18,
                 color: AppColors.primaryPurple,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
