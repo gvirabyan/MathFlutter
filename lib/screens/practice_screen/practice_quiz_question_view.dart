@@ -164,7 +164,6 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   borderColor = AppColors.redWrong;
                   textColor = AppColors.redWrong;
                 }
-
                 return Container(
                   width: 64,
                   height: 64,
@@ -285,13 +284,29 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 } else {
                   borderCol = Colors.grey.shade300;
                 }
+                List<BoxShadow>? externalBorders;
 
+                if (widget.submitted && isMachineSelected) {
+                  // Определяем цвет внешней рамки соперника
+                  final Color rivalColor = (i == widget.correctAnswerIndex)
+                      ? AppColors.primaryYellow
+                      : AppColors.primaryYellow;
+
+                  externalBorders = [
+                    BoxShadow(
+                      color: rivalColor,
+                      spreadRadius: 3, // На сколько пикселей рамка "выпирает" наружу
+                      blurRadius: 0,   // 0 делает линию четкой, а не размытой
+                    )
+                  ];
+                }
                 return GestureDetector(
                   onTap: () => widget.onSelect?.call(i),
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
+                      boxShadow: externalBorders,
                       color: cardBg ?? Colors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(

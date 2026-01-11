@@ -3,7 +3,6 @@ import '../../app_start.dart';
 import '../../ui_elements/auth_input_decoration.dart';
 import '../../ui_elements/primary_button.dart';
 import '../../services/auth_service.dart';
-import '../../main.dart';
 import 'auth_screen.dart';
 
 class NicknameForm extends StatefulWidget {

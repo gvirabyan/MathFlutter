@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
-import '../topics_screen/learning_quiz_question_screen.dart';
 
 class PracticeVsMachineTab extends StatelessWidget {
   const PracticeVsMachineTab({super.key});
@@ -17,7 +16,7 @@ class PracticeVsMachineTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       children: [
         _item(
           context,

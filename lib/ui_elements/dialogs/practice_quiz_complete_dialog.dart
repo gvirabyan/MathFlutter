@@ -4,7 +4,7 @@ enum PracticeQuizResult { win, lose, draw }
 
 class PracticeQuizCompleteDialog extends StatelessWidget {
   final PracticeQuizResult result;
-  final int points; // how many points lost / won / etc.
+  final int points;
   final VoidCallback onMyStatus;
   final VoidCallback onNewGame;
 
@@ -17,21 +17,22 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
   });
 
   static Future<void> show(
-      BuildContext context, {
-        required PracticeQuizResult result,
-        required int points,
-        required VoidCallback onMyStatus,
-        required VoidCallback onNewGame,
-      }) {
+    BuildContext context, {
+    required PracticeQuizResult result,
+    required int points,
+    required VoidCallback onMyStatus,
+    required VoidCallback onNewGame,
+  }) {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
-      builder: (_) => PracticeQuizCompleteDialog(
-        result: result,
-        points: points,
-        onMyStatus: onMyStatus,
-        onNewGame: onNewGame,
-      ),
+      builder:
+          (_) => PracticeQuizCompleteDialog(
+            result: result,
+            points: points,
+            onMyStatus: onMyStatus,
+            onNewGame: onNewGame,
+          ),
     );
   }
 
@@ -48,8 +49,6 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
   }
 
   String get _subtitle {
-    // Screenshot style: "Du hast {points} Punkte verloren"
-    // Keep it simple and consistent.
     switch (result) {
       case PracticeQuizResult.win:
         return 'Du hast $points Punkte gewonnen';
@@ -113,6 +112,7 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                             ),
                           ),
                           child: const Text(
+                            maxLines: 1,
                             'Mein Status',
                             style: TextStyle(
                               fontSize: 16,
@@ -141,6 +141,7 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                           ),
                           child: const Text(
                             'Neues Spiel',
+                            maxLines: 1,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,

@@ -3,7 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
-import '../topics_screen/learning_quiz_question_screen.dart';
+
+import '../../ui_elements/player_searching_loading.dart';
 
 class PracticeVsPlayerTab extends StatefulWidget {
   const PracticeVsPlayerTab({super.key});
@@ -38,9 +39,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   Widget build(BuildContext context) {
     if (!started) return _intro();
 
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    if (loading) return LoadingView();
 
     if (startCountdownRunning) {
       return _startCountdownView();
@@ -113,7 +112,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
 
   Widget _selectionList() {
     return ListView(
-      padding: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.only(top: 8),
       children: [
         _item(
           context,
@@ -149,7 +148,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     return InkWell(
       onTap: () => _startVsPlayer(count),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Row(
           children: [
             /// LEFT
@@ -256,6 +255,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
       MaterialPageRoute(
         builder: (_) => PracticeQuizQuestionScreen(
           totalQuestions: selectedQuestionsCount!,
+          rival: 'fake_user',
         ),
 
       ),

@@ -8,14 +8,14 @@ class NotificationPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.50,
+        width: MediaQuery.of(context).size.width * 0.80,
         color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ===== HEADER =====
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -30,7 +30,7 @@ class NotificationPanel extends StatelessWidget {
                   Row(
                     children: const [
                       Icon(Icons.notifications_none_outlined, color: Colors.white),
-                      SizedBox(width: 8),
+                      SizedBox(width: 4),
                       Text(
                         'Benachrichtigungen',
                         style: TextStyle(

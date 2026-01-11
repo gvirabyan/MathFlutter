@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../main.dart';
 import '../../services/auth_service.dart';
 import 'auth_screen.dart';
 

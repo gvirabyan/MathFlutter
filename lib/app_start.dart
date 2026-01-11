@@ -5,7 +5,6 @@ import 'package:untitled2/screens/activity_screen/progress_tab.dart';
 import 'package:untitled2/screens/activity_screen/status_tab.dart';
 import 'package:untitled2/screens/activity_screen/top_list_tab.dart';
 import 'package:untitled2/screens/auth/auth_screen.dart';
-import 'package:untitled2/screens/practice_screen/practice_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_player_tab.dart'; // Добавьте импорт
 import 'package:untitled2/screens/profile_screen/about_us/profile_about_tab.dart';
@@ -50,10 +49,6 @@ class _AppStartState extends State<AppStart> {
 
     final token = prefs.getString('token');
     final userId = prefs.getInt('user_id');
-
-    final shortToken = token == null
-        ? 'null'
-        : '${token.substring(0, 6)}…${token.substring(token.length - 4)}';
 
     if (token != null && token.isNotEmpty && userId != null) {
 

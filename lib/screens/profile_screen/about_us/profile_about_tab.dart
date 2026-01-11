@@ -1,13 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:untitled2/screens/profile_screen/about_us/release_notes_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'privacy_policy_page.dart';
 import 'software_page.dart';
-
-// ⬇️ импорт твоих страниц
-
 
 class ProfileAboutTab extends StatelessWidget {
   const ProfileAboutTab({super.key});

@@ -6,7 +6,6 @@ import 'package:untitled2/services/questions_service.dart';
 
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
-import '../../services/quiz_service.dart';
 import '../../ui_elements/dialogs/second_answer_dialog.dart';
 import '../../ui_elements/solution_viewer.dart';
 import '../../ui_elements/whiteboard_service.dart';
@@ -28,7 +27,7 @@ class LearningQuizQuestionScreen extends StatefulWidget {
     super.key,
     required this.totalQuestions,
     this.categoryId,
-    required this.categoryName, // ✅ Добавлено в обязательные параметры
+    required this.categoryName,
     this.learningMode = false,
     this.awardPoints = true,
     this.saveResult = true,

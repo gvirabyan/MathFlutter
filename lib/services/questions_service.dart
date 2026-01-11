@@ -1,9 +1,6 @@
-import 'package:flutter/cupertino.dart';
-
 import 'api_service.dart';
 
 class QuestionsService {
-  /// Получить вопросы по категории
   static Future<Map<String, dynamic>> getQuestions({
     int? categoryId,
   }) async {

@@ -1,9 +1,13 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled2/screens/topics_screen/learning_quiz_question_screen.dart';
 import 'package:untitled2/services/auth_service.dart';
+
 import '../../app_colors.dart';
 import '../../services/user_stats_service.dart';
+import '../../ui_elements/status_tab_elements/daily_goal_widget.dart';
+import '../../ui_elements/status_tab_elements/point_section_widget.dart';
+import '../../ui_elements/status_tab_elements/today_activity_widget.dart';
 
 class StatusTab extends StatefulWidget {
   final Function(int)? onGoalUpdated;
@@ -71,7 +75,6 @@ class _StatusTabState extends State<StatusTab> {
     }
   }
 
-
   int _parseInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;
@@ -135,7 +138,7 @@ class _StatusTabState extends State<StatusTab> {
         children: [
           const SizedBox(height: 16),
 
-          _DailyGoal(
+          DailyGoal(
             value: dailyGoal,
             disabled: disableSelect,
             onChanged: setGoal,
@@ -143,12 +146,14 @@ class _StatusTabState extends State<StatusTab> {
 
           const SizedBox(height: 24),
 
-          _LastQuiz(lastQuiz: lastQuiz),
-
-          const SizedBox(height: 32),
+          _LastQuiz(
+            lastQuiz: lastQuiz,
+            onTap: _goLastQuiz, // Передаем метод
+          ),
+          const SizedBox(height: 40),
 
           if (dailyStatics.isNotEmpty)
-            _TodayActivity(
+            TodayActivity(
               amount: amountAnswered,
               correct: stat("correct")["count"],
               skipped: stat("skipped")["count"],
@@ -158,7 +163,7 @@ class _StatusTabState extends State<StatusTab> {
 
           const SizedBox(height: 20),
 
-          _PointsSection(points: points, lastUpdate: lastUpdate),
+          PointsSection(points: points, lastUpdate: lastUpdate),
 
           if (pastCategoriesCount > 0 && categoriesCount > 0) ...[
             const SizedBox(height: 32),
@@ -170,67 +175,53 @@ class _StatusTabState extends State<StatusTab> {
             Text(
               '${pastCategoriesPercent.toStringAsFixed(0)} %',
               style: const TextStyle(
-                color: Colors.purple,
+                color: AppColors.primaryPurple,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
-
-          const SizedBox(height: 40),
+          const SizedBox(height: 6),
 
           _FooterText(timeInApp: timeInApp),
-
-          const SizedBox(height: 50),
         ],
       ),
     );
   }
-}
 
-/* ================= DAILY GOAL ================= */
+  void _goLastQuiz() {
+    if (lastQuiz != null && lastQuiz!["lastCategory"] != null) {
+      // Извлекаем ID категории
+      final categoryId = _parseInt(lastQuiz!["lastCategory"]["id"]);
 
-class _DailyGoal extends StatelessWidget {
-  final int value;
-  final bool disabled;
-  final ValueChanged<int> onChanged;
+      // Извлекаем имя категории (чтобы оно отображалось в заголовке экрана)
+      final String categoryName = lastQuiz!["lastCategory"]["name"] ?? 'Quiz';
 
-  const _DailyGoal({
-    required this.value,
-    required this.disabled,
-    required this.onChanged,
-  });
+      // Извлекаем общее количество вопросов (чтобы кружочки сверху были правильного размера)
+      final int totalQuestions = _parseInt(lastQuiz!["totalQuestions"]);
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Tägliches Ziel setzen'),
-          DropdownButton<int>(
-            value: value == 0 ? null : value,
-            isExpanded: true,
-            onChanged: disabled ? null : (v) => onChanged(v!),
-            items: const [
-              DropdownMenuItem(value: 10, child: Text('10 Fragen')),
-              DropdownMenuItem(value: 20, child: Text('20 Fragen')),
-              DropdownMenuItem(value: 30, child: Text('30 Fragen')),
-              DropdownMenuItem(value: 40, child: Text('40 Fragen')),
-            ],
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LearningQuizQuestionScreen(
+            categoryId: categoryId,
+            categoryName: categoryName,
+            totalQuestions: totalQuestions,
+            learningMode: true, // В Vue версии это обычно режим обучения
+            awardPoints: true,
+            saveResult: true,
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    }
   }
 }
-
-/* ================= LAST QUIZ ================= */
 
 class _LastQuiz extends StatelessWidget {
   final Map<String, dynamic>? lastQuiz;
+  // Добавляем колбэк для клика
+  final VoidCallback onTap;
 
-  const _LastQuiz({required this.lastQuiz});
+  const _LastQuiz({required this.lastQuiz, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -238,185 +229,49 @@ class _LastQuiz extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      children: [
-        const Text(
-          'Letztes Quiz',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 24),
-
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return GestureDetector(
+      onTap: onTap, // Вызываем функцию при нажатии
+      behavior: HitTestBehavior.opaque, // Чтобы кликалась вся область
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
           children: [
-            Text(
-              lastQuiz!["lastCategory"]["name"] ?? '',
-              style: const TextStyle(
-                fontSize: 16, // ← увеличь тут
-              ),
+            const Text(
+              'Letztes Quiz',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(width: 10),
-            Text(
-              '${lastQuiz!["answeredQuestions"]} / ${lastQuiz!["totalQuestions"]}',
-              style: const TextStyle(
-                fontSize: 14, // ← и тут
-                color: AppColors.primaryPurple,
-                  fontWeight: FontWeight.w600              ),
-            ),
-          ],
-        ),
-
-      ],
-    );
-  }
-}
-
-/* ================= TODAY ACTIVITY ================= */
-
-class _TodayActivity extends StatelessWidget {
-  final int amount;
-  final int correct;
-  final int skipped;
-  final int wrong;
-  final double percentCorrect;
-
-  const _TodayActivity({
-    required this.amount,
-    required this.correct,
-    required this.skipped,
-    required this.wrong,
-    required this.percentCorrect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Text(
-          'Heutige Aktivität',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 40),
-        SizedBox(
-          width: 220,
-          height: 160,
-          child: CustomPaint(
-            painter: _OpenCirclePainter(
-              percent: percentCorrect,
-              gapDegrees: 50,
-              color: Colors.green,
-              strokeWidth: 10,
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$amount',
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Text(
+                    lastQuiz!["lastCategory"]["name"] ?? '',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Text(
+                    '${lastQuiz!["answeredQuestions"]} / ${lastQuiz!["totalQuestions"]}',
                     style: const TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: AppColors.primaryPurple,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Text(
-                    'Richtig $correct',
-                    style: const TextStyle(color: Colors.green),
-                  ),
-                  Text('Übersprungen $skipped'),
-                  Text(
-                    'Falsch $wrong',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        _CheckProgressButton(
-          onTap: () {
-            DefaultTabController.of(context).animateTo(1);
-          },
-        ),
-      ],
-    );
-  }
-}
-
-/* ================= POINTS (SECOND CIRCLE) ================= */
-
-class _CheckProgressButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _CheckProgressButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onTap,
-      child: const Text(
-        'Fortschritt prüfen',
-        style: TextStyle(
-          color: Colors.purple,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
+          ],
         ),
       ),
     );
   }
 }
-
-class _PointsSection extends StatelessWidget {
-  final int points;
-  final String? lastUpdate;
-
-  const _PointsSection({required this.points, required this.lastUpdate});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Text(
-          'Punkte',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        if (lastUpdate != null)
-          Text(
-            'Letztes Update: $lastUpdate',
-            style: const TextStyle(color: Colors.black,fontSize: 12),
-          ),
-        const SizedBox(height: 20),
-        SizedBox(
-          width: 220,
-          height: 220,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CustomPaint(
-                size: const Size(220, 220),
-                painter: _OpenCirclePainter(
-                  percent: 100,
-                  gapDegrees: 0,
-                  color: const Color(0xFFEDE7FF),
-                  strokeWidth: 10,
-                ),
-              ),
-              Text(
-                '$points',
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/* ================= FOOTER ================= */
 
 class _FooterText extends StatelessWidget {
   final String? timeInApp;
@@ -427,66 +282,30 @@ class _FooterText extends StatelessWidget {
   Widget build(BuildContext context) {
     if (timeInApp == null || timeInApp!.isEmpty) return const SizedBox.shrink();
 
-    return RichText(
-      text: TextSpan(
-        children: [
-          const TextSpan(
-            text: 'Du bist in Mathe App ',
-            style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),
-          ),
-          TextSpan(
-            text: timeInApp,
-            style: const TextStyle(
-              color: AppColors.primaryPurple,
-              fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 56.0),
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: const TextStyle(fontSize: 14, height: 1.4),
+          children: [
+            const TextSpan(
+              text: 'Du bist in Mathe App ',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+            TextSpan(
+              text: timeInApp,
+              style: const TextStyle(
+                color: AppColors.primaryPurple,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-}
-
-/* ================= PAINTER ================= */
-
-class _OpenCirclePainter extends CustomPainter {
-  final double percent;
-  final double gapDegrees;
-  final Color color;
-  final double strokeWidth;
-
-  _OpenCirclePainter({
-    required this.percent,
-    required this.gapDegrees,
-    required this.color,
-    required this.strokeWidth,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final radius = size.width / 2 - strokeWidth;
-    final center = Offset(size.width / 2, size.height / 2);
-
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round;
-
-    final rect = Rect.fromCircle(center: center, radius: radius);
-
-    final gap = gapDegrees * math.pi / 180;
-    final sweep = (2 * math.pi - gap) * (percent / 100);
-    final start = math.pi / 2 + gap / 2;
-
-    canvas.drawArc(rect, start, sweep, false, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _OpenCirclePainter old) =>
-      old.percent != percent ||
-      old.gapDegrees != gapDegrees ||
-      old.color != color ||
-      old.strokeWidth != strokeWidth;
 }
