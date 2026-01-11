@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/topic_progress_item.dart';
 import '../../services/category_service.dart';
+import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/topic_progress_item.dart';
 import 'learning_quiz_question_screen.dart';
 
@@ -46,7 +47,7 @@ class _Topics89TabState extends State<Topics89Tab> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: LoadingOverlay());
     }
 
     return ListView(

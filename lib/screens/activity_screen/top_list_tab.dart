@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/auth_service.dart';
 import '../../services/top_list_service.dart';
+import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/open_circle_gauge.dart';
 
 class TopListTab extends StatefulWidget {
@@ -131,7 +132,7 @@ class _TopListTabState extends State<TopListTab> {
     if (isLoading) {
       return const Padding(
         padding: EdgeInsets.only(top: 80),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: LoadingOverlay()),
       );
     }
 
@@ -428,7 +429,7 @@ class _TopListSingleState extends State<TopListSingle> {
         // СПИСОК
         Expanded(
           child: isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: LoadingOverlay())
               : ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: items.length,

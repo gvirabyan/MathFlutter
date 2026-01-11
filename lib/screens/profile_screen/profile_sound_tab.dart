@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app_colors.dart';
 import '../../services/auth_service.dart';
+import '../../ui_elements/loading_overlay.dart';
 
 class ProfileSoundTab extends StatefulWidget {
   const ProfileSoundTab({super.key});
@@ -81,7 +82,7 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
     super.build(context);
 
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: LoadingOverlay());
     }
 
     return Container(

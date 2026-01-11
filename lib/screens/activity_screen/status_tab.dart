@@ -5,6 +5,7 @@ import 'package:untitled2/services/auth_service.dart';
 
 import '../../app_colors.dart';
 import '../../services/user_stats_service.dart';
+import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/status_tab_elements/daily_goal_widget.dart';
 import '../../ui_elements/status_tab_elements/point_section_widget.dart';
 import '../../ui_elements/status_tab_elements/today_activity_widget.dart';
@@ -127,10 +128,7 @@ class _StatusTabState extends State<StatusTab> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 80),
-        child: Center(child: CircularProgressIndicator()),
-      );
+      return LoadingOverlay();
     }
 
     return SingleChildScrollView(

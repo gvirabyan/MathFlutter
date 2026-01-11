@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:untitled2/app_colors.dart';
 import '../../services/auth_service.dart';
+import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/primary_button.dart';
 import '../../screens/auth/auth_screen.dart';
 
@@ -165,7 +166,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child:  LoadingOverlay());
     }
 
     final bool disableInputs = _processing;

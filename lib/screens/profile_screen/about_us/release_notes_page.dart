@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../ui_elements/loading_overlay.dart';
+
 class ReleaseNotesPopup extends StatefulWidget {
   const ReleaseNotesPopup({super.key});
 
@@ -62,7 +64,7 @@ class _ReleaseNotesPopupState extends State<ReleaseNotesPopup> {
     }
 
     if (versions == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: LoadingOverlay());
     }
 
     return SingleChildScrollView(

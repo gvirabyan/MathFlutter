@@ -66,6 +66,7 @@ flutter:
     - assets/buttons/practice.svg
     - assets/buttons/profile.svg
     - assets/buttons/topics.svg
+    - assets/gifs/loading.gif
   fonts:
     - family: Rubik
       fonts:

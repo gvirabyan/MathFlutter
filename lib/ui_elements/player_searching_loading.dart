@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled2/ui_elements/loading_overlay.dart';
 
 Widget LoadingView() {
   return Center(
@@ -8,8 +8,7 @@ Widget LoadingView() {
       child: Column(
         mainAxisSize: MainAxisSize.min, // Центрируем по вертикали
         children: [
-          const CircularProgressIndicator(
-          ),
+          const LoadingOverlay(),
           const SizedBox(height: 24),
           const Text(
             'Wir suchen nach einem Spieler,\nbitte warte',

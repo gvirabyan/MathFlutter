@@ -24,6 +24,7 @@ import 'package:untitled2/screens/topics_screen/topics_7_8_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_8_9_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_9_10_tab.dart';
 import 'package:untitled2/services/auth_service.dart';
+import 'package:untitled2/ui_elements/loading_overlay.dart';
 import 'package:untitled2/ui_elements/main_app_bar.dart';
 import 'package:untitled2/ui_elements/main_bottom_nav.dart';
 import 'package:untitled2/ui_elements/notification_panel.dart';
@@ -76,7 +77,7 @@ class _AppStartState extends State<AppStart> {
     // Можно лоадер или splash
     return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child:  LoadingOverlay(),
       ),
     );
   }

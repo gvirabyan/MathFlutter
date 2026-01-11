@@ -8,6 +8,7 @@ import '../../models/question_model.dart';
 import '../../services/quiz_service.dart';
 import '../../ui_elements/dialogs/practice_quiz_complete_dialog.dart';
 import '../../ui_elements/dialogs/second_answer_dialog.dart';
+import '../../ui_elements/loading_overlay.dart';
 
 class PracticeQuizQuestionScreen extends StatefulWidget {
   final int totalQuestions;
@@ -268,7 +269,7 @@ class _PracticeQuizQuestionScreenState
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child:  LoadingOverlay()));
     }
 
     if (questions.isEmpty) {

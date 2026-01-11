@@ -4,6 +4,7 @@ import 'package:untitled2/app_colors.dart';
 import 'package:untitled2/services/auth_service.dart';
 
 import '../../services/user_stats_service.dart';
+import '../../ui_elements/loading_overlay.dart';
 
 
 
@@ -206,7 +207,7 @@ class _ProgressTabState extends State<ProgressTab> {
     if (isLoading) {
       return const Padding(
         padding: EdgeInsets.only(top: 80),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child:  LoadingOverlay()),
       );
     }
 
@@ -652,7 +653,7 @@ class _ProgressTabState extends State<ProgressTab> {
               style: const TextStyle(
                 fontSize: 18,
                 color: AppColors.primaryPurple,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

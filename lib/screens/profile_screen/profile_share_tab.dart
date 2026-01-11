@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/parents_emails_service.dart';
+import '../../ui_elements/loading_overlay.dart';
 
 class ProfileShareTab extends StatefulWidget {
   const ProfileShareTab({super.key});
@@ -122,7 +123,7 @@ class _ProfileShareTabState extends State<ProfileShareTab>
     super.build(context);
 
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return LoadingOverlay();
     }
 
     return Container(

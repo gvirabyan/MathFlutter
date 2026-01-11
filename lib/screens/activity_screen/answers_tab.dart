@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/user_stats_service.dart';
 import '../../ui_elements/gauge_circle.dart';
+import '../../ui_elements/loading_overlay.dart';
 
 class AnswersTab extends StatefulWidget {
   const AnswersTab({super.key});
@@ -85,7 +86,7 @@ class _AnswersTabState extends State<AnswersTab> {
     if (isLoading) {
       return const Padding(
         padding: EdgeInsets.only(top: 80),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: LoadingOverlay()),
       );
     }
 
