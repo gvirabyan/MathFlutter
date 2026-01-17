@@ -55,7 +55,7 @@ class MathContent extends StatelessWidget {
       final lines = plainText.trim().split('\n');
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: lines
             .map((line) => Text(
           line.trim(),
@@ -77,7 +77,7 @@ class MathContent extends StatelessWidget {
       final lines = plainText.trim().split('\n');
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: lines
             .map((line) => Text(
           line.trim(),
@@ -103,14 +103,13 @@ class MathContent extends StatelessWidget {
     else {
       final lines = content.split('\n');
       return Column(
-        crossAxisAlignment:
-        isQuestion ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: lines.map((line) {
           if (line.startsWith(r'$$') && line.endsWith(r'$$')) {
             // It's a plain text line
             return Text(
               line.substring(2, line.length - 2),
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.start,
               style: TextStyle(
                 fontSize: (isQuestion ? 16 : 14) * scale,
                 color: color,

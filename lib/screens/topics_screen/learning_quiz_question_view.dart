@@ -146,6 +146,8 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
             const SizedBox(height: 14),
 
