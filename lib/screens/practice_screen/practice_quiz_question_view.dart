@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_colors.dart';
-import '../../ui_elements/math_content.dart';
+import '../../ui_elements/practice_math_content.dart';
 import '../../ui_elements/primary_button.dart';
 
 class PracticeQuizQuestionView extends StatefulWidget {
@@ -133,6 +133,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
         ),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 32),
           // Кружки
@@ -228,20 +229,22 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   widget.title,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 16),
                 MathContent(
                   content: widget.question,
-                  isQuestion: true,
-                  fontSize: 32,
+                  isQuestion: false,
+                  fontSize: 22,
+
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 34),
+          const SizedBox(height: 16),
           // Ответы
+          // Замените существующий ListView.builder (секцию "Ответы") на этот код:
+
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -253,7 +256,6 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 Color? machineBorderColor;
                 double borderWidth = 1.5;
 
-
                 Color? cardBg;
                 Color? borderCol;
                 Color contentColor = Colors.black;
@@ -262,7 +264,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   machineBorderColor = (i == widget.correctAnswerIndex)
                       ? AppColors.greenCorrect
                       : AppColors.redWrong;
-                  borderWidth = 3.0;
+                  borderWidth = 1.5;
                 }
 
                 if (widget.submitted && widget.correctAnswerIndex != null) {
@@ -284,10 +286,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 } else {
                   borderCol = Colors.grey.shade300;
                 }
+
                 List<BoxShadow>? externalBorders;
 
                 if (widget.submitted && isMachineSelected) {
-                  // Определяем цвет внешней рамки соперника
                   final Color rivalColor = (i == widget.correctAnswerIndex)
                       ? AppColors.primaryYellow
                       : AppColors.primaryYellow;
@@ -295,16 +297,18 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   externalBorders = [
                     BoxShadow(
                       color: rivalColor,
-                      spreadRadius: 3, // На сколько пикселей рамка "выпирает" наружу
-                      blurRadius: 0,   // 0 делает линию четкой, а не размытой
+                      spreadRadius: 3,
+                      blurRadius: 0,
                     )
                   ];
                 }
+
                 return GestureDetector(
                   onTap: () => widget.onSelect?.call(i),
                   child: Container(
+                    constraints: const BoxConstraints(minHeight: 60),
                     margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     decoration: BoxDecoration(
                       boxShadow: externalBorders,
                       color: cardBg ?? Colors.white,
@@ -315,6 +319,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                       ),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
                           width: 25,
@@ -322,20 +327,15 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                             String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.black54,
-                              height: 1.0,
+                              color: contentColor.withOpacity(0.7),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 4.5),
-                            child: MathContent(
-                              content: widget.answers[i],
-                              fontSize: 18,
-                              color: contentColor,
-                            ),
+                          child: MathContent(
+                            content: widget.answers[i],
+                            fontSize: 22,
+                            color: contentColor,
                           ),
                         ),
                       ],
