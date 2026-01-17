@@ -88,26 +88,34 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
   }
 
   void _scrollToIndex(int index) {
-    if (_scrollController.hasClients) {
-      final double itemWidth = 64.0;
-      final double itemSpacing = 10.0;
-      final double itemWithSpacing = itemWidth + itemSpacing;
-      final double viewportWidth = _scrollController.position.viewportDimension;
+    // Используем Future.microtask или небольшую задержку,
+    // чтобы ListView успел обновить внутренние размеры
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        // ВАЖНО: Эти значения должны точно совпадать с размерами в itemBuilder
+        final double itemWidth = 64.0;
+        // В вашем коде separator width = 1.0, а не 10.0!
+        final double itemSpacing = 1.0;
 
-      double targetOffset =
-          (index * itemWithSpacing) - (viewportWidth / 2) + (itemWidth / 2);
+        final double itemWithSpacing = itemWidth + itemSpacing;
+        final double viewportWidth = _scrollController.position.viewportDimension;
 
-      targetOffset = targetOffset.clamp(
-        _scrollController.position.minScrollExtent,
-        _scrollController.position.maxScrollExtent,
-      );
+        // Центрируем элемент
+        double targetOffset = (index * itemWithSpacing) - (viewportWidth / 2) + (itemWidth / 2);
 
-      _scrollController.animateTo(
-        targetOffset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
+        // Ограничиваем скролл лимитами
+        targetOffset = targetOffset.clamp(
+          _scrollController.position.minScrollExtent,
+          _scrollController.position.maxScrollExtent,
+        );
+
+        _scrollController.animateTo(
+          targetOffset,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
