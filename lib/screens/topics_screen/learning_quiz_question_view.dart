@@ -46,7 +46,7 @@ class LearningQuizQuestionView extends StatefulWidget {
     this.correctAnswerIndex,
     this.userAnswerStatus,
     this.isViewingHistory = false,
-    this.selectedAnswerText, // ✅ NEW
+    this.selectedAnswerText,
     required this.selectedIndex,
     required this.results,
     required this.onSelect,
@@ -62,21 +62,28 @@ class LearningQuizQuestionView extends StatefulWidget {
 
 class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
   final ScrollController _scrollController = ScrollController();
+  bool _isInitialBuild = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToIndex(widget.currentIndex);
-    });
   }
 
   @override
   void didUpdateWidget(LearningQuizQuestionView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.currentIndex != widget.currentIndex) {
+      _scrollToIndex(widget.currentIndex, animate: true);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInitialBuild) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToIndex(widget.currentIndex);
+        _scrollToIndex(widget.currentIndex, animate: false);
+        _isInitialBuild = false;
       });
     }
   }
@@ -87,35 +94,33 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
     super.dispose();
   }
 
-  void _scrollToIndex(int index) {
-    // Используем Future.microtask или небольшую задержку,
-    // чтобы ListView успел обновить внутренние размеры
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        // ВАЖНО: Эти значения должны точно совпадать с размерами в itemBuilder
-        final double itemWidth = 64.0;
-        // В вашем коде separator width = 1.0, а не 10.0!
-        final double itemSpacing = 1.0;
+  void _scrollToIndex(int index, {required bool animate}) {
+    if (!_scrollController.hasClients) return;
 
-        final double itemWithSpacing = itemWidth + itemSpacing;
-        final double viewportWidth = _scrollController.position.viewportDimension;
+    final double itemWidth = 64.0;
+    final double itemSpacing = 1.0;
+    final double itemWithSpacing = itemWidth + itemSpacing;
+    final double viewportWidth = _scrollController.position.viewportDimension;
 
-        // Центрируем элемент
-        double targetOffset = (index * itemWithSpacing) - (viewportWidth / 2) + (itemWidth / 2);
+    // Центрируем элемент
+    double targetOffset =
+        (index * itemWithSpacing) - (viewportWidth / 2) + (itemWidth / 2);
 
-        // Ограничиваем скролл лимитами
-        targetOffset = targetOffset.clamp(
-          _scrollController.position.minScrollExtent,
-          _scrollController.position.maxScrollExtent,
-        );
+    // Ограничиваем скролл лимитами
+    targetOffset = targetOffset.clamp(
+      _scrollController.position.minScrollExtent,
+      _scrollController.position.maxScrollExtent,
+    );
 
-        _scrollController.animateTo(
-          targetOffset,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
+    if (animate) {
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _scrollController.jumpTo(targetOffset);
+    }
   }
 
   @override
@@ -132,7 +137,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
               child: Text(
                 widget.title,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
             ),
             const SizedBox(width: 10),
@@ -144,7 +149,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
           children: [
             const SizedBox(height: 14),
 
-            // ✅ TOP CIRCLES WITH CLICK HANDLERS
+            // TOP CIRCLES
             SizedBox(
               height: 44,
               child: ListView.separated(
@@ -155,17 +160,26 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                 separatorBuilder: (_, __) => const SizedBox(width: 1),
                 itemBuilder: (context, i) {
                   final res = widget.results[i];
-                  final isCurrent =
-                      i == widget.currentIndex && !widget.isViewingHistory;
+                  final isCurrent = i == widget.currentIndex;
 
                   Color borderColor = Colors.grey.shade300;
                   Color backgroundColor = Colors.transparent;
                   Color textColor = Colors.black38;
 
                   if (isCurrent) {
-                    backgroundColor = Colors.black;
-                    borderColor = Colors.black;
-                    textColor = Colors.white;
+                    if (res == true) {
+                      backgroundColor = AppColors.greenCorrect;
+                      borderColor = AppColors.greenCorrect;
+                      textColor = Colors.white;
+                    } else if (res == false) {
+                      backgroundColor = AppColors.redWrong;
+                      borderColor = AppColors.redWrong;
+                      textColor = Colors.white;
+                    } else {
+                      backgroundColor = Colors.black;
+                      borderColor = Colors.black;
+                      textColor = Colors.white;
+                    }
                   } else if (res == true) {
                     borderColor = AppColors.greenCorrect;
                     textColor = AppColors.greenCorrect;
@@ -211,7 +225,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
             const SizedBox(height: 36),
 
-            // ✅ QUESTION TEXT
+            // QUESTION TEXT
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: MathContent(
@@ -233,7 +247,6 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                 final selected = widget.selectedIndex == i;
                 final isCorrect = widget.correctAnswerIndex == i;
 
-                // ✅ FIX: Compare by TEXT for history
                 final bool isUserChoice = widget.isViewingHistory
                     ? (widget.selectedAnswerText == answer)
                     : (widget.selectedIndex == i);
@@ -314,16 +327,26 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                             ),
                           ),
                         ),
-                        // Icons for history mode
-                        if (widget.isViewingHistory && widget.correctAnswerIndex == i)
+                        if (widget.isViewingHistory &&
+                            widget.correctAnswerIndex == i)
                           const Padding(
                             padding: EdgeInsets.only(top: 4.0),
-                            child: Icon(Icons.check_circle, color: Colors.green, size: 24),
+                            child: Icon(
+                              Icons.check_circle,
+                              color: Colors.green,
+                              size: 24,
+                            ),
                           )
-                        else if (widget.isViewingHistory && isUserChoice && !isCorrect)
+                        else if (widget.isViewingHistory &&
+                            isUserChoice &&
+                            !isCorrect)
                           const Padding(
                             padding: EdgeInsets.only(top: 4.0),
-                            child: Icon(Icons.cancel, color: Colors.red, size: 24),
+                            child: Icon(
+                              Icons.cancel,
+                              color: Colors.red,
+                              size: 24,
+                            ),
                           ),
                       ],
                     ),
@@ -356,7 +379,6 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
             const SizedBox(height: 8),
 
-            // ✅ ACTION BUTTONS (skip/submit) - only in normal mode
             if (!widget.isViewingHistory)
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -399,7 +421,6 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                   ],
                 ),
               ),
-            // ✅ CONTINUE BUTTON (only in history mode)
             if (widget.isViewingHistory)
               Padding(
                 padding: const EdgeInsets.all(16.0),
