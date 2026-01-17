@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/ui_elements/loading_overlay.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:untitled2/app_colors.dart'; // Убедитесь, что путь верный
 
@@ -80,7 +81,7 @@ class _SolutionWebViewState extends State<SolutionWebView> {
           children: [
             WebViewWidget(controller: controller),
             if (isLoading)
-              const Center(child: CircularProgressIndicator()),
+              const Center(child: LoadingOverlay()),
           ],
         ),
       ),
