@@ -28,6 +28,7 @@ class LearningQuizQuestionView extends StatefulWidget {
   final void Function(int index)? onSelect;
   final VoidCallback? onSubmit;
   final VoidCallback? onSkip;
+  final VoidCallback? onNext;
   final VoidCallback? onShowSolution;
   final void Function(int index)? onCircleTap;
   final VoidCallback? onReturnToPresent;
@@ -52,6 +53,7 @@ class LearningQuizQuestionView extends StatefulWidget {
     required this.onSelect,
     required this.onSubmit,
     this.onSkip,
+    this.onNext,
     this.onShowSolution,
   });
 
@@ -397,7 +399,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                         enabled:
                         (widget.submitted || widget.selectedIndex != null),
                         onPressed:
-                        widget.submitted ? widget.onSkip : widget.onSubmit,
+                        widget.submitted ? widget.onNext : widget.onSubmit,
                       ),
                     ),
                   ],

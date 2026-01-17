@@ -56,6 +56,7 @@ class _LearningQuizQuestionScreenState
 
   // ✅ NEW: Store history of answered questions
   List<QuestionModel> historyQuestions = [];
+  int initialHistoryLength = 0;
 
   // ✅ FIXED: Store user's selected answer TEXT (not index) for history questions
   Map<int, String> historyUserAnswers = {}; // questionId -> selectedAnswerText
@@ -72,18 +73,18 @@ class _LearningQuizQuestionScreenState
 
   void _handleShowSolution() {
     final currentQuestion =
-        viewingHistory && historyIndex != null
-            ? historyQuestions[historyIndex!]
-            : questions[index];
+    viewingHistory && historyIndex != null
+        ? historyQuestions[historyIndex!]
+        : questions[index];
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder:
             (_) => SolutionWebView(
-              questionId: currentQuestion.id,
-              categoryName: widget.categoryName,
-            ),
+          questionId: currentQuestion.id,
+          categoryName: widget.categoryName,
+        ),
       ),
     );
   }
@@ -123,7 +124,7 @@ class _LearningQuizQuestionScreenState
       try {
         final decoded = json.decode(shuffledOrdersJson) as Map<String, dynamic>;
         savedShuffledOrders = decoded.map(
-          (key, value) => MapEntry(
+              (key, value) => MapEntry(
             int.parse(key),
             (value as List).map((e) => e.toString()).toList(),
           ),
@@ -139,9 +140,9 @@ class _LearningQuizQuestionScreenState
           final questionId = e['id'] as int;
           final correct = e['answer'].toString();
           final wrong =
-              (e['wrong_answers'] as List? ?? [])
-                  .map((w) => w.toString())
-                  .toList();
+          (e['wrong_answers'] as List? ?? [])
+              .map((w) => w.toString())
+              .toList();
 
           List<String> allAnswers;
 
@@ -177,9 +178,9 @@ class _LearningQuizQuestionScreenState
           final questionId = e['id'] as int;
           final correct = e['answer'].toString();
           final wrong =
-              (e['wrong_answers'] as List? ?? [])
-                  .map((w) => w.toString())
-                  .toList();
+          (e['wrong_answers'] as List? ?? [])
+              .map((w) => w.toString())
+              .toList();
 
           List<String> allAnswers;
 
@@ -198,7 +199,7 @@ class _LearningQuizQuestionScreenState
 
     // ✅ Save shuffled orders to SharedPreferences
     final ordersToSave = savedShuffledOrders.map(
-      (key, value) => MapEntry(key.toString(), value),
+          (key, value) => MapEntry(key.toString(), value),
     );
     await prefs.setString(
       'shuffled_answers_${widget.categoryId}',
@@ -206,11 +207,12 @@ class _LearningQuizQuestionScreenState
     );
 
     // ✅ ОБЩЕЕ КОЛ-ВО ВОПРОСОВ
-    final total = (res['meta']?['total'] ?? 0) + historyQuestions.length;
+    initialHistoryLength = historyQuestions.length;
+    final total = (res['meta']?['total'] ?? 0) + initialHistoryLength;
 
     // ✅ КРУЖКИ (1-в-1 как Vue)
     answersResult = List.generate(total, (i) {
-      if (i < historyQuestions.length) {
+      if (i < initialHistoryLength) {
         return historyQuestions[i].userAnswerStatus == 'correct';
       }
       return null;
@@ -271,6 +273,25 @@ class _LearningQuizQuestionScreenState
   }
 
   void _nextQuestion() {
+    final q = questions[index];
+    final circleIndex = initialHistoryLength + index;
+
+    if (submitted) {
+      setState(() {
+        if (q.userAnswerStatus == 'correct') {
+          answersResult[circleIndex] = true;
+        } else if (q.userAnswerStatus == 'wrong') {
+          answersResult[circleIndex] = false;
+        }
+
+        // Move to history
+        if (!historyQuestions.contains(q)) {
+          historyQuestions.add(q);
+          historyUserAnswers[q.id] = q.userSelectedText ?? '';
+        }
+      });
+    }
+
     // Ищем только те, где статус совсем пустой (еще не видели)
     int nextIndex = questions.indexWhere((q) => q.userAnswerStatus == null);
 
@@ -289,14 +310,24 @@ class _LearningQuizQuestionScreenState
 
   // ✅ NEW: Show history question
   void _showHistoryQuestion(int circleIndex) {
-    if (circleIndex < historyQuestions.length) {
+    if (circleIndex < initialHistoryLength) {
+      // Previous sessions history
       setState(() {
         viewingHistory = true;
         historyIndex = circleIndex;
       });
-     } else if (circleIndex == historyQuestions.length + index) {
+    } else {
+      int sessionIndex = circleIndex - initialHistoryLength;
+      if (sessionIndex < index) {
+        // Already answered in this session
+        setState(() {
+          viewingHistory = true;
+          historyIndex = circleIndex;
+        });
+      } else if (sessionIndex == index) {
         _returnToPresentQuestion();
-     }
+      }
+    }
   }
 
   // ✅ NEW: Return to present question
@@ -345,13 +376,18 @@ class _LearningQuizQuestionScreenState
     String? historySelectedAnswerText; // ✅ CHANGED: Store text instead of index
 
     if (viewingHistory && historyIndex != null) {
-      displayQuestion = historyQuestions[historyIndex!];
+      if (historyIndex! < initialHistoryLength) {
+        displayQuestion = historyQuestions[historyIndex!];
+        historySelectedAnswerText = historyUserAnswers[displayQuestion.id];
+      } else {
+        displayQuestion = questions[historyIndex! - initialHistoryLength];
+        historySelectedAnswerText = displayQuestion.userSelectedText;
+      }
       displayIndex = historyIndex!;
       isHistory = true;
-      historySelectedAnswerText = historyUserAnswers[displayQuestion.id];
-    }else {
+    } else {
       displayQuestion = questions[index];
-      displayIndex = historyQuestions.length + index;
+      displayIndex = initialHistoryLength + index;
     }
 
     return LearningQuizQuestionView(
@@ -365,7 +401,7 @@ class _LearningQuizQuestionScreenState
       question: displayQuestion.question,
       answers: displayQuestion.answers,
       correctAnswerIndex:
-          (isHistory || submitted) ? displayQuestion.correctIndex : null,
+      (isHistory || submitted) ? displayQuestion.correctIndex : null,
       userAnswerStatus: isHistory ? displayQuestion.userAnswerStatus : null,
       selectedAnswerText: isHistory ? historySelectedAnswerText : null,
       // ✅ CHANGED
@@ -373,21 +409,17 @@ class _LearningQuizQuestionScreenState
       // ✅ Only for current question
       isViewingHistory: isHistory,
       onSelect:
-          (submitted || isHistory)
-              ? null
-              : (i) {
-                setState(() => selectedIndex = i);
-              },
+      (submitted || isHistory)
+          ? null
+          : (i) {
+        setState(() => selectedIndex = i);
+      },
       onSubmit:
-          (selectedIndex == null || submitted || isHistory)
-              ? null
-              : () => _submitAnswer(selectedIndex),
-      onSkip:
-          isHistory
-              ? null
-              : () {
-                _skipQuestion();
-              },
+      (selectedIndex == null || submitted || isHistory)
+          ? null
+          : () => _submitAnswer(selectedIndex),
+      onSkip: isHistory ? null : _skipQuestion,
+      onNext: isHistory ? null : _nextQuestion,
       onShowSolution: _handleShowSolution,
       onCircleTap: _showHistoryQuestion,
       onReturnToPresent: _returnToPresentQuestion,
@@ -395,8 +427,13 @@ class _LearningQuizQuestionScreenState
   }
 
   Future<void> _skipQuestion() async {
+    if (submitted) {
+      _nextQuestion();
+      return;
+    }
+
     final q = questions[index];
-    final circleIndex = historyQuestions.length + index;
+    final circleIndex = initialHistoryLength + index;
 
     // ✅ Don't change circle color for skipped - keep it null (grey)
     setState(() {
@@ -426,23 +463,20 @@ class _LearningQuizQuestionScreenState
   }
 
   Future<void> _finalizeAnswer(
-    int selectedIndex,
-    String? secondAnswerVal,
-    bool isFinalCorrect,
-  ) async {
+      int selectedIndex,
+      String? secondAnswerVal,
+      bool isFinalCorrect,
+      ) async {
     final q = questions[index];
-    final circleIndex = historyQuestions.length + index;
 
     // ✅ ДОБАВИТЬ: Сохраняем текст ответа пользователя в саму модель вопроса
     q.userSelectedText = q.answers[selectedIndex];
 
     setState(() {
-      answersResult[circleIndex] = isFinalCorrect;
+      // answersResult[circleIndex] = isFinalCorrect; // DELAYED UNTIL _nextQuestion
       q.userAnswerStatus = isFinalCorrect ? 'correct' : 'wrong';
 
-      // ✅ ДОБАВИТЬ: Сразу добавляем этот вопрос в список истории и сохраняем текст ответа
-      historyQuestions.add(q);
-      historyUserAnswers[q.id] = q.answers[selectedIndex];
+      // historyQuestions.add(q); // DELAYED UNTIL _nextQuestion
     });
 
     // ✅ Wait a frame to ensure UI updates
