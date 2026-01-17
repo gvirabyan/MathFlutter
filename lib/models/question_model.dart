@@ -6,6 +6,7 @@ class QuestionModel {
 
   final String question;
   final List<String> answers;
+  String? userSelectedText;
 
   final int correctIndex;
   String? userAnswerStatus;
