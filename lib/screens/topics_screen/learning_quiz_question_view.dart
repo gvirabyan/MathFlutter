@@ -15,12 +15,14 @@ class LearningQuizQuestionView extends StatefulWidget {
   final String question;
   final List<String> answers;
 
-  // ✅ NEW: For history display
+  // ✅ For history display
   final int? correctAnswerIndex;
   final String? userAnswerStatus;
   final bool isViewingHistory;
 
-  final int? selectedIndex;
+  // ✅ CHANGED: Use text for history, index for current
+  final String? selectedAnswerText; // For history - the actual answer text
+  final int? selectedIndex; // For current question only
   final List<bool?> results;
 
   final void Function(int index)? onSelect;
@@ -28,22 +30,23 @@ class LearningQuizQuestionView extends StatefulWidget {
   final VoidCallback? onSkip;
   final VoidCallback? onShowSolution;
   final void Function(int index)? onCircleTap;
-  final VoidCallback? onReturnToPresent; // ✅ NEW
+  final VoidCallback? onReturnToPresent;
 
   const LearningQuizQuestionView({
     super.key,
     this.onCircleTap,
     required this.submitted,
-    this.onReturnToPresent, // ✅ NEW
+    this.onReturnToPresent,
     required this.currentIndex,
     required this.total,
     this.rivalLabel = 'Punkte der Maschine',
     required this.title,
     required this.question,
     required this.answers,
-    this.correctAnswerIndex, // ✅ NEW
-    this.userAnswerStatus, // ✅ NEW
-    this.isViewingHistory = false, // ✅ NEW
+    this.correctAnswerIndex,
+    this.userAnswerStatus,
+    this.isViewingHistory = false,
+    this.selectedAnswerText, // ✅ NEW
     required this.selectedIndex,
     required this.results,
     required this.onSelect,
@@ -125,8 +128,6 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
               ),
             ),
             const SizedBox(width: 10),
-
-            // ✅ timer (optional)
           ],
         ),
       ),
@@ -165,7 +166,6 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                     textColor = AppColors.redWrong;
                   }
 
-                  // ✅ Make circles clickable
                   return GestureDetector(
                     onTap: () => widget.onCircleTap?.call(i),
                     child: Container(
@@ -221,15 +221,14 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: widget.answers.length,
               itemBuilder: (context, i) {
+                final answer = widget.answers[i];
                 final selected = widget.selectedIndex == i;
                 final isCorrect = widget.correctAnswerIndex == i;
 
-                int? userAnswerIndex;
-                if (widget.isViewingHistory &&
-                    widget.userAnswerStatus != null) {
-                  // In history, selectedIndex represents the user's choice
-                  userAnswerIndex = widget.selectedIndex;
-                }
+                // ✅ FIX: Compare by TEXT for history
+                final bool isUserChoice = widget.isViewingHistory
+                    ? (widget.selectedAnswerText == answer)
+                    : (widget.selectedIndex == i);
 
                 String letter =
                     String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
@@ -241,7 +240,6 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
                 if (widget.isViewingHistory ||
                     (widget.submitted && widget.correctAnswerIndex != null)) {
-                  final bool isUserChoice = widget.selectedIndex == i;
                   final bool isCorrectAnswer = widget.correctAnswerIndex == i;
 
                   if (isCorrectAnswer) {
@@ -269,9 +267,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
                 return GestureDetector(
                   onTap:
-                      widget.isViewingHistory
-                          ? null
-                          : () => widget.onSelect?.call(i),
+                  widget.isViewingHistory
+                      ? null
+                      : () => widget.onSelect?.call(i),
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(14),
@@ -284,11 +282,10 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                       ),
                     ),
                     child: Row(
-                      // ✅ Оставляем center, чтобы буквы были четко по середине высоты контейнера
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         SizedBox(
-                          width: 25, // Фиксированная ширина для букв a., b., c.
+                          width: 25,
                           child: Text(
                             letter,
                             style: TextStyle(
@@ -301,24 +298,21 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Padding(
-                            // ✅ РЕГУЛИРОВКА ЗДЕСЬ:
-                            // Увеличивай число в top, чтобы опустить ответ ниже.
-                            // Начни с 4.0 или 5.0, пока визуально ответ не встанет на одну линию с буквой.
                             padding: const EdgeInsets.only(top: 4.5),
                             child: MathContent(
-                              content: widget.answers[i],
+                              content: answer,
                               fontSize: 18,
                               color: answersColor,
                             ),
                           ),
                         ),
-                        // Иконки для режима истории
+                        // Icons for history mode
                         if (widget.isViewingHistory && widget.correctAnswerIndex == i)
                           const Padding(
-                            padding: EdgeInsets.only(top: 4.0), // Иконку тоже чуть спустим в тон ответу
+                            padding: EdgeInsets.only(top: 4.0),
                             child: Icon(Icons.check_circle, color: Colors.green, size: 24),
                           )
-                        else if (widget.isViewingHistory && userAnswerIndex == i && !isCorrect)
+                        else if (widget.isViewingHistory && isUserChoice && !isCorrect)
                           const Padding(
                             padding: EdgeInsets.only(top: 4.0),
                             child: Icon(Icons.cancel, color: Colors.red, size: 24),
@@ -389,9 +383,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                         color: AppColors.primaryYellow,
                         text: (widget.submitted) ? 'nächstes' : 'abgeben',
                         enabled:
-                            (widget.submitted || widget.selectedIndex != null),
+                        (widget.submitted || widget.selectedIndex != null),
                         onPressed:
-                            widget.submitted ? widget.onSkip : widget.onSubmit,
+                        widget.submitted ? widget.onSkip : widget.onSubmit,
                       ),
                     ),
                   ],
@@ -405,7 +399,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                   height: 54,
                   width: double.infinity,
                   child: PrimaryButton(
-                    text: 'Weitermachen', // или 'Continue'
+                    text: 'Weitermachen',
                     enabled: true,
                     color: Colors.amber,
                     onPressed: widget.onReturnToPresent,
