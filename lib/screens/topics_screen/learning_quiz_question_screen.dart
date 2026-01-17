@@ -346,7 +346,7 @@ class _LearningQuizQuestionScreenState
     }
 
     return LearningQuizQuestionView(
-      key: const ValueKey('learning_quiz_view'),
+      key: ValueKey('${displayIndex}_${isHistory ? 'history' : 'current'}'),
       currentIndex: displayIndex,
       submitted: submitted,
       total: widget.totalQuestions,
