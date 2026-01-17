@@ -122,7 +122,7 @@ class MathContent extends StatelessWidget {
               math: r'\displaystyle ' + processedContent,
               teXInputType: TeXInputType.teX,
               formulaWidgetBuilder: (context, svg) {
-                final double finalFontSize = (isQuestion ? 22 : 20) * scale;
+                final double finalFontSize = (isQuestion ? 18 :16) * scale;
                 return SvgPicture.string(
                   svg,
                   height: finalFontSize,

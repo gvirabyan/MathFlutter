@@ -72,21 +72,17 @@ class _LearningQuizQuestionScreenState
         ? historyQuestions[historyIndex!]
         : questions[index];
 
-    final sol = currentQuestion.solution;
-
-    if (sol != null && sol.isNotEmpty) {
-      // ✅ Показываем наше созданное окно
-      SolutionViewer.show(context, sol);
-    } else {
-      // Если решения нет, показываем небольшое уведомление (как f7.dialog.alert в Vue)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("'Solution doesn't exists"),
-          duration: Duration(seconds: 2),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SolutionWebView(
+          questionId: currentQuestion.id,
+          categoryName: widget.categoryName,
         ),
-      );
-    }
+      ),
+    );
   }
+
 
   @override
   void initState() {
