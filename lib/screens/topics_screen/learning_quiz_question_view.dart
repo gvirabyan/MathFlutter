@@ -327,27 +327,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                             ),
                           ),
                         ),
-                        if (widget.isViewingHistory &&
-                            widget.correctAnswerIndex == i)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4.0),
-                            child: Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
-                              size: 24,
-                            ),
-                          )
-                        else if (widget.isViewingHistory &&
-                            isUserChoice &&
-                            !isCorrect)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 4.0),
-                            child: Icon(
-                              Icons.cancel,
-                              color: Colors.red,
-                              size: 24,
-                            ),
-                          ),
+
                       ],
                     ),
                   ),
