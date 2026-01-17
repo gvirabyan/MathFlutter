@@ -81,9 +81,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInitialBuild) {
+      _isInitialBuild = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToIndex(widget.currentIndex, animate: false);
-        _isInitialBuild = false;
+        _scrollToIndex(widget.currentIndex, animate: true);
       });
     }
   }
@@ -97,26 +97,26 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
   void _scrollToIndex(int index, {required bool animate}) {
     if (!_scrollController.hasClients) return;
 
-    final double itemWidth = 64.0;
-    final double itemSpacing = 1.0;
-    final double itemWithSpacing = itemWidth + itemSpacing;
+    const double itemWidth = 64.0;
+    const double spacing = 1.0;
+    final double itemWithSpacing = itemWidth + spacing;
     final double viewportWidth = _scrollController.position.viewportDimension;
 
-    // Центрируем элемент
     double targetOffset =
         (index * itemWithSpacing) - (viewportWidth / 2) + (itemWidth / 2);
 
-    // Ограничиваем скролл лимитами
     targetOffset = targetOffset.clamp(
       _scrollController.position.minScrollExtent,
       _scrollController.position.maxScrollExtent,
     );
 
     if (animate) {
+      // Для первого раза используем более длинную анимацию
+      final isFirstLoad = _isInitialBuild;
       _scrollController.animateTo(
         targetOffset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        duration: Duration(milliseconds: isFirstLoad ? 800 : 300),
+        curve: isFirstLoad ? Curves.easeInOutCubic : Curves.easeInOut,
       );
     } else {
       _scrollController.jumpTo(targetOffset);
