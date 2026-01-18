@@ -5,6 +5,8 @@ import 'package:untitled2/services/auth_service.dart';
 
 import '../../app_colors.dart';
 import '../../services/user_stats_service.dart';
+import '../../ui_elements/dialogs/account_info_save_dialog.dart';
+import '../../ui_elements/dialogs/daily_goal_changed_dialog.dart';
 import '../../ui_elements/gauge_circle.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/status_tab_elements/daily_goal_widget.dart';
@@ -116,6 +118,12 @@ class _StatusTabState extends State<StatusTab> {
     } finally {
       if (mounted) setState(() => disableSelect = false);
     }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const DailyGoalChangedDialog(),
+    );
   }
 
   Future<void> _loadDailyGoalFromStorage() async {
