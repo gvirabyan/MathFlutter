@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:untitled2/app_colors.dart';
 
 import '../../ui_elements/math_content.dart';
@@ -133,16 +134,25 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
         backgroundColor: AppColors.primaryPurple,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Row(
+        title: Text(
+          widget.title,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        flexibleSpace: Stack(
           children: [
-            Expanded(
-              child: Text(
-                widget.title,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            Positioned(
+              top: 0,
+              right: 0, // Прижато к правому краю
+              bottom: 0,
+              child: Opacity(
+                opacity: 0.3, // Растянуто по высоте
+                child: SvgPicture.asset(
+                  'assets/pics_for_buttons/pointsRight.svg',
+                  fit: BoxFit.cover, // Или BoxFit.fitHeight
+                ),
               ),
             ),
-            const SizedBox(width: 10),
           ],
         ),
       ),
@@ -251,9 +261,10 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                 final selected = widget.selectedIndex == i;
                 final isCorrect = widget.correctAnswerIndex == i;
 
-                final bool isUserChoice = widget.isViewingHistory
-                    ? (widget.selectedAnswerText == answer)
-                    : (widget.selectedIndex == i);
+                final bool isUserChoice =
+                    widget.isViewingHistory
+                        ? (widget.selectedAnswerText == answer)
+                        : (widget.selectedIndex == i);
 
                 String letter =
                     String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
@@ -292,9 +303,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
                 return GestureDetector(
                   onTap:
-                  widget.isViewingHistory
-                      ? null
-                      : () => widget.onSelect?.call(i),
+                      widget.isViewingHistory
+                          ? null
+                          : () => widget.onSelect?.call(i),
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(14),
@@ -330,7 +341,6 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                             ),
                           ),
                         ),
-
                       ],
                     ),
                   ),
@@ -396,9 +406,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                         color: AppColors.primaryYellow,
                         text: (widget.submitted) ? 'nächstes' : 'abgeben',
                         enabled:
-                        (widget.submitted || widget.selectedIndex != null),
+                            (widget.submitted || widget.selectedIndex != null),
                         onPressed:
-                        widget.submitted ? widget.onNext : widget.onSubmit,
+                            widget.submitted ? widget.onNext : widget.onSubmit,
                       ),
                     ),
                   ],

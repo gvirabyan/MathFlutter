@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../../app_colors.dart';
 import '../../ui_elements/dialogs/cancel_practice_quiz_dialog.dart';
@@ -139,6 +140,22 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+        flexibleSpace: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              right: 0, // Прижато к правому краю
+              bottom: 0,
+              child: Opacity(
+                opacity: 0.3, // Растянуто по высоте
+                child: SvgPicture.asset(
+                  'assets/pics_for_buttons/pointsRight.svg',
+                  fit: BoxFit.cover, // Или BoxFit.fitHeight
+                ),
+              ),
             ),
           ],
         ),
