@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:untitled2/app_colors.dart';
 import '../../services/auth_service.dart';
+import '../../ui_elements/dialogs/account_info_save_dialog.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/primary_button.dart';
 import '../../screens/auth/auth_screen.dart';
@@ -93,9 +94,12 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
     setState(() => _saving = false);
 
     final ok = res['status'] == 'success';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Profil gespeichert' : 'Fehler beim Speichern')),
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const AccountInfoSaveDialog(),
     );
+
   }
 
   Future<void> _logout() async {
@@ -246,7 +250,8 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
           const SizedBox(height: 16),
 
           /// DELETE ACCOUNT
-          Center(
+          Align(
+            alignment: Alignment.centerLeft,
             child: GestureDetector(
               onTap: _processing ? null : _deleteAccount,
               child: const Text(

@@ -43,7 +43,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       ],
 
       title: Padding(
-        padding: const EdgeInsets.only(top: 24),
+        padding: const EdgeInsets.only(top: 22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

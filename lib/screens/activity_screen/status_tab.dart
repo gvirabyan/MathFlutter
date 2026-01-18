@@ -5,6 +5,7 @@ import 'package:untitled2/services/auth_service.dart';
 
 import '../../app_colors.dart';
 import '../../services/user_stats_service.dart';
+import '../../ui_elements/gauge_circle.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/status_tab_elements/daily_goal_widget.dart';
 import '../../ui_elements/status_tab_elements/point_section_widget.dart';
@@ -164,23 +165,50 @@ class _StatusTabState extends State<StatusTab> {
           PointsSection(points: points, lastUpdate: lastUpdate),
 
           if (pastCategoriesCount > 0 && categoriesCount > 0) ...[
-            const SizedBox(height: 32),
-            Text(
+            const SizedBox(height: 54),
+            // Заголовок оставляем снаружи
+            const Text(
               'Vergangene Kategorien',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            Text('$pastCategoriesCount von $categoriesCount'),
-            Text(
-              '${pastCategoriesPercent.toStringAsFixed(0)} %',
-              style: const TextStyle(
+            const SizedBox(height: 16), // Отступ до круга
+
+            Center(
+              child: GaugeCircle(
+                percent: pastCategoriesPercent,
                 color: AppColors.primaryPurple,
-                fontWeight: FontWeight.bold,
+                size: 200,
+                // Можно настроить нужный размер
+                strokeWidth: 10,
+                // Верхний текст: проценты
+                top: Text(
+                  '${pastCategoriesPercent.toStringAsFixed(0)} %',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                // Средний текст: дробь
+                middle: Text(
+                  '$pastCategoriesCount of $categoriesCount',
+                  style: const TextStyle(
+                    fontSize: 36,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                // Нижний текст (если нужен доп. текст, иначе можно оставить пустым)
+                bottom: const Text(
+                  'Beantwortete \nKategorien',
+                  style: TextStyle(fontSize: 12, color: Colors.black),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ],
-          const SizedBox(height: 6),
 
           _FooterText(timeInApp: timeInApp),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -200,14 +228,16 @@ class _StatusTabState extends State<StatusTab> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => LearningQuizQuestionScreen(
-            categoryId: categoryId,
-            categoryName: categoryName,
-            totalQuestions: totalQuestions,
-            learningMode: true, // В Vue версии это обычно режим обучения
-            awardPoints: true,
-            saveResult: true,
-          ),
+          builder:
+              (context) => LearningQuizQuestionScreen(
+                categoryId: categoryId,
+                categoryName: categoryName,
+                totalQuestions: totalQuestions,
+                learningMode: true,
+                // В Vue версии это обычно режим обучения
+                awardPoints: true,
+                saveResult: true,
+              ),
         ),
       );
     }
@@ -216,6 +246,7 @@ class _StatusTabState extends State<StatusTab> {
 
 class _LastQuiz extends StatelessWidget {
   final Map<String, dynamic>? lastQuiz;
+
   // Добавляем колбэк для клика
   final VoidCallback onTap;
 
@@ -281,7 +312,7 @@ class _FooterText extends StatelessWidget {
     if (timeInApp == null || timeInApp!.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 56.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 42.0),
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
