@@ -4,22 +4,24 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class MathContent extends StatelessWidget {
+  static final RegExp _htmlTagRegExp = RegExp(r'<[^>]*>');
+  static final RegExp _sqrtRegExp = RegExp(r'sqrt\((.*?)\)');
+
   final String content;
   final double fontSize;
   final Color color;
   final bool isQuestion;
 
   const MathContent({
-    Key? key,
+    super.key,
     required this.content,
     this.fontSize = 18.0,
     this.color = Colors.black,
     this.isQuestion = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    // 🔹 Единый масштаб (можно легко подкрутить)
     final double scale = isQuestion ? 1.0 : 0.9;
 
     if (content.startsWith('@@@')) {
@@ -37,7 +39,7 @@ class MathContent extends StatelessWidget {
     }
     else if (content.startsWith('@emoji@')) {
       final emojiContent = content.substring(7);
-      final plainText = emojiContent.replaceAll(RegExp(r'<[^>]*>'), '');
+      final plainText = emojiContent.replaceAll(_htmlTagRegExp, '');
       return Text(
         plainText,
         style: TextStyle(
@@ -50,7 +52,7 @@ class MathContent extends StatelessWidget {
     else if (content.startsWith('@@')) {
       final monoContent = content.substring(2);
       final plainText = monoContent
-          .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
+          .replaceAll(_htmlTagRegExp, '') // Remove HTML tags
           .replaceAll('&nbsp;', ' '); // Replace &nbsp; with a space
       final lines = plainText.trim().split('\n');
 
@@ -139,13 +141,10 @@ class MathContent extends StatelessWidget {
   String _preprocessLatex(String input) {
     String result = input.replaceAll('pi', r'\pi');
 
-    // sqrt(x) -> \sqrt{x}
     result = result.replaceAllMapped(
-      RegExp(r'sqrt\((.*?)\)'),
+      _sqrtRegExp,
           (match) => r'\sqrt{' + (match.group(1) ?? '') + '}',
     );
-
-    // делаем дроби визуально нормальными
     result = result.replaceAll(r'\frac', r'\dfrac');
 
     return result;
