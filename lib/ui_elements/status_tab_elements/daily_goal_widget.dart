@@ -15,7 +15,7 @@ class DailyGoal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 26),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -24,15 +24,23 @@ class DailyGoal extends StatelessWidget {
             'Tägliches Ziel setzen',
             style: TextStyle(color: Colors.black87, fontSize: 12),
           ),
-          const SizedBox(height: 16),
+
           DropdownMenu<int>(
             initialSelection: value == 0 ? null : value,
             enabled: !disabled,
-            width: MediaQuery.of(context).size.width - 40,
+            // 1. Устанавливаем ширину ровно по границам линии (экран минус padding 26*2)
+            width: MediaQuery.of(context).size.width - 52,
 
-            // Стрелочка как на скриншоте
-            trailingIcon: const Icon(Icons.keyboard_arrow_down, color: Colors.black, size: 20),
-            selectedTrailingIcon: const Icon(Icons.keyboard_arrow_up, color: Colors.black, size: 20),
+            trailingIcon: const Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.black,
+              size: 20,
+            ),
+            selectedTrailingIcon: const Icon(
+              Icons.keyboard_arrow_up,
+              color: Colors.black,
+              size: 20,
+            ),
 
             textStyle: const TextStyle(
               fontSize: 15,
@@ -44,18 +52,21 @@ class DailyGoal extends StatelessWidget {
               backgroundColor: WidgetStateProperty.all(Colors.white),
               surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
               elevation: WidgetStateProperty.all(6),
-              // Убираем внутренние отступы самого контейнера меню
               padding: WidgetStateProperty.all(EdgeInsets.zero),
               shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
 
             inputDecorationTheme: const InputDecorationTheme(
               isDense: true,
-              // Тонкая линия под текстом
-              contentPadding: EdgeInsets.only(bottom: 8),
-              constraints: BoxConstraints(maxHeight: 32), // Уменьшили высоту самого поля
+              // 2. Убираем горизонтальный padding, чтобы текст был слева, а иконка справа до упора.
+              // Увеличиваем вертикальный padding для симметрии (8-10 обычно идеально).
+              contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 0),
+              // 3. Убираем ограничение по высоте или делаем его чуть больше, чтобы отступы были видны
+              constraints: BoxConstraints(maxHeight: 55),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: Colors.black12, width: 1),
               ),
@@ -68,19 +79,15 @@ class DailyGoal extends StatelessWidget {
               if (v != null) onChanged(v);
             },
 
-            dropdownMenuEntries: [10, 20, 30, 40].map((int val) {
+            dropdownMenuEntries: [10, 20, 30, 40].map((val) {
               final bool isSelected = value == val;
               return DropdownMenuEntry<int>(
                 value: val,
                 label: '$val Fragen',
                 style: MenuItemButton.styleFrom(
-                  // УМЕНЬШЕННАЯ ВЫСОТА ЭЛЕМЕНТА
                   fixedSize: const Size.fromHeight(24),
-                  // Плотные отступы между пунктами
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  // Только цвет текста меняется на серый, без подчеркиваний
                   foregroundColor: isSelected ? Colors.black38 : Colors.black,
-                  // Убираем фоновое выделение при наведении/выборе, если нужно
                   backgroundColor: Colors.transparent,
                   textStyle: const TextStyle(
                     fontSize: 15,

@@ -177,7 +177,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _label('E-Mail Adresse'),
-          _input(emailCtrl, enabled: false),
+          _input(emailCtrl, enabled: !disableInputs),
           _divider(),
 
           _label('Name'),

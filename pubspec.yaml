@@ -70,6 +70,7 @@ flutter:
     - assets/buttons/topics.svg
     - assets/buttons/buttons_pic.svg
     - assets/gifs/loading.gif
+    - assets/pics_for_buttons/
   fonts:
     - family: Rubik
       fonts:

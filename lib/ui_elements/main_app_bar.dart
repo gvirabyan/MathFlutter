@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../app_colors.dart';
 import '../app_text_theme.dart';
@@ -9,29 +11,34 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int? dailyGoal;
 
   const MainAppBar({super.key, required this.title, this.tabs, this.dailyGoal});
-  static const double _myToolbarHeight = 100.0;
 
+  static const double _myToolbarHeight = 100.0;
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       elevation: 0,
-      titleSpacing: 32,
+      titleSpacing: 24,
       centerTitle: false,
       toolbarHeight: _myToolbarHeight,
       actions: [
         Builder(
-          builder: (context) => Padding(
-            padding: const EdgeInsets.only(right: 24),
-            child: IconButton(
-              icon: const Icon(Icons.notifications_none_outlined,size: 26,),
-              color: Colors.white,
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
-              },
-
-            ),
-          ),
+          builder:
+              (context) => Padding(
+                padding: const EdgeInsets.only(right: 24),
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_none_outlined, size: 26),
+                  color: Colors.white,
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                ),
+              ),
         ),
       ],
 
@@ -45,7 +52,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
-                fontSize: 28
+                fontSize: 28,
               ),
             ),
             if (dailyGoal != null)
@@ -61,25 +68,30 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                       text: dailyGoal == -1 ? '…' : '$dailyGoal Fragen',
                       style: const TextStyle(
                         color: AppColors.primaryYellow,
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
-
           ],
         ),
       ),
 
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primaryPurple, Color(0xFF5B12C9)],
+      flexibleSpace: Stack(
+        children: [
+          Container(color: Color(0xFF7A24E4)),
+          Align(
+            alignment: Alignment.topRight,
+            child: Opacity(
+              opacity: 0.3, // от 0.0 до 1.0
+              child: SvgPicture.asset(
+                'assets/pics_for_buttons/pointsRight.svg',
+                height: 140,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
 
       bottom:
@@ -87,13 +99,14 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
               ? null
               : TabBar(
                 isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                padding: const EdgeInsets.only(left: 8),
                 indicatorColor: Colors.white,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white70,
                 tabs: tabs!,
-            labelStyle: AppTextTheme.textTheme.titleMedium,
-
-          ),
+                labelStyle: AppTextTheme.textTheme.titleMedium,
+              ),
     );
   }
 
