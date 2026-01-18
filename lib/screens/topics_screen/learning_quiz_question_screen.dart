@@ -9,6 +9,7 @@ import 'package:untitled2/services/questions_service.dart';
 
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
+import '../../ui_elements/complete_of_learning_page.dart';
 import '../../ui_elements/dialogs/second_answer_dialog.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/solution_viewer.dart';
@@ -73,18 +74,18 @@ class _LearningQuizQuestionScreenState
 
   void _handleShowSolution() {
     final currentQuestion =
-    viewingHistory && historyIndex != null
-        ? historyQuestions[historyIndex!]
-        : questions[index];
+        viewingHistory && historyIndex != null
+            ? historyQuestions[historyIndex!]
+            : questions[index];
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder:
             (_) => SolutionWebView(
-          questionId: currentQuestion.id,
-          categoryName: widget.categoryName,
-        ),
+              questionId: currentQuestion.id,
+              categoryName: widget.categoryName,
+            ),
       ),
     );
   }
@@ -124,7 +125,7 @@ class _LearningQuizQuestionScreenState
       try {
         final decoded = json.decode(shuffledOrdersJson) as Map<String, dynamic>;
         savedShuffledOrders = decoded.map(
-              (key, value) => MapEntry(
+          (key, value) => MapEntry(
             int.parse(key),
             (value as List).map((e) => e.toString()).toList(),
           ),
@@ -140,9 +141,9 @@ class _LearningQuizQuestionScreenState
           final questionId = e['id'] as int;
           final correct = e['answer'].toString();
           final wrong =
-          (e['wrong_answers'] as List? ?? [])
-              .map((w) => w.toString())
-              .toList();
+              (e['wrong_answers'] as List? ?? [])
+                  .map((w) => w.toString())
+                  .toList();
 
           List<String> allAnswers;
 
@@ -178,9 +179,9 @@ class _LearningQuizQuestionScreenState
           final questionId = e['id'] as int;
           final correct = e['answer'].toString();
           final wrong =
-          (e['wrong_answers'] as List? ?? [])
-              .map((w) => w.toString())
-              .toList();
+              (e['wrong_answers'] as List? ?? [])
+                  .map((w) => w.toString())
+                  .toList();
 
           List<String> allAnswers;
 
@@ -199,7 +200,7 @@ class _LearningQuizQuestionScreenState
 
     // ✅ Save shuffled orders to SharedPreferences
     final ordersToSave = savedShuffledOrders.map(
-          (key, value) => MapEntry(key.toString(), value),
+      (key, value) => MapEntry(key.toString(), value),
     );
     await prefs.setString(
       'shuffled_answers_${widget.categoryId}',
@@ -339,7 +340,38 @@ class _LearningQuizQuestionScreenState
   }
 
   Future<void> _finishQuiz() async {
-    if (mounted) Navigator.pop(context);
+    // Считаем данные для динамики
+    int correctCount =
+        questions.where((q) => q.userAnswerStatus == 'correct').length;
+    correctCount +=
+        historyQuestions.where((q) => q.userAnswerStatus == 'correct').length;
+
+    // В вашем Vue коде баллы считались отдельно (например, 3 за вопрос)
+    int totalPoints = correctCount * 3;
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => CompleteOfLearningPage(
+              points: totalPoints,
+              // Динамическое число (например, 3)
+              correctAnswers: correctCount,
+              // Динамическое 1
+              totalQuestions: widget.totalQuestions,
+              // Динамическое 1
+              onStartPractice: () {
+                // Логика перехода к практике (как в closeAndNavigate('practice'))
+                Navigator.pop(context);
+              },
+              onBottomIconTap: () {
+                Navigator.pop(context);
+              },
+            ),
+      ),
+    );
   }
 
   @override
@@ -367,6 +399,17 @@ class _LearningQuizQuestionScreenState
       return const Scaffold(
         body: Center(child: Text('Keine Fragen verfügbar')),
       );
+    }
+
+    if (questions.isEmpty && historyQuestions.isNotEmpty) {
+      // Все вопросы пройдены - показываем финальный экран
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _finishQuiz();
+        }
+      });
+      // Пока показываем загрузку
+      return const Scaffold(body: Center(child: LoadingOverlay()));
     }
 
     // Determine which question to show
@@ -401,7 +444,7 @@ class _LearningQuizQuestionScreenState
       question: displayQuestion.question,
       answers: displayQuestion.answers,
       correctAnswerIndex:
-      (isHistory || submitted) ? displayQuestion.correctIndex : null,
+          (isHistory || submitted) ? displayQuestion.correctIndex : null,
       userAnswerStatus: isHistory ? displayQuestion.userAnswerStatus : null,
       selectedAnswerText: isHistory ? historySelectedAnswerText : null,
       // ✅ CHANGED
@@ -409,15 +452,15 @@ class _LearningQuizQuestionScreenState
       // ✅ Only for current question
       isViewingHistory: isHistory,
       onSelect:
-      (submitted || isHistory)
-          ? null
-          : (i) {
-        setState(() => selectedIndex = i);
-      },
+          (submitted || isHistory)
+              ? null
+              : (i) {
+                setState(() => selectedIndex = i);
+              },
       onSubmit:
-      (selectedIndex == null || submitted || isHistory)
-          ? null
-          : () => _submitAnswer(selectedIndex),
+          (selectedIndex == null || submitted || isHistory)
+              ? null
+              : () => _submitAnswer(selectedIndex),
       onSkip: isHistory ? null : _skipQuestion,
       onNext: isHistory ? null : _nextQuestion,
       onShowSolution: _handleShowSolution,
@@ -463,10 +506,10 @@ class _LearningQuizQuestionScreenState
   }
 
   Future<void> _finalizeAnswer(
-      int selectedIndex,
-      String? secondAnswerVal,
-      bool isFinalCorrect,
-      ) async {
+    int selectedIndex,
+    String? secondAnswerVal,
+    bool isFinalCorrect,
+  ) async {
     final q = questions[index];
 
     // ✅ ДОБАВИТЬ: Сохраняем текст ответа пользователя в саму модель вопроса
