@@ -97,25 +97,25 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 48,
+                        height: 36,
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                             onMyStatus();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE3E3E3),
+                            backgroundColor: Colors.grey,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                           ),
                           child: const Text(
                             maxLines: 1,
                             'Mein Status',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -125,7 +125,7 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: SizedBox(
-                        height: 48,
+                        height: 36,
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).pop();
@@ -136,14 +136,14 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                           ),
                           child: const Text(
                             'Neues Spiel',
                             maxLines: 1,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.w800,
                             ),
                           ),

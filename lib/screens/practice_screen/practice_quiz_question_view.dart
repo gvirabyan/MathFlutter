@@ -98,8 +98,9 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
   @override
   Widget build(BuildContext context) {
-    final bool showThinkingText = !widget.submitted && widget.secondsLeft > 2;
-    return Scaffold(
+    final bool showThinkingText = !widget.submitted &&
+        widget.secondsLeft > 52 &&
+        widget.rivalLabel != 'Punkte der Mas...';    return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: AppColors.primaryPurple,
@@ -186,7 +187,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               },
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
@@ -225,25 +226,25 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   ),
                 ),
               )
-              : const SizedBox(height: 16),
+              : const SizedBox(height: 20),
 
           // Если условие неверно, место остается пустым, но высота сохраняется
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
           // Вопрос
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
+                // --- Заголовок и Вопрос теперь внутри скролла ---
                 Text(
                   widget.title,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -252,129 +253,122 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   isQuestion: true,
                   fontSize: 10,
                 ),
+                const SizedBox(height: 32),
+
+                // --- Список ответов (shrinkWrap позволяет ему быть внутри ListView) ---
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero, // Обнуляем, так как padding уже есть у родителя
+                  itemCount: widget.answers.length,
+                  itemBuilder: (context, i) {
+                    final selected = widget.selectedIndex == i;
+                    final isCorrect = widget.correctAnswerIndex == i;
+                    final isMachineSelected = widget.machineSelectedIndex == i;
+                    Color? machineBorderColor;
+                    double borderWidth = 1.5;
+
+                    Color? cardBg;
+                    Color? borderCol;
+                    Color contentColor = Colors.black;
+
+                    if (widget.submitted && isMachineSelected) {
+                      machineBorderColor = (i == widget.correctAnswerIndex)
+                          ? AppColors.greenCorrect
+                          : AppColors.redWrong;
+                      borderWidth = 3.0;
+                    }
+
+                    if (widget.submitted && widget.correctAnswerIndex != null) {
+                      if (isCorrect) {
+                        cardBg = AppColors.greenCorrect;
+                        borderCol = AppColors.greenCorrect;
+                        contentColor = Colors.white;
+                      } else if (selected) {
+                        cardBg = AppColors.redWrong;
+                        borderCol = AppColors.redWrong;
+                        contentColor = Colors.white;
+                      } else {
+                        borderCol = Colors.grey.shade300;
+                      }
+                    } else if (selected) {
+                      cardBg = AppColors.primaryPurple;
+                      borderCol = AppColors.primaryPurple;
+                      contentColor = Colors.white;
+                    } else {
+                      borderCol = Colors.grey.shade300;
+                    }
+
+                    List<BoxShadow>? externalBorders;
+                    if (widget.submitted && isMachineSelected) {
+                      externalBorders = [
+                        const BoxShadow(
+                          color: AppColors.primaryYellow,
+                          spreadRadius: 3,
+                          blurRadius: 0,
+                        ),
+                      ];
+                    }
+
+                    return GestureDetector(
+                      onTap: () => widget.onSelect?.call(i),
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 60),
+                        margin: const EdgeInsets.only(bottom: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          boxShadow: externalBorders,
+                          color: cardBg ?? Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: machineBorderColor ?? borderCol ?? Colors.grey.shade300,
+                            width: borderWidth,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 25,
+                              child: Text(
+                                String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: contentColor.withOpacity(0.7),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: MathContent(
+                                content: widget.answers[i],
+                                fontSize: 22,
+                                color: contentColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+
+                  },
+
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 24), // Чуть добавил сверху (8)
+                  child: PrimaryButton(
+                    color: AppColors.primaryYellow,
+                    text: widget.submitted ? 'nächstes' : 'abgeben',
+                    enabled: widget.submitted || widget.selectedIndex != null,
+                    onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 32),
 
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: widget.answers.length,
-              itemBuilder: (context, i) {
-                final selected = widget.selectedIndex == i;
-                final isCorrect = widget.correctAnswerIndex == i;
-                final isMachineSelected = widget.machineSelectedIndex == i;
-                Color? machineBorderColor;
-                double borderWidth = 1.5;
-
-                Color? cardBg;
-                Color? borderCol;
-                Color contentColor = Colors.black;
-
-                if (widget.submitted && isMachineSelected) {
-                  machineBorderColor =
-                      (i == widget.correctAnswerIndex)
-                          ? AppColors.greenCorrect
-                          : AppColors.redWrong;
-                  borderWidth = 3.0;
-                }
-
-                if (widget.submitted && widget.correctAnswerIndex != null) {
-                  if (isCorrect) {
-                    cardBg = AppColors.greenCorrect;
-                    borderCol = AppColors.greenCorrect;
-                    contentColor = Colors.white;
-                  } else if (selected) {
-                    cardBg = AppColors.redWrong;
-                    borderCol = AppColors.redWrong;
-                    contentColor = Colors.white;
-                  } else {
-                    borderCol = Colors.grey.shade300;
-                  }
-                } else if (selected) {
-                  cardBg = AppColors.primaryPurple;
-                  borderCol = AppColors.primaryPurple;
-                  contentColor = Colors.white;
-                } else {
-                  borderCol = Colors.grey.shade300;
-                }
-
-                List<BoxShadow>? externalBorders;
-
-                if (widget.submitted && isMachineSelected) {
-                  final Color rivalColor =
-                      (i == widget.correctAnswerIndex)
-                          ? AppColors.primaryYellow
-                          : AppColors.primaryYellow;
-
-                  externalBorders = [
-                    BoxShadow(
-                      color: rivalColor,
-                      spreadRadius: 3,
-                      blurRadius: 0,
-                    ),
-                  ];
-                }
-
-                return GestureDetector(
-                  onTap: () => widget.onSelect?.call(i),
-                  child: Container(
-                    constraints: const BoxConstraints(minHeight: 60),
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      boxShadow: externalBorders,
-                      color: cardBg ?? Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color:
-                            machineBorderColor ??
-                            borderCol ??
-                            Colors.grey.shade300,
-                        width: borderWidth,
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 25,
-                          child: Text(
-                            String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: contentColor.withOpacity(0.7),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: MathContent(
-                            content: widget.answers[i],
-                            fontSize: 22,
-                            color: contentColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          // Кнопка
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            child: PrimaryButton(
-              color: AppColors.primaryYellow,
-              text: widget.submitted ? 'nächstes' : 'abgeben',
-              enabled: widget.submitted || widget.selectedIndex != null,
-              onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
-            ),
-          ),
         ],
       ),
     );
@@ -388,7 +382,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
   ) {
     return Expanded(
       child: Container(
-        height: 44,
+        height: 50,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: bg,

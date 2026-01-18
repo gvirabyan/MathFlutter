@@ -70,7 +70,7 @@ class PracticeVsMachineTab extends StatelessWidget {
             Text(
               score,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF7C3AED), // фиолетовый как на скрине
               ),

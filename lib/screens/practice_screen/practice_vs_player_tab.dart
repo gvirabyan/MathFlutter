@@ -7,6 +7,7 @@ import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
 
 import '../../app_colors.dart';
 import '../../ui_elements/player_searching_loading.dart';
+import '../../ui_elements/primary_button.dart';
 
 class PracticeVsPlayerTab extends StatefulWidget {
   const PracticeVsPlayerTab({super.key});
@@ -60,47 +61,51 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
 
             // Title
             const Text(
-              'Du kannst mit jemandem üben, der\neine ähnliche Bewertung hat',
+              'Du kannst mit jemandem \nüben, der eine ähnliche \nBewertung hat',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                height: 1.1,
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             const Text(
               'Anzahl der Fragen: 10–30',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.black54,
+                color: Colors.black87,
               ),
             ),
 
-            const SizedBox(height: 36,),
+            const SizedBox(height: 46,),
 
             // Start Button (yellow)
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => setState(() => started = true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFC107), // Yellow
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  elevatedButtonTheme: ElevatedButtonThemeData(
+                    style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Start',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                child: SizedBox(
+                  height: 55,
+                  child: PrimaryButton(
+                    text: 'Start',
+                    enabled: true,
+                    color: const Color(0xFFFFC107),
+                    onPressed: () => setState(() => started = true),
                   ),
                 ),
+
               ),
             ),
 
@@ -168,7 +173,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
             Text(
               score,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF7C3AED), // фиолетовый как на скрине
               ),
