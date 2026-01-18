@@ -323,7 +323,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: backgroundColor ?? Colors.white,
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: borderColor ?? Colors.grey.shade300,
                               width: 1.5,
