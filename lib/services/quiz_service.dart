@@ -13,7 +13,7 @@ class QuizService {
     return {
       'questions': res['questions'] ?? [],
       'categoriesAnswers': res['categories_answers'] ?? [],
-      'rivalUser': res['rival_user'],
+      'rival_user': res['rival_user'],
     };
   }
 

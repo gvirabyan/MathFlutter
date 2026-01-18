@@ -71,23 +71,34 @@ class _PracticeQuizQuestionScreenState
       rival: widget.rival,
     );
 
-    if (res['rival_user'] != null) {
-      setState(() {
-        currentRivalName = res['rival_user']['username'] ?? 'Gegner';
-        rivalCoefficient =
-            (res['rival_user']['coefficient'] as num?)?.toDouble() ?? 0.5;
+    print('=== RESPONSE ===');
+    print('rival param: ${widget.rival}');
+    print('rival_user exists: ${res['rival_user'] != null}');
+    print('rival_user data: ${res['rival_user']}');
 
-      });
+    if (!mounted) return;
+
+    String rivalName = 'Gegner';
+    double coefficient = 0.5;
+
+    if (res['rival_user'] != null) {
+      rivalName = res['rival_user']['username'] ?? 'Gegner';
+      coefficient = (res['rival_user']['coefficient'] as num?)?.toDouble() ?? 0.5;
+
+      print('Parsed rivalName: $rivalName');
+      print('Parsed coefficient: $coefficient');
     }
 
     final List list =
-        res['questions'] is List ? List.from(res['questions']) : [];
-    questions = list.map((e) => QuestionModel.fromJson(e)).toList();
+    res['questions'] is List ? List.from(res['questions']) : [];
+    final loadedQuestions = list.map((e) => QuestionModel.fromJson(e)).toList();
+    final loadedAnswers = List<bool?>.filled(widget.totalQuestions, null);
 
-    answersResult = List.filled(widget.totalQuestions, null);
-
-    if (!mounted) return;
     setState(() {
+      currentRivalName = rivalName;
+      rivalCoefficient = coefficient;
+      questions = loadedQuestions;
+      answersResult = loadedAnswers;
       index = 0;
       loading = false;
       submitted = false;
@@ -95,6 +106,8 @@ class _PracticeQuizQuestionScreenState
       myPoints = 0;
       machinePoints = 0;
     });
+
+    print('After setState - currentRivalName: $currentRivalName'); // <-- ВАЖНО!
 
     _startTimer();
   }
@@ -281,8 +294,9 @@ class _PracticeQuizQuestionScreenState
 
     final displayQuestion = questions[index];
     final displayIndex = index;
-    print("$currentRivalName===========");
-
+    print("=== BUILD ===");
+    print("currentRivalName: '$currentRivalName'");
+    print("widget.rival: ${widget.rival}");
     final String appBarTitle = widget.rival == 'fake_user'
         ? "Spieler vs $currentRivalName"
         : "Spieler vs Maschine";
