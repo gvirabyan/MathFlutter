@@ -76,6 +76,7 @@ class _PracticeQuizQuestionScreenState
         currentRivalName = res['rival_user']['username'] ?? 'Gegner';
         rivalCoefficient =
             (res['rival_user']['coefficient'] as num?)?.toDouble() ?? 0.5;
+
       });
     }
 
@@ -280,6 +281,8 @@ class _PracticeQuizQuestionScreenState
 
     final displayQuestion = questions[index];
     final displayIndex = index;
+    print("$currentRivalName===========");
+
     final String appBarTitle = widget.rival == 'fake_user'
         ? "Spieler vs $currentRivalName"
         : "Spieler vs Maschine";

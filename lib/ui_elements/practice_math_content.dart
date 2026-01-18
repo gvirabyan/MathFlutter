@@ -27,7 +27,7 @@ class MathContent extends StatelessWidget {
         data: content.substring(3),
         style: {
           "body": Style(
-            fontSize: FontSize((isQuestion ? 18 : fontSize) * scale),
+            fontSize: FontSize((isQuestion ? 20 : fontSize) * scale),
             lineHeight: LineHeight.number(1),
             fontFamily: 'Rubik',
             color: color,

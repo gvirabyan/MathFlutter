@@ -44,7 +44,6 @@ class PracticeQuizQuestionView extends StatefulWidget {
     required this.onSubmit,
     required this.onNext,
     this.machineSelectedIndex,
-
   });
 
   @override
@@ -99,6 +98,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
   @override
   Widget build(BuildContext context) {
+    final bool showThinkingText = !widget.submitted && widget.secondsLeft > 2;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -213,7 +213,21 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+
+          showThinkingText
+              ? Center(
+                child: Text(
+                  "${widget.rivalLabel} denkt gerade ...",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 14,
+                  ),
+                ),
+              )
+              : const SizedBox(height: 16),
+
+          // Если условие неверно, место остается пустым, но высота сохраняется
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0)),
@@ -232,18 +246,16 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                const SizedBox(height: 8),
                 MathContent(
                   content: widget.question,
-                  isQuestion: false,
-                  fontSize: 22,
-
+                  isQuestion: true,
+                  fontSize: 10,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Ответы
-          // Замените существующий ListView.builder (секцию "Ответы") на этот код:
+          const SizedBox(height: 32),
 
           Expanded(
             child: ListView.builder(
@@ -261,10 +273,11 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 Color contentColor = Colors.black;
 
                 if (widget.submitted && isMachineSelected) {
-                  machineBorderColor = (i == widget.correctAnswerIndex)
-                      ? AppColors.greenCorrect
-                      : AppColors.redWrong;
-                  borderWidth = 1.5;
+                  machineBorderColor =
+                      (i == widget.correctAnswerIndex)
+                          ? AppColors.greenCorrect
+                          : AppColors.redWrong;
+                  borderWidth = 3.0;
                 }
 
                 if (widget.submitted && widget.correctAnswerIndex != null) {
@@ -290,16 +303,17 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 List<BoxShadow>? externalBorders;
 
                 if (widget.submitted && isMachineSelected) {
-                  final Color rivalColor = (i == widget.correctAnswerIndex)
-                      ? AppColors.primaryYellow
-                      : AppColors.primaryYellow;
+                  final Color rivalColor =
+                      (i == widget.correctAnswerIndex)
+                          ? AppColors.primaryYellow
+                          : AppColors.primaryYellow;
 
                   externalBorders = [
                     BoxShadow(
                       color: rivalColor,
                       spreadRadius: 3,
                       blurRadius: 0,
-                    )
+                    ),
                   ];
                 }
 
@@ -308,13 +322,19 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   child: Container(
                     constraints: const BoxConstraints(minHeight: 60),
                     margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       boxShadow: externalBorders,
                       color: cardBg ?? Colors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: machineBorderColor ?? borderCol ?? Colors.grey.shade300,
+                        color:
+                            machineBorderColor ??
+                            borderCol ??
+                            Colors.grey.shade300,
                         width: borderWidth,
                       ),
                     ),

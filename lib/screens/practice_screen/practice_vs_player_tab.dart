@@ -3,7 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
+import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
 
+import '../../app_colors.dart';
 import '../../ui_elements/player_searching_loading.dart';
 
 class PracticeVsPlayerTab extends StatefulWidget {
@@ -284,28 +286,135 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   void _showNoPlayersPopup() {
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Oops'),
-          content: const Text(
-            'Im Moment sind keine Spieler verfügbar.',
+        return Dialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-              child: const Text('Zurück'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                _startVsPlayer(selectedQuestionsCount!);
-              },
-              child: const Text('Nochmal'),
-            ),
-          ],
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Stack(
+            children: [
+              // Кнопка закрытия (крестик) в углу
+              Positioned(
+                right: 8,
+                top: 8,
+                child: IconButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  icon: const Icon(Icons.close, color: Colors.black54, size: 28),
+                  splashRadius: 20,
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Заголовок
+                    const Text(
+                      'Kein Spieler ist verfügbar',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800, // Extra Bold
+                        color: Colors.black,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // Описание с эмодзи
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                          height: 1.3,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        children: [
+                          const TextSpan(text: 'Sorry, aktuell ist kein Spieler verfügbar '),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Text('🤷‍♀️', style: TextStyle(fontSize: 18)),
+                          ),
+                          const TextSpan(text: '.\nProbiere später noch einmal.'),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Фиолетовая кнопка "Gehe zum Üben"
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const PracticeVsMachineTab(
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:  AppColors.primaryPurple, // Яркий фиолетовый как на скрине
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Gehe zum Üben',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Фиолетовая кнопка "Erneut versuchen"
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          _startVsPlayer(selectedQuestionsCount!);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryPurple,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Erneut versuchen',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
