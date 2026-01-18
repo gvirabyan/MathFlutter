@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_colors.dart';
+import '../../ui_elements/dialogs/cancel_practice_quiz_dialog.dart';
 import '../../ui_elements/practice_math_content.dart';
 import '../../ui_elements/primary_button.dart';
 
@@ -106,6 +107,15 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
         backgroundColor: AppColors.primaryPurple,
         foregroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            final result = await CancelPracticeQuizDialog.show(context);
+            if (result == true && context.mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
         title: Row(
           children: [
             Expanded(
