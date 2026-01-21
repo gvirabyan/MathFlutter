@@ -83,14 +83,15 @@ class _PracticeQuizQuestionScreenState
 
     if (res['rival_user'] != null) {
       rivalName = res['rival_user']['username'] ?? 'Gegner';
-      coefficient = (res['rival_user']['coefficient'] as num?)?.toDouble() ?? 0.5;
+      coefficient =
+          (res['rival_user']['coefficient'] as num?)?.toDouble() ?? 0.5;
 
       print('Parsed rivalName: $rivalName');
       print('Parsed coefficient: $coefficient');
     }
 
     final List list =
-    res['questions'] is List ? List.from(res['questions']) : [];
+        res['questions'] is List ? List.from(res['questions']) : [];
     final loadedQuestions = list.map((e) => QuestionModel.fromJson(e)).toList();
     final loadedAnswers = List<bool?>.filled(widget.totalQuestions, null);
 
@@ -107,7 +108,7 @@ class _PracticeQuizQuestionScreenState
       machinePoints = 0;
     });
 
-    print('After setState - currentRivalName: $currentRivalName'); // <-- ВАЖНО!
+    print('After setState - currentRivalName: $currentRivalName');
 
     _startTimer();
   }
@@ -228,15 +229,6 @@ class _PracticeQuizQuestionScreenState
 
   Future<void> _finishQuiz() async {
     timer?.cancel();
-    if (widget.saveResult) {
-      await QuizService.saveQuizResult(
-        data: {
-          'my_points': myPoints,
-          'machine_points': machinePoints,
-          'rival': widget.rival,
-        },
-      );
-    }
 
     final PracticeQuizResult result =
         myPoints > machinePoints
@@ -244,14 +236,51 @@ class _PracticeQuizQuestionScreenState
             : (myPoints < machinePoints
                 ? PracticeQuizResult.lose
                 : PracticeQuizResult.draw);
-    final int pointsText = (myPoints - machinePoints).abs();
+
+    int pointsToDisplay = (myPoints - machinePoints).abs();
+
+    if (widget.saveResult) {
+      final response = await QuizService.saveQuizResult(
+        data: {
+          'user_score': myPoints,
+          'rival_score': machinePoints,
+          'rival_type': widget.rival,
+          'mode': {
+            'id': 1,
+            'questions': widget.totalQuestions,
+            'winPoints': 10,
+            'drawPoints': 5,
+            'losePoints': -2,
+            'showPoints': "+10, +5, -2",
+          },
+        },
+      );
+
+      if (response['status'] == 'success' && response['data'] != null) {
+        try {
+          final attributes = response['data']['attributes'];
+          final modeData = attributes['mode'];
+
+          if (result == PracticeQuizResult.win) {
+            pointsToDisplay = modeData['winPoints'] ?? 10;
+          } else if (result == PracticeQuizResult.draw) {
+            pointsToDisplay = modeData['drawPoints'] ?? 5;
+          } else {
+            pointsToDisplay =
+                (modeData['losePoints'] as num? ?? 0).toInt().abs();
+          }
+        } catch (e) {
+          print("Error parsing response: $e");
+        }
+      }
+    }
 
     if (!mounted) return;
 
     await PracticeQuizCompleteDialog.show(
       context,
       result: result,
-      points: pointsText,
+      points: pointsToDisplay,
       onMyStatus: () {
         Navigator.of(context).pop();
       },
@@ -268,7 +297,6 @@ class _PracticeQuizQuestionScreenState
             q.userAnswerStatus = null;
           }
         });
-
         _startTimer();
       },
     );
@@ -283,7 +311,7 @@ class _PracticeQuizQuestionScreenState
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Scaffold(body: Center(child:  LoadingOverlay()));
+      return const Scaffold(body: Center(child: LoadingOverlay()));
     }
 
     if (questions.isEmpty) {
@@ -297,15 +325,16 @@ class _PracticeQuizQuestionScreenState
     print("=== BUILD ===");
     print("currentRivalName: '$currentRivalName'");
     print("widget.rival: ${widget.rival}");
-    final String appBarTitle = widget.rival == 'fake_user'
-        ? "Spieler vs $currentRivalName"
-        : "Spieler vs Maschine";
+    final String appBarTitle =
+        widget.rival == 'fake_user'
+            ? "Spieler vs $currentRivalName"
+            : "Spieler vs Maschine";
 
     return PracticeQuizQuestionView(
       key: ValueKey(displayIndex),
       currentIndex: displayIndex,
       submitted: submitted,
-      appBarTitle:appBarTitle,
+      appBarTitle: appBarTitle,
       total: widget.totalQuestions,
       results: answersResult,
       myPoints: myPoints,

@@ -95,7 +95,7 @@ class MathContent extends StatelessWidget {
         content.substring(1),
         style: TextStyle(
           fontSize: (isQuestion ? 18 : fontSize) * scale,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
           color: color,
         ),
       );
