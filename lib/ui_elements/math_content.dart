@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tex/flutter_tex.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_tex/flutter_tex.dart';
 
 class MathContent extends StatelessWidget {
   final String content;
@@ -34,8 +33,7 @@ class MathContent extends StatelessWidget {
           ),
         },
       );
-    }
-    else if (content.startsWith('@emoji@')) {
+    } else if (content.startsWith('@emoji@')) {
       final emojiContent = content.substring(7);
       final plainText = emojiContent.replaceAll(RegExp(r'<[^>]*>'), '');
       return Text(
@@ -46,8 +44,7 @@ class MathContent extends StatelessWidget {
           color: color,
         ),
       );
-    }
-    else if (content.startsWith('@@')) {
+    } else if (content.startsWith('@@')) {
       final monoContent = content.substring(2);
       final plainText = monoContent
           .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
@@ -56,41 +53,46 @@ class MathContent extends StatelessWidget {
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines
-            .map((line) => Text(
-          line.trim(),
-          style: TextStyle(
-            fontSize: (isQuestion ? 18 : fontSize) * scale,
-            height: 1.2, // Adjust height for better spacing
-            fontFamily: 'monospace',
-            fontWeight: FontWeight.bold,
-            letterSpacing: 4,
-            color: color,
-          ),
-        ))
-            .toList(),
+        children:
+            lines
+                .map(
+                  (line) => Text(
+                    line.trim(),
+                    style: TextStyle(
+                      fontSize: (isQuestion ? 18 : fontSize) * scale,
+                      height: 1.2,
+                      // Adjust height for better spacing
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 4,
+                      color: color,
+                    ),
+                  ),
+                )
+                .toList(),
       );
-    }
-    else if (content.startsWith('@pre@')) {
+    } else if (content.startsWith('@pre@')) {
       final preContent = content.substring(5);
       final plainText = preContent.replaceAll('<br>', '\n');
       final lines = plainText.trim().split('\n');
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines
-            .map((line) => Text(
-          line.trim(),
-          style: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: (isQuestion ? 18 : fontSize) * scale,
-            color: color,
-          ),
-        ))
-            .toList(),
+        children:
+            lines
+                .map(
+                  (line) => Text(
+                    line.trim(),
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: (isQuestion ? 18 : fontSize) * scale,
+                      color: color,
+                    ),
+                  ),
+                )
+                .toList(),
       );
-    }
-    else if (content.startsWith('@')) {
+    } else if (content.startsWith('@')) {
       return Text(
         content.substring(1),
         style: TextStyle(
@@ -99,32 +101,32 @@ class MathContent extends StatelessWidget {
           color: color,
         ),
       );
-    }
-    else {
+    } else {
       final lines = content.split('\n');
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: lines.map((line) {
-          if (line.startsWith(r'$$') && line.endsWith(r'$$')) {
-            // It's a plain text line
-            return Text(
-              line.substring(2, line.length - 2),
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: (isQuestion ? 16 : 14) * scale,
-                color: color,
-              ),
-            );
-          } else {
-            // It's a LaTeX line
-            final processedContent = _preprocessLatex(line);
-            return _LatexRenderer(
-              math: r'\displaystyle ' + processedContent,
-              color: color,
-              fontSize: (isQuestion ? 18 : 16) * scale,
-            );
-          }
-        }).toList(),
+        children:
+            lines.map((line) {
+              if (line.startsWith(r'$$') && line.endsWith(r'$$')) {
+                // It's a plain text line
+                return Text(
+                  line.substring(2, line.length - 2),
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontSize: (isQuestion ? 16 : 14) * scale,
+                    color: color,
+                  ),
+                );
+              } else {
+                // It's a LaTeX line
+                final processedContent = _preprocessLatex(line);
+                return _LatexRenderer(
+                  math: r'\displaystyle ' + processedContent,
+                  color: color,
+                  fontSize: (isQuestion ? 18 : 16) * scale,
+                );
+              }
+            }).toList(),
       );
     }
   }
@@ -135,7 +137,7 @@ class MathContent extends StatelessWidget {
     // sqrt(x) -> \sqrt{x}
     result = result.replaceAllMapped(
       RegExp(r'sqrt\((.*?)\)'),
-          (match) => r'\sqrt{' + (match.group(1) ?? '') + '}',
+      (match) => r'\sqrt{' + (match.group(1) ?? '') + '}',
     );
 
     // делаем дроби визуально нормальными
@@ -183,6 +185,10 @@ class _LatexRendererState extends State<_LatexRenderer> {
 
   @override
   Widget build(BuildContext context) {
+    final hasFraction =
+        widget.math.contains(r'\over') || widget.math.contains(r'\dfrac');
+    final heightMultiplier = hasFraction ? 2.0 : 1.0;
+
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: _isReady ? 1.0 : 0.0,
@@ -201,7 +207,7 @@ class _LatexRendererState extends State<_LatexRenderer> {
           }
           return SvgPicture.string(
             svg,
-            height: widget.fontSize,
+            height: widget.fontSize * heightMultiplier,
             colorFilter: ColorFilter.mode(widget.color, BlendMode.srcIn),
           );
         },

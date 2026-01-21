@@ -121,11 +121,15 @@ class MathContent extends StatelessWidget {
             return TeX2SVG(
               math: r'\displaystyle ' + processedContent,
               teXInputType: TeXInputType.teX,
+
               formulaWidgetBuilder: (context, svg) {
                 final double finalFontSize = (isQuestion ? 18 :16) * scale;
+                final hasFraction = processedContent.contains(r'\over') ||
+                    processedContent.contains(r'\dfrac');
+                final heightMultiplier = hasFraction ? 1.8 : 1.0;
                 return SvgPicture.string(
                   svg,
-                  height: finalFontSize,
+                  height: finalFontSize * heightMultiplier,
                   colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
                 );
               },

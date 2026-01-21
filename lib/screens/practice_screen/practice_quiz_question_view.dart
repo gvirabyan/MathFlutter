@@ -282,7 +282,6 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 ),
                 const SizedBox(height: 32),
 
-                // --- Список ответов (shrinkWrap позволяет ему быть внутри ListView) ---
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
