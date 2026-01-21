@@ -383,19 +383,19 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   },
 
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 24), // Чуть добавил сверху (8)
-                  child: PrimaryButton(
-                    color: AppColors.primaryYellow,
-                    text: widget.submitted ? 'nächstes' : 'abgeben',
-                    enabled: widget.submitted || widget.selectedIndex != null,
-                    onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
-                  ),
-                ),
+
               ],
             ),
           ),
-
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 24), // Чуть добавил сверху (8)
+            child: PrimaryButton(
+              color: AppColors.primaryYellow,
+              text: widget.submitted ? 'nächstes' : 'abgeben',
+              enabled: widget.submitted || widget.selectedIndex != null,
+              onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
+            ),
+          ),
         ],
       ),
     );

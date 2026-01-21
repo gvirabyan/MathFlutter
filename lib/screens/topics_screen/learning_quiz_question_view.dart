@@ -359,94 +359,95 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                       );
                     },
                   ),
-                  const SizedBox(height: 54),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        onPressed: widget.onShowSolution,
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primaryPurple,
-                          padding: EdgeInsets.zero,
+
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 54),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: widget.onShowSolution,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryPurple,
+                  padding: EdgeInsets.zero,
+                ),
+                child: const Text(
+                  'Erklärung',
+                  style: TextStyle(
+                    fontSize: 15,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          if (!widget.isViewingHistory)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: SizedBox(
+                      height: 54,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.black),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
                         ),
+                        onPressed: widget.onSkip,
                         child: const Text(
-                          'Erklärung',
+                          'überspringen',
                           style: TextStyle(
-                            fontSize: 15,
-                            decoration: TextDecoration.underline,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            color: Colors.black87,
                           ),
                         ),
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 8),
-
-                  if (!widget.isViewingHistory)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 4,
-                            child: SizedBox(
-                              height: 54,
-                              child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: Colors.black),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                ),
-                                onPressed: widget.onSkip,
-                                child: const Text(
-                                  'überspringen',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            flex: 5,
-                            child: PrimaryButton(
-                              color: AppColors.primaryYellow,
-                              text: (widget.submitted) ? 'nächstes' : 'abgeben',
-                              enabled:
-                              (widget.submitted ||
-                                  widget.selectedIndex != null),
-                              onPressed:
-                              widget.submitted
-                                  ? widget.onNext
-                                  : widget.onSubmit,
-                            ),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    flex: 5,
+                    child: PrimaryButton(
+                      color: AppColors.primaryYellow,
+                      text: (widget.submitted) ? 'nächstes' : 'abgeben',
+                      enabled:
+                      (widget.submitted ||
+                          widget.selectedIndex != null),
+                      onPressed:
+                      widget.submitted
+                          ? widget.onNext
+                          : widget.onSubmit,
                     ),
-                  if (widget.isViewingHistory)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SizedBox(
-                        height: 54,
-                        width: double.infinity,
-                        child: PrimaryButton(
-                          text: 'Weitermachen',
-                          enabled: true,
-                          color: Colors.amber,
-                          onPressed: widget.onReturnToPresent,
-                        ),
-                      ),
-                    ),
+                  ),
                 ],
               ),
             ),
-          ),
+          if (widget.isViewingHistory)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                height: 54,
+                width: double.infinity,
+                child: PrimaryButton(
+                  text: 'Weitermachen',
+                  enabled: true,
+                  color: Colors.amber,
+                  onPressed: widget.onReturnToPresent,
+                ),
+              ),
+            ),
         ],
       ),
     );

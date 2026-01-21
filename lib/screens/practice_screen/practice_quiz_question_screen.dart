@@ -54,6 +54,7 @@ class _PracticeQuizQuestionScreenState
 
   late int secondsLeft;
   Timer? timer;
+  Timer? autoNextTimer;
 
   int? selectedIndex;
   int? machineSelectedIndex;
@@ -158,6 +159,12 @@ class _PracticeQuizQuestionScreenState
         answersResult[index] = false;
       }
     });
+
+    autoNextTimer = Timer(const Duration(seconds: 6), () {
+      if (mounted && submitted) {
+        _nextQuestion();
+      }
+    });
   }
 
   Future<void> _submitAnswer(int selected) async {
@@ -212,6 +219,8 @@ class _PracticeQuizQuestionScreenState
   }
 
   void _nextQuestion() {
+    autoNextTimer?.cancel();
+
     if (index + 1 >= questions.length) {
       _finishQuiz();
       return;
@@ -229,6 +238,7 @@ class _PracticeQuizQuestionScreenState
 
   Future<void> _finishQuiz() async {
     timer?.cancel();
+    autoNextTimer?.cancel();
 
     final PracticeQuizResult result =
         myPoints > machinePoints
@@ -305,6 +315,7 @@ class _PracticeQuizQuestionScreenState
   @override
   void dispose() {
     timer?.cancel();
+    autoNextTimer?.cancel();
     super.dispose();
   }
 
