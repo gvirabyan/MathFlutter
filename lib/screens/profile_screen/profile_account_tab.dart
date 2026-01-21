@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled2/app_colors.dart';
+import 'package:untitled2/ui_elements/dialogs/account_error_info_dialog.dart';
 import '../../services/auth_service.dart';
 import '../../ui_elements/dialogs/account_info_save_dialog.dart';
 import '../../ui_elements/loading_overlay.dart';
@@ -94,12 +95,19 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
     setState(() => _saving = false);
 
     final ok = res['status'] == 'success';
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const AccountInfoSaveDialog(),
-    );
-
+    if(ok) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const AccountInfoSaveDialog(),
+      );
+    }
+    else {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const AccountErrorInfoDialog(),
+      );    }
   }
 
   Future<void> _logout() async {
