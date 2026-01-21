@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:untitled2/app_colors.dart';
 import 'package:untitled2/ui_elements/dialogs/account_error_info_dialog.dart';
+
+import '../../screens/auth/auth_screen.dart';
 import '../../services/auth_service.dart';
 import '../../ui_elements/dialogs/account_info_save_dialog.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/primary_button.dart';
-import '../../screens/auth/auth_screen.dart';
 
 class ProfileAccountTab extends StatefulWidget {
   const ProfileAccountTab({super.key});
@@ -26,9 +27,9 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
   final schoolCtrl = TextEditingController();
   final classCtrl = TextEditingController();
 
-  bool _loading = true;      // initial load
-  bool _saving = false;      // save profile
-  bool _processing = false;  // logout / delete
+  bool _loading = true; // initial load
+  bool _saving = false; // save profile
+  bool _processing = false; // logout / delete
 
   @override
   void initState() {
@@ -95,19 +96,19 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
     setState(() => _saving = false);
 
     final ok = res['status'] == 'success';
-    if(ok) {
+    if (ok) {
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (_) => const AccountInfoSaveDialog(),
       );
-    }
-    else {
+    } else {
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (_) => const AccountErrorInfoDialog(),
-      );    }
+      );
+    }
   }
 
   Future<void> _logout() async {
@@ -120,7 +121,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AuthScreen()),
-          (_) => false,
+      (_) => false,
     );
   }
 
@@ -129,24 +130,25 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Konto löschen'),
-        content: const Text(
-          'Möchtest du dein Konto wirklich löschen? '
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Konto löschen'),
+            content: const Text(
+              'Möchtest du dein Konto wirklich löschen? '
               'Diese Aktion kann nicht rückgängig gemacht werden.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Abbrechen'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Abbrechen'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Löschen'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed != true) return;
@@ -163,13 +165,15 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(res['message']?.toString() ?? 'Fehler beim Löschen')),
+        SnackBar(
+          content: Text(res['message']?.toString() ?? 'Fehler beim Löschen'),
+        ),
       );
     }
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AuthScreen()),
-          (_) => false,
+      (_) => false,
     );
   }
 
@@ -178,100 +182,122 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child:  LoadingOverlay());
+      return const Center(child: LoadingOverlay());
     }
 
     final bool disableInputs = _processing;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _label('E-Mail Adresse'),
-          _input(emailCtrl, enabled: !disableInputs),
-          _divider(),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ... остальной код без изменений
+            _label('E-Mail Adresse'),
+            _input(emailCtrl, enabled: !disableInputs),
+            _divider(),
 
-          _label('Name'),
-          _input(nameCtrl, enabled: !disableInputs),
-          _divider(),
+            _label('Name'),
+            _input(nameCtrl, enabled: !disableInputs),
+            _divider(),
 
-          _label('Nachname'),
-          _input(surnameCtrl, enabled: !disableInputs),
-          _divider(),
+            _label('Nachname'),
+            _input(surnameCtrl, enabled: !disableInputs),
+            _divider(),
 
-          _label('Spitzname'),
-          _input(nicknameCtrl, enabled: !disableInputs),
-          _divider(),
+            _label('Spitzname'),
+            _input(nicknameCtrl, enabled: !disableInputs),
+            _divider(),
 
-          _label('Geburtsdatum'),
-          _input(birthCtrl, enabled: !disableInputs),
-          _divider(),
+            _label('Geburtsdatum'),
+            _input(birthCtrl, enabled: !disableInputs),
+            _divider(),
 
-          _label('Land'),
-          _input(countryCtrl, hint: 'In welchem Land lebst du?', enabled: !disableInputs),
-          _divider(),
+            _label('Land'),
+            _input(
+              countryCtrl,
+              hint: 'In welchem Land lebst du?',
+              enabled: !disableInputs,
+            ),
+            _divider(),
 
-          _label('Stadt'),
-          _input(cityCtrl, hint: 'In welcher Stadt lebst du?', enabled: !disableInputs),
-          _divider(),
+            _label('Stadt'),
+            _input(
+              cityCtrl,
+              hint: 'In welcher Stadt lebst du?',
+              enabled: !disableInputs,
+            ),
+            _divider(),
 
-          _label('Schule'),
-          _input(schoolCtrl, hint: 'Name deiner Schule', enabled: !disableInputs),
-          _divider(),
+            _label('Schule'),
+            _input(
+              schoolCtrl,
+              hint: 'Name deiner Schule',
+              enabled: !disableInputs,
+            ),
+            _divider(),
 
-          _label('Klasse'),
-          _input(classCtrl, hint: 'Deine Klasse (z.B. 7a oder 7.1)', enabled: !disableInputs),
+            _label('Klasse'),
+            _input(
+              classCtrl,
+              hint: 'Deine Klasse (z.B. 7a oder 7.1)',
+              enabled: !disableInputs,
+            ),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          /// SAVE
-          PrimaryButton(
-            text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
-            enabled: !_saving && !_processing,
-            onPressed: _saveProfile,
-            color: AppColors.primaryYellow,
-          ),
+            /// SAVE
+            PrimaryButton(
+              text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
+              enabled: !_saving && !_processing,
+              onPressed: _saveProfile,
+              color: AppColors.primaryYellow,
+            ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          /// LOGOUT
-          Center(
-            child: _processing
-                ? const SizedBox(
-              height: 24,
-              width: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-                : GestureDetector(
-              onTap: _logout,
-              child: const Text(
-                'Abmelden',
-                style: TextStyle(
-                  color: Color(0xFF7B2CFF),
-                  fontWeight: FontWeight.w600,
+            /// LOGOUT
+            Center(
+              child:
+                  _processing
+                      ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : GestureDetector(
+                        onTap: _logout,
+                        child: const Text(
+                          'Abmelden',
+                          style: TextStyle(
+                            color: Color(0xFF7B2CFF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+            ),
+
+            const SizedBox(height: 16),
+
+            /// DELETE ACCOUNT
+            Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                onTap: _processing ? null : _deleteAccount,
+                child: const Text(
+                  'Konto löschen',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-          ),
-
-          const SizedBox(height: 16),
-
-          /// DELETE ACCOUNT
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: _processing ? null : _deleteAccount,
-              child: const Text(
-                'Konto löschen',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -286,16 +312,17 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
         style: const TextStyle(
           fontSize: 12,
           color: Colors.black,
-fontWeight: FontWeight.w300        ),
+          fontWeight: FontWeight.w300,
+        ),
       ),
     );
   }
 
   Widget _input(
-      TextEditingController controller, {
-        String? hint,
-        bool enabled = true,
-      }) {
+    TextEditingController controller, {
+    String? hint,
+    bool enabled = true,
+  }) {
     return TextField(
       controller: controller,
       enabled: enabled,
