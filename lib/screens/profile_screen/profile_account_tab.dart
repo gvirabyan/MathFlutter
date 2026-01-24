@@ -203,8 +203,10 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
         onPopInvoked: (didPop) async {
           if (didPop) return;
 
-          final shouldPop = await UnsavedChangesService().showConfirmDialog(context);
-
+          final shouldPop = await UnsavedChangesService().showConfirmDialog(
+            context,
+            onSave: _saveProfile, // ← ПЕРЕДАЙ ФУНКЦИЮ СОХРАНЕНИЯ
+          );
           if (shouldPop == true && context.mounted) {
             Navigator.pop(context);
           }

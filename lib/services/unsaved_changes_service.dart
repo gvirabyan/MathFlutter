@@ -15,8 +15,10 @@ class UnsavedChangesService extends ChangeNotifier {
     }
   }
 
-  Future<bool> showConfirmDialog(BuildContext context) async {
-    final result = await showDialog<bool>(
+  Future<bool> showConfirmDialog(
+      BuildContext context, {
+        VoidCallback? onSave, // ← ДОБАВЬ ПАРАМЕТР
+      }) async {    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
@@ -91,7 +93,14 @@ class UnsavedChangesService extends ChangeNotifier {
                         child: SizedBox(
                           height: 42,
                           child: ElevatedButton(
-                            onPressed: () => Navigator.pop(context, true),
+                            onPressed: () async { // ← СДЕЛАЙ ASYNC
+                              Navigator.pop(context, true); // ← СНАЧАЛА ЗАКРОЙ ДИАЛОГ
+
+                              if (onSave != null) { // ← ПОТОМ ВЫЗОВИ SAVE
+                                await Future.delayed(Duration(milliseconds: 100)); // ← МАЛЕНЬКАЯ ЗАДЕРЖКА
+                                onSave();
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C3AED),
                               foregroundColor: Colors.white,
@@ -99,14 +108,13 @@ class UnsavedChangesService extends ChangeNotifier {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 8), // ← ДОБАВЬ
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                             ),
-                            child: const FittedBox( // ← ВЕРНИ FittedBox
+                            child: const FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
                                 'Speichern',
                                 maxLines: 1,
-
                                 style: TextStyle(
                                   fontSize: 14,
                                   letterSpacing: 1.2,
