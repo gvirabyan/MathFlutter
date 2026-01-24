@@ -9,10 +9,7 @@ class SecondAnswerResult {
   final String? value;
   final bool isCorrect;
 
-  SecondAnswerResult({
-    required this.value,
-    required this.isCorrect,
-  });
+  SecondAnswerResult({required this.value, required this.isCorrect});
 }
 
 class SecondAnswerDialog extends StatefulWidget {
@@ -28,19 +25,20 @@ class SecondAnswerDialog extends StatefulWidget {
   });
 
   static Future<SecondAnswerResult?> show(
-      BuildContext context, {
-        required String title,
-        required String expression,
-        required String correctSecondAnswer,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String expression,
+    required String correctSecondAnswer,
+  }) {
     return showDialog<SecondAnswerResult?>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => SecondAnswerDialog(
-        title: title,
-        expression: expression,
-        correctSecondAnswer: correctSecondAnswer,
-      ),
+      builder:
+          (_) => SecondAnswerDialog(
+            title: title,
+            expression: expression,
+            correctSecondAnswer: correctSecondAnswer,
+          ),
     );
   }
 
@@ -90,9 +88,10 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
   Widget build(BuildContext context) {
     final isAnswered = _state == SecondAnswerState.answered;
 
-    final buttonColor = !isAnswered
-        ? const Color(0xFFC084FC)
-        : (_isCorrect ? Colors.green : Colors.red);
+    final buttonColor =
+        !isAnswered
+            ? const Color(0xFFC084FC)
+            : (_isCorrect ? Colors.green : Colors.red);
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -114,20 +113,16 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
             Text(
               widget.title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 16),
 
-             MathContent(
+            MathContent(
               content: widget.expression,
               isQuestion: true,
               fontSize: 32,
             ),
-
 
             TextField(
               controller: _controller,
@@ -139,19 +134,6 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
               decoration: InputDecoration(
                 hintText: 'Ergebnis eingeben',
                 border: const UnderlineInputBorder(),
-                suffixIcon: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    InkWell(
-                      onTap: !isAnswered ? _increment : null,
-                      child: const Icon(Icons.arrow_drop_up),
-                    ),
-                    InkWell(
-                      onTap: !isAnswered ? _decrement : null,
-                      child: const Icon(Icons.arrow_drop_down),
-                    ),
-                  ],
-                ),
               ),
             ),
 
