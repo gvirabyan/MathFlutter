@@ -417,9 +417,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             // Чуть добавил сверху (8)
             child: PrimaryButton(
+              fontSize: 18,
               color: AppColors.primaryYellow,
               text: widget.submitted ? 'nächstes' : 'abgeben',
               enabled: widget.submitted || widget.selectedIndex != null,

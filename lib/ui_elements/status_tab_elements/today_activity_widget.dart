@@ -105,7 +105,7 @@ class TodayActivity extends StatelessWidget {
         const SizedBox(height: 20),
         _CheckProgressButton(
           onTap: () {
-            DefaultTabController.of(context).animateTo(1);
+            DefaultTabController.of(context).animateTo(3);
           },
         ),
       ],

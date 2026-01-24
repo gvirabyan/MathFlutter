@@ -1,12 +1,17 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:untitled2/app_colors.dart';
+
+import '../app_colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool enabled;
   final Color? color;
+  final double? fontSize; // 1. Добавляем новое поле
 
   const PrimaryButton({
     super.key,
@@ -14,6 +19,7 @@ class PrimaryButton extends StatelessWidget {
     required this.onPressed,
     required this.enabled,
     this.color,
+    this.fontSize, // 2. Добавляем в конструктор
   });
 
   @override
@@ -28,7 +34,6 @@ class PrimaryButton extends StatelessWidget {
           backgroundColor: enabled ? baseColor : baseColor.withOpacity(0.5),
           foregroundColor: Colors.white,
           elevation: 0,
-          // ВАЖНО: обнуляем padding, чтобы иконка прилегала к краям кнопки
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         ),
@@ -38,10 +43,16 @@ class PrimaryButton extends StatelessWidget {
         },
         child: Stack(
           children: [
-            // Текст строго по центру
-            Center(child: Text(text)),
-
-            // Иконка растянута по высоте кнопки (от пола до верха) и прижата вправо
+            Center(
+              child: Text(
+                text,
+                // 3. Применяем стиль. Если fontSize не передан, будет null (стандартный размер)
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600, // Можно добавить жирности для красоты
+                ),
+              ),
+            ),
             Positioned(
               top: 0,
               bottom: 0,
@@ -50,7 +61,6 @@ class PrimaryButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: SvgPicture.asset(
                   'assets/buttons/buttons_pic.svg',
-                  // fitHeight заставляет иконку растянуться вертикально под размер Positioned
                   fit: BoxFit.fitHeight,
                   colorFilter: const ColorFilter.mode(
                     Colors.white,

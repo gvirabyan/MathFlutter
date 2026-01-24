@@ -245,8 +245,10 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
               hint: 'Deine Klasse (z.B. 7a oder 7.1)',
               enabled: !disableInputs,
             ),
+            _divider(),
 
-            const SizedBox(height: 32),
+
+            const SizedBox(height: 4),
 
             /// SAVE
             PrimaryButton(
