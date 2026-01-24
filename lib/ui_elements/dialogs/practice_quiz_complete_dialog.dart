@@ -87,8 +87,8 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.black.withOpacity(0.65),
-                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -115,8 +115,8 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                             maxLines: 1,
                             'Mein Status',
                             style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -143,8 +143,8 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
                             'Neues Spiel',
                             maxLines: 1,
                             style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),

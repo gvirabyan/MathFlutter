@@ -40,6 +40,7 @@ class _PracticeQuizQuestionScreenState
     extends State<PracticeQuizQuestionScreen> {
   bool loading = true;
   bool submitted = false;
+  bool showAnswerLoading = false;
 
   List<QuestionModel> questions = [];
   List<bool?> answersResult = [];
@@ -176,6 +177,19 @@ class _PracticeQuizQuestionScreenState
 
     timer?.cancel();
 
+    final bool shouldShowLoading =
+        widget.rival == 'fake_user' && secondsLeft > 52;
+
+    if (shouldShowLoading) {
+      setState(() {
+        showAnswerLoading = true;
+      });
+
+      await Future.delayed(
+        Duration(milliseconds: 1000 + Random().nextInt(2000)),
+      );
+    }
+
     if (isPrimaryCorrect &&
         q.secondAnswer != null &&
         q.secondAnswer!.trim().isNotEmpty) {
@@ -192,6 +206,7 @@ class _PracticeQuizQuestionScreenState
 
     setState(() {
       submitted = true;
+      showAnswerLoading = false;
       questions[index].userAnswerStatus = isFinalCorrect ? 'correct' : 'wrong';
 
       if (index >= 0 && index < answersResult.length) {
@@ -295,19 +310,7 @@ class _PracticeQuizQuestionScreenState
         Navigator.of(context).pop();
       },
       onNewGame: () {
-        setState(() {
-          index = 0;
-          myPoints = 0;
-          machinePoints = 0;
-          submitted = false;
-          selectedIndex = null;
-
-          answersResult = List.filled(widget.totalQuestions, null);
-          for (final q in questions) {
-            q.userAnswerStatus = null;
-          }
-        });
-        _startTimer();
+        Navigator.of(context).pop();
       },
     );
   }
@@ -350,6 +353,7 @@ class _PracticeQuizQuestionScreenState
       results: answersResult,
       myPoints: myPoints,
       machinePoints: machinePoints,
+      showAnswerLoading: showAnswerLoading,
       rivalLabel:
           widget.rival == 'fake_user'
               ? '$currentRivalName:'
@@ -364,13 +368,13 @@ class _PracticeQuizQuestionScreenState
       selectedIndex: selectedIndex,
 
       onSelect:
-          submitted
+          submitted || showAnswerLoading
               ? null
               : (i) {
                 setState(() => selectedIndex = i);
               },
       onSubmit:
-          (selectedIndex == null || submitted)
+          (selectedIndex == null || submitted || showAnswerLoading)
               ? null
               : () => _submitAnswer(selectedIndex!),
       onNext: submitted ? _nextQuestion : null,

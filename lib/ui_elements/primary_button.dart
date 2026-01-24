@@ -11,7 +11,8 @@ class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool enabled;
   final Color? color;
-  final double? fontSize; // 1. Добавляем новое поле
+  final double? fontSize;
+  final bool isLoading;
 
   const PrimaryButton({
     super.key,
@@ -19,7 +20,8 @@ class PrimaryButton extends StatelessWidget {
     required this.onPressed,
     required this.enabled,
     this.color,
-    this.fontSize, // 2. Добавляем в конструктор
+    this.fontSize,
+    this.isLoading = false,
   });
 
   @override
@@ -30,6 +32,7 @@ class PrimaryButton extends StatelessWidget {
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
+
         style: ElevatedButton.styleFrom(
           backgroundColor: enabled ? baseColor : baseColor.withOpacity(0.5),
           foregroundColor: Colors.white,
@@ -44,12 +47,20 @@ class PrimaryButton extends StatelessWidget {
         child: Stack(
           children: [
             Center(
-              child: Text(
+              child: isLoading
+                  ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
+              )
+                  : Text(
                 text,
-                // 3. Применяем стиль. Если fontSize не передан, будет null (стандартный размер)
                 style: TextStyle(
                   fontSize: fontSize,
-                  fontWeight: FontWeight.w600, // Можно добавить жирности для красоты
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),

@@ -30,6 +30,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
   bool _loading = true; // initial load
   bool _saving = false; // save profile
   bool _processing = false; // logout / delete
+  bool _hasUnsavedChanges = false;
 
   @override
   void initState() {
@@ -72,8 +73,14 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     if (!mounted) return;
     setState(() => _loading = false);
-  }
 
+
+  }
+  void _checkForChanges() {
+    setState(() {
+      _hasUnsavedChanges = true;
+    });
+  }
   Future<void> _saveProfile() async {
     if (_saving || _processing) return;
 
@@ -97,6 +104,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     final ok = res['status'] == 'success';
     if (ok) {
+      setState(() => _hasUnsavedChanges = false); // ← ДОБАВЬ ЭТО
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -121,7 +129,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AuthScreen()),
-      (_) => false,
+          (_) => false,
     );
   }
 
@@ -132,23 +140,23 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
       context: context,
       builder:
           (_) => AlertDialog(
-            title: const Text('Konto löschen'),
-            content: const Text(
-              'Möchtest du dein Konto wirklich löschen? '
+        title: const Text('Konto löschen'),
+        content: const Text(
+          'Möchtest du dein Konto wirklich löschen? '
               'Diese Aktion kann nicht rückgängig gemacht werden.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Abbrechen'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Löschen'),
-              ),
-            ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Abbrechen'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Löschen'),
+          ),
+        ],
+      ),
     );
 
     if (confirmed != true) return;
@@ -173,7 +181,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const AuthScreen()),
-      (_) => false,
+          (_) => false,
     );
   }
 
@@ -187,119 +195,150 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     final bool disableInputs = _processing;
 
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: SingleChildScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _label('E-Mail Adresse'),
-            _input(emailCtrl, enabled: !disableInputs),
-            _divider(),
+    return PopScope( // ← ДОБАВЬ ЭТО
+        canPop: !_hasUnsavedChanges,
+        onPopInvoked: (didPop) async {
+          if (didPop) return;
 
-            _label('Name'),
-            _input(nameCtrl, enabled: !disableInputs),
-            _divider(),
-
-            _label('Nachname'),
-            _input(surnameCtrl, enabled: !disableInputs),
-            _divider(),
-
-            _label('Spitzname'),
-            _input(nicknameCtrl, enabled: !disableInputs),
-            _divider(),
-
-            _label('Geburtsdatum'),
-            _input(birthCtrl, enabled: !disableInputs),
-            _divider(),
-
-            _label('Land'),
-            _input(
-              countryCtrl,
-              hint: 'In welchem Land lebst du?',
-              enabled: !disableInputs,
+          final shouldPop = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Nicht gespeicherte Änderungen'),
+              content: const Text(
+                'Du hast nicht gespeicherte Änderungen. '
+                    'Möchtest du wirklich fortfahren?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Abbrechen'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Verwerfen'),
+                ),
+              ],
             ),
-            _divider(),
+          );
 
-            _label('Stadt'),
-            _input(
-              cityCtrl,
-              hint: 'In welcher Stadt lebst du?',
-              enabled: !disableInputs,
-            ),
-            _divider(),
+          if (shouldPop == true && context.mounted) {
+            Navigator.pop(context);
+          }
+        },
+        child: GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _label('E-Mail Adresse'),
+                _input(emailCtrl, enabled: !disableInputs),
+                _divider(),
 
-            _label('Schule'),
-            _input(
-              schoolCtrl,
-              hint: 'Name deiner Schule',
-              enabled: !disableInputs,
-            ),
-            _divider(),
+                _label('Name'),
+                _input(nameCtrl, enabled: !disableInputs),
+                _divider(),
 
-            _label('Klasse'),
-            _input(
-              classCtrl,
-              hint: 'Deine Klasse (z.B. 7a oder 7.1)',
-              enabled: !disableInputs,
-            ),
-            _divider(),
+                _label('Nachname'),
+                _input(surnameCtrl, enabled: !disableInputs),
+                _divider(),
+
+                _label('Spitzname'),
+                _input(nicknameCtrl, enabled: !disableInputs),
+                _divider(),
+
+                _label('Geburtsdatum'),
+                _input(birthCtrl, enabled: !disableInputs),
+                _divider(),
+
+                _label('Land'),
+                _input(
+                  countryCtrl,
+                  hint: 'In welchem Land lebst du?',
+                  enabled: !disableInputs,
+                ),
+                _divider(),
+
+                _label('Stadt'),
+                _input(
+                  cityCtrl,
+                  hint: 'In welcher Stadt lebst du?',
+                  enabled: !disableInputs,
+                ),
+                _divider(),
+
+                _label('Schule'),
+                _input(
+                  schoolCtrl,
+                  hint: 'Name deiner Schule',
+                  enabled: !disableInputs,
+                ),
+                _divider(),
+
+                _label('Klasse'),
+                _input(
+                  classCtrl,
+                  hint: 'Deine Klasse (z.B. 7a oder 7.1)',
+                  enabled: !disableInputs,
+                ),
+                _divider(),
 
 
-            const SizedBox(height: 4),
+                const SizedBox(height: 4),
 
-            /// SAVE
-            PrimaryButton(
-              text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
-              enabled: !_saving && !_processing,
-              onPressed: _saveProfile,
-              color: AppColors.primaryYellow,
-            ),
+                /// SAVE
+                PrimaryButton(
+                  text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
+                  enabled: !_saving && !_processing,
+                  onPressed: _saveProfile,
+                  color: AppColors.primaryYellow,
+                ),
 
-            const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-            /// LOGOUT
-            Center(
-              child:
+                /// LOGOUT
+                Center(
+                  child:
                   _processing
                       ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                       : GestureDetector(
-                        onTap: _logout,
-                        child: const Text(
-                          'Abmelden',
-                          style: TextStyle(
-                            color: Color(0xFF7B2CFF),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                    onTap: _logout,
+                    child: const Text(
+                      'Abmelden',
+                      style: TextStyle(
+                        color: Color(0xFF7B2CFF),
+                        fontWeight: FontWeight.w600,
                       ),
-            ),
-
-            const SizedBox(height: 16),
-
-            /// DELETE ACCOUNT
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GestureDetector(
-                onTap: _processing ? null : _deleteAccount,
-                child: const Text(
-                  'Konto löschen',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
+
+                const SizedBox(height: 16),
+
+                /// DELETE ACCOUNT
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: _processing ? null : _deleteAccount,
+                    child: const Text(
+                      'Konto löschen',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),)
     );
   }
 
@@ -320,13 +359,14 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
   }
 
   Widget _input(
-    TextEditingController controller, {
-    String? hint,
-    bool enabled = true,
-  }) {
+      TextEditingController controller, {
+        String? hint,
+        bool enabled = true,
+      }) {
     return TextField(
       controller: controller,
       enabled: enabled,
+      onChanged: (_) => _checkForChanges(),
       decoration: InputDecoration(
         isDense: true,
         hintText: hint,

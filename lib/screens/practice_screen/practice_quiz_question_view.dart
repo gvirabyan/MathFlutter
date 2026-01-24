@@ -25,6 +25,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
   final VoidCallback? onSubmit;
   final VoidCallback? onNext;
   final int? machineSelectedIndex;
+  final bool showAnswerLoading;
 
   const PracticeQuizQuestionView({
     super.key,
@@ -46,6 +47,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
     required this.onSubmit,
     required this.onNext,
     this.machineSelectedIndex,
+    required this.showAnswerLoading,
   });
 
   @override
@@ -272,7 +274,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 Text(
                   widget.title,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -283,7 +285,6 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   fontSize: 10,
                 ),
                 const SizedBox(height: 32),
-
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -340,11 +341,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                       ];
                     }
 
-                    // Двойная рамка показывается только если:
-// 1. Ответ уже отправлен (submitted)
-// 2. Машина выбрала этот ответ (machineSelectedIndex установлен и равен i)
-// 3. Ответ НЕ залит цветом (cardBg == null), т.е. это не правильный и не выбранный игроком ответ
-                    final bool showDoubleBorder = widget.submitted &&
+                    final bool showDoubleBorder =
+                        widget.submitted &&
                         widget.machineSelectedIndex != null &&
                         isMachineSelected &&
                         cardBg != null;
@@ -353,24 +351,24 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                       onTap: () => widget.onSelect?.call(i),
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 14),
-                        // ВНЕШНИЙ КОНТЕЙНЕР: Показывается только когда нужна двойная рамка
-                        decoration: showDoubleBorder
-                            ? BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: (i == widget.correctAnswerIndex)
-                                ? AppColors.greenCorrect
-                                : AppColors.redWrong,
-                            width: 2.0,
-                          ),
-                        )
-                            : null,
-                        // ОТСТУП: Прослойка воздуха между двумя рамками (только при двойной рамке)
-                        padding: showDoubleBorder
-                            ? const EdgeInsets.all(4.0)
-                            : EdgeInsets.zero,
+                        decoration:
+                            showDoubleBorder
+                                ? BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color:
+                                        (i == widget.correctAnswerIndex)
+                                            ? AppColors.greenCorrect
+                                            : AppColors.redWrong,
+                                    width: 2.0,
+                                  ),
+                                )
+                                : null,
+                        padding:
+                            showDoubleBorder
+                                ? const EdgeInsets.all(4.0)
+                                : EdgeInsets.zero,
                         child: Container(
-                          // ВНУТРЕННИЙ КОНТЕЙНЕР: Основная карточка ответа
                           constraints: const BoxConstraints(minHeight: 60),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -380,7 +378,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                             color: cardBg ?? Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: machineBorderColor ??
+                              color:
+                                  machineBorderColor ??
                                   borderCol ??
                                   Colors.grey.shade300,
                               width: borderWidth,
@@ -392,7 +391,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                               SizedBox(
                                 width: 25,
                                 child: Text(
-                                  String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
+                                  String.fromCharCode('a'.codeUnitAt(0) + i) +
+                                      '.',
                                   style: TextStyle(
                                     fontSize: 18,
                                     color: contentColor.withOpacity(0.7),
@@ -416,14 +416,15 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               ],
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            // Чуть добавил сверху (8)
             child: PrimaryButton(
               fontSize: 18,
               color: AppColors.primaryYellow,
               text: widget.submitted ? 'nächstes' : 'abgeben',
               enabled: widget.submitted || widget.selectedIndex != null,
+              isLoading: widget.showAnswerLoading,
               onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
             ),
           ),
