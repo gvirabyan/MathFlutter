@@ -55,7 +55,7 @@ class MathContent extends StatelessWidget {
       final lines = plainText.trim().split('\n');
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: lines
             .map((line) => Text(
           line.trim(),
