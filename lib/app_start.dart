@@ -24,6 +24,7 @@ import 'package:untitled2/screens/topics_screen/topics_7_8_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_8_9_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_9_10_tab.dart';
 import 'package:untitled2/services/auth_service.dart';
+import 'package:untitled2/services/unsaved_changes_service.dart';
 import 'package:untitled2/ui_elements/loading_overlay.dart';
 import 'package:untitled2/ui_elements/main_app_bar.dart';
 import 'package:untitled2/ui_elements/main_bottom_nav.dart';
@@ -90,10 +91,12 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _currentIndex = 0;
   int? _dailyGoal;
   bool _goalLoaded = false;
+  TabController? _tabController;
+  bool _isReverting = false;
 
   void _onGoalChanged(int newGoal) {
     setState(() {
@@ -106,6 +109,47 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _loadDailyGoal();
+    UnsavedChangesService().addListener(_onUnsavedChangesChanged);
+    _initTabController();
+  }
+
+  @override
+  void dispose() {
+    UnsavedChangesService().removeListener(_onUnsavedChangesChanged);
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  void _onUnsavedChangesChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _initTabController() {
+    final current = _tabs[_currentIndex];
+    if (current.subTabs != null) {
+      _tabController?.dispose();
+      _tabController =
+          TabController(length: current.subTabs!.length, vsync: this);
+      _tabController!.addListener(_handleTabSelection);
+    } else {
+      _tabController?.dispose();
+      _tabController = null;
+    }
+  }
+
+  void _handleTabSelection() async {
+    if (_tabController == null || _isReverting) return;
+    if (_tabController!.indexIsChanging) {
+      if (UnsavedChangesService().hasUnsavedChanges) {
+        final confirmed =
+        await UnsavedChangesService().showConfirmDialog(context);
+        if (!confirmed) {
+          _isReverting = true;
+          _tabController!.index = _tabController!.previousIndex;
+          _isReverting = false;
+        }
+      }
+    }
   }
   bool startPracticeVsFriend = false;
 
@@ -177,34 +221,35 @@ class _MainScreenState extends State<MainScreen> {
         title: current.title,
         tabs: current.subTabs?.map((e) => Tab(text: e.label)).toList(),
         dailyGoal: _goalLoaded ? _dailyGoal : -1,
-
+        controller: _tabController,
       ),
       endDrawer: const NotificationPanel(),
-
-
       body: current.subTabs == null
           ? current.view!
           : TabBarView(
+        controller: _tabController,
+        physics: UnsavedChangesService().hasUnsavedChanges
+            ? const NeverScrollableScrollPhysics()
+            : null,
         children: current.subTabs!.map((e) => e.view).toList(),
       ),
       bottomNavigationBar: MainBottomNav(
         currentIndex: _currentIndex,
-        onTap: (index) {
+        onTap: (index) async {
+          if (index == _currentIndex) return;
+          if (UnsavedChangesService().hasUnsavedChanges) {
+            final confirmed =
+            await UnsavedChangesService().showConfirmDialog(context);
+            if (!confirmed) return;
+          }
           setState(() {
             _currentIndex = index;
+            _initTabController();
             startPracticeVsFriend = false;
           });
         },
       ),
     );
-
-    if (current.subTabs != null) {
-      page = DefaultTabController(
-        key: ValueKey(_currentIndex),
-        length: current.subTabs!.length,
-        child: page,
-      );
-    }
 
     return page;
   }

@@ -9,8 +9,15 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Tab>? tabs;
   final int? dailyGoal;
+  final TabController? controller;
 
-  const MainAppBar({super.key, required this.title, this.tabs, this.dailyGoal});
+  const MainAppBar({
+    super.key,
+    required this.title,
+    this.tabs,
+    this.dailyGoal,
+    this.controller,
+  });
 
   static const double _myToolbarHeight = 100.0;
 
@@ -30,15 +37,15 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
         Builder(
           builder:
               (context) => Padding(
-                padding: const EdgeInsets.only(right: 24),
-                child: IconButton(
-                  icon: const Icon(Icons.notifications_none_outlined, size: 26),
-                  color: Colors.white,
-                  onPressed: () {
-                    Scaffold.of(context).openEndDrawer();
-                  },
-                ),
-              ),
+            padding: const EdgeInsets.only(right: 24),
+            child: IconButton(
+              icon: const Icon(Icons.notifications_none_outlined, size: 26),
+              color: Colors.white,
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            ),
+          ),
         ),
       ],
 
@@ -95,18 +102,19 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
 
       bottom:
-          tabs == null
-              ? null
-              : TabBar(
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                padding: const EdgeInsets.only(left: 8),
-                indicatorColor: Colors.white,
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
-                tabs: tabs!,
-                labelStyle: AppTextTheme.textTheme.titleMedium,
-              ),
+      tabs == null
+          ? null
+          : TabBar(
+        controller: controller,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        padding: const EdgeInsets.only(left: 8),
+        indicatorColor: Colors.white,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        tabs: tabs!,
+        labelStyle: AppTextTheme.textTheme.titleMedium,
+      ),
     );
   }
 

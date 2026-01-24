@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled2/app_colors.dart';
+import 'package:untitled2/services/unsaved_changes_service.dart';
 import 'package:untitled2/ui_elements/dialogs/account_error_info_dialog.dart';
 
 import '../../screens/auth/auth_screen.dart';
@@ -15,7 +16,8 @@ class ProfileAccountTab extends StatefulWidget {
   State<ProfileAccountTab> createState() => _ProfileAccountTabState();
 }
 
-class _ProfileAccountTabState extends State<ProfileAccountTab> {
+class _ProfileAccountTabState extends State<ProfileAccountTab>
+    with AutomaticKeepAliveClientMixin {
   // ===== controllers =====
   final emailCtrl = TextEditingController();
   final nameCtrl = TextEditingController();
@@ -30,7 +32,9 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
   bool _loading = true; // initial load
   bool _saving = false; // save profile
   bool _processing = false; // logout / delete
-  bool _hasUnsavedChanges = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -77,9 +81,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
   }
   void _checkForChanges() {
-    setState(() {
-      _hasUnsavedChanges = true;
-    });
+    UnsavedChangesService().hasUnsavedChanges = true;
   }
   Future<void> _saveProfile() async {
     if (_saving || _processing) return;
@@ -104,7 +106,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
     final ok = res['status'] == 'success';
     if (ok) {
-      setState(() => _hasUnsavedChanges = false); // ← ДОБАВЬ ЭТО
+      UnsavedChangesService().hasUnsavedChanges = false;
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -189,38 +191,19 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_loading) {
       return const Center(child: LoadingOverlay());
     }
 
     final bool disableInputs = _processing;
 
-    return PopScope( // ← ДОБАВЬ ЭТО
-        canPop: !_hasUnsavedChanges,
+    return PopScope(
+        canPop: !UnsavedChangesService().hasUnsavedChanges,
         onPopInvoked: (didPop) async {
           if (didPop) return;
 
-          final shouldPop = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Nicht gespeicherte Änderungen'),
-              content: const Text(
-                'Du hast nicht gespeicherte Änderungen. '
-                    'Möchtest du wirklich fortfahren?',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Abbrechen'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  child: const Text('Verwerfen'),
-                ),
-              ],
-            ),
-          );
+          final shouldPop = await UnsavedChangesService().showConfirmDialog(context);
 
           if (shouldPop == true && context.mounted) {
             Navigator.pop(context);
