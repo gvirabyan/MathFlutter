@@ -100,9 +100,11 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
   @override
   Widget build(BuildContext context) {
-    final bool showThinkingText = !widget.submitted &&
+    final bool showThinkingText =
+        !widget.submitted &&
         widget.secondsLeft > 52 &&
-        widget.rivalLabel != 'Punkte der Mas...';    return Scaffold(
+        widget.rivalLabel != 'Punkte der Mas...';
+    return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: AppColors.primaryPurple,
@@ -285,7 +287,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.zero, // Обнуляем, так как padding уже есть у родителя
+                  padding: EdgeInsets.zero,
+                  // Обнуляем, так как padding уже есть у родителя
                   itemCount: widget.answers.length,
                   itemBuilder: (context, i) {
                     final selected = widget.selectedIndex == i;
@@ -299,9 +302,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                     Color contentColor = Colors.black;
 
                     if (widget.submitted && isMachineSelected) {
-                      machineBorderColor = (i == widget.correctAnswerIndex)
-                          ? AppColors.greenCorrect
-                          : AppColors.redWrong;
+                      machineBorderColor =
+                          (i == widget.correctAnswerIndex)
+                              ? AppColors.greenCorrect
+                              : AppColors.redWrong;
                       borderWidth = 3.0;
                     }
 
@@ -336,58 +340,85 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                       ];
                     }
 
+                    // Двойная рамка показывается только если:
+// 1. Ответ уже отправлен (submitted)
+// 2. Машина выбрала этот ответ (machineSelectedIndex установлен и равен i)
+// 3. Ответ НЕ залит цветом (cardBg == null), т.е. это не правильный и не выбранный игроком ответ
+                    final bool showDoubleBorder = widget.submitted &&
+                        widget.machineSelectedIndex != null &&
+                        isMachineSelected &&
+                        cardBg != null;
+
                     return GestureDetector(
                       onTap: () => widget.onSelect?.call(i),
                       child: Container(
-                        constraints: const BoxConstraints(minHeight: 60),
                         margin: const EdgeInsets.only(bottom: 14),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          boxShadow: externalBorders,
-                          color: cardBg ?? Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                        // ВНЕШНИЙ КОНТЕЙНЕР: Показывается только когда нужна двойная рамка
+                        decoration: showDoubleBorder
+                            ? BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: machineBorderColor ?? borderCol ?? Colors.grey.shade300,
-                            width: borderWidth,
+                            color: (i == widget.correctAnswerIndex)
+                                ? AppColors.greenCorrect
+                                : AppColors.redWrong,
+                            width: 2.0,
                           ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 25,
-                              child: Text(
-                                String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: contentColor.withOpacity(0.7),
+                        )
+                            : null,
+                        // ОТСТУП: Прослойка воздуха между двумя рамками (только при двойной рамке)
+                        padding: showDoubleBorder
+                            ? const EdgeInsets.all(4.0)
+                            : EdgeInsets.zero,
+                        child: Container(
+                          // ВНУТРЕННИЙ КОНТЕЙНЕР: Основная карточка ответа
+                          constraints: const BoxConstraints(minHeight: 60),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: cardBg ?? Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: machineBorderColor ??
+                                  borderCol ??
+                                  Colors.grey.shade300,
+                              width: borderWidth,
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 25,
+                                child: Text(
+                                  String.fromCharCode('a'.codeUnitAt(0) + i) + '.',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: contentColor.withOpacity(0.7),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: MathContent(
-                                content: widget.answers[i],
-                                fontSize: 22,
-                                color: contentColor,
+                              Expanded(
+                                child: MathContent(
+                                  content: widget.answers[i],
+                                  fontSize: 22,
+                                  color: contentColor,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
-
                   },
-
                 ),
-
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 24), // Чуть добавил сверху (8)
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+            // Чуть добавил сверху (8)
             child: PrimaryButton(
               color: AppColors.primaryYellow,
               text: widget.submitted ? 'nächstes' : 'abgeben',
