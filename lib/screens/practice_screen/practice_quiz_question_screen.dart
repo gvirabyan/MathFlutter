@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_view.dart';
 
 import '../../models/question_model.dart';
+import '../../services/category_answer_service.dart';
 import '../../services/quiz_service.dart';
 import '../../ui_elements/dialogs/practice_quiz_complete_dialog.dart';
 import '../../ui_elements/dialogs/second_answer_dialog.dart';
@@ -132,7 +134,7 @@ class _PracticeQuizQuestionScreenState
     });
   }
 
-  void _submitTimeout() {
+  Future<void> _submitTimeout() async {
     if (submitted) return;
     timer?.cancel();
 
@@ -150,7 +152,22 @@ class _PracticeQuizQuestionScreenState
       }
       mSelected = wrongIndices[Random().nextInt(wrongIndices.length)];
     }
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
 
+    final answerData = {
+      'users_permissions_user': userId,
+      'question': q.id,
+      'category': widget.categoryId.toString(),
+      'answer': q.answers[selectedIndex].toString(),
+      'second_answer': secondAnswerVal ?? '',
+      'status': isFinalCorrect ? 'correct' : 'wrong',
+      'answer_type': 'practice-vs-machine',
+    };
+
+    await CategoryAnswerService.updateUserAnsweredQuestion(
+      answerData: answerData,
+    );
     setState(() {
       submitted = true;
       machineSelectedIndex = mSelected;
@@ -203,7 +220,21 @@ class _PracticeQuizQuestionScreenState
         isFinalCorrect = result.isCorrect;
       }
     }
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
 
+    final answerData = {
+      'users_permissions_user': userId,
+      'question': q.id,
+      'category': '',
+      'answer': '',
+      'status': 'skipped',
+      'answer_type': 'topic',
+    };
+
+    await CategoryAnswerService.updateUserAnsweredQuestion(
+      answerData: answerData,
+    );
     setState(() {
       submitted = true;
       showAnswerLoading = false;
