@@ -30,7 +30,7 @@ class PracticeQuizQuestionScreen extends StatefulWidget {
     this.rivalLabel = 'Punkte der Mas...',
     this.awardPoints = true,
     this.saveResult = true,
-    this.timeLimitSeconds = 600,
+    this.timeLimitSeconds = 60,
   });
 
   @override

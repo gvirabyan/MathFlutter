@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../app_colors.dart';
 import '../math_content.dart';
 
 enum SecondAnswerState { idle, answered }
@@ -25,20 +26,20 @@ class SecondAnswerDialog extends StatefulWidget {
   });
 
   static Future<SecondAnswerResult?> show(
-    BuildContext context, {
-    required String title,
-    required String expression,
-    required String correctSecondAnswer,
-  }) {
+      BuildContext context, {
+        required String title,
+        required String expression,
+        required String correctSecondAnswer,
+      }) {
     return showDialog<SecondAnswerResult?>(
       context: context,
       barrierDismissible: false,
       builder:
           (_) => SecondAnswerDialog(
-            title: title,
-            expression: expression,
-            correctSecondAnswer: correctSecondAnswer,
-          ),
+        title: title,
+        expression: expression,
+        correctSecondAnswer: correctSecondAnswer,
+      ),
     );
   }
 
@@ -51,16 +52,27 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
 
   SecondAnswerState _state = SecondAnswerState.idle;
   bool _isCorrect = false;
+  bool _isButtonEnabled = false;
 
-  void _increment() {
-    final current = int.tryParse(_controller.text) ?? 0;
-    _controller.text = (current + 1).toString();
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_handleTextChange);
   }
 
-  void _decrement() {
-    final current = int.tryParse(_controller.text) ?? 0;
-    if (current > 0) {
-      _controller.text = (current - 1).toString();
+  @override
+  void dispose() {
+    _controller.removeListener(_handleTextChange);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTextChange() {
+    final isNotEmpty = _controller.text.trim().isNotEmpty;
+    if (isNotEmpty != _isButtonEnabled) {
+      setState(() {
+        _isButtonEnabled = isNotEmpty;
+      });
     }
   }
 
@@ -89,9 +101,9 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
     final isAnswered = _state == SecondAnswerState.answered;
 
     final buttonColor =
-        !isAnswered
-            ? const Color(0xFFC084FC)
-            : (_isCorrect ? Colors.green : Colors.red);
+    !isAnswered
+        ?  AppColors.primaryPurple
+        : (_isCorrect ? Colors.green : Colors.red);
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -131,9 +143,9 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^-?\d*$')),
               ],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Ergebnis eingeben',
-                border: const UnderlineInputBorder(),
+                border: UnderlineInputBorder(),
               ),
             ),
 
@@ -142,16 +154,22 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: buttonColor,
+                // Добавляем цвет для состояния disabled
+                disabledBackgroundColor: AppColors.primaryPurple.withOpacity(0.5),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onPressed: _onButtonPressed,
+              // Кнопка активна, если уже ответили ИЛИ если введен текст
+              onPressed: (isAnswered || _isButtonEnabled) ? _onButtonPressed : null,
               child: Text(
-                // ✅ Меняем текст в зависимости от состояния
                 _state == SecondAnswerState.idle ? 'abgeben' : 'nächstes',
-                style: const TextStyle(fontSize: 16, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 16,
+                  // Если кнопка заблокирована, делаем текст полупрозрачным
+                  color: (isAnswered || _isButtonEnabled) ? Colors.white : Colors.white60,
+                ),
               ),
             ),
           ],
