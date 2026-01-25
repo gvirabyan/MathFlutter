@@ -158,11 +158,10 @@ class _PracticeQuizQuestionScreenState
     final answerData = {
       'users_permissions_user': userId,
       'question': q.id,
-      'category': widget.categoryId.toString(),
-      'answer': q.answers[selectedIndex].toString(),
-      'second_answer': secondAnswerVal ?? '',
-      'status': isFinalCorrect ? 'correct' : 'wrong',
-      'answer_type': 'practice-vs-machine',
+      'category': q.categoryId,
+      'answer': selectedIndex != null ? q.answers[selectedIndex!].toString() : '',
+      'status': 'wrong',
+      'answer_type': widget.rival == 'machine' ? 'practice-vs-machine' : 'practice-vs-player',
     };
 
     await CategoryAnswerService.updateUserAnsweredQuestion(
@@ -220,21 +219,7 @@ class _PracticeQuizQuestionScreenState
         isFinalCorrect = result.isCorrect;
       }
     }
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('user_id');
 
-    final answerData = {
-      'users_permissions_user': userId,
-      'question': q.id,
-      'category': '',
-      'answer': '',
-      'status': 'skipped',
-      'answer_type': 'topic',
-    };
-
-    await CategoryAnswerService.updateUserAnsweredQuestion(
-      answerData: answerData,
-    );
     setState(() {
       submitted = true;
       showAnswerLoading = false;
@@ -262,6 +247,12 @@ class _PracticeQuizQuestionScreenState
         }
       }
     });
+    _sendAnswerToBackend(
+      questionId: q.id,
+      categoryId: q.categoryId,
+      answer: q.answers[selected].toString(),
+      status: isFinalCorrect ? 'correct' : 'wrong',
+    );
   }
 
   void _nextQuestion() {
@@ -410,5 +401,34 @@ class _PracticeQuizQuestionScreenState
               : () => _submitAnswer(selectedIndex!),
       onNext: submitted ? _nextQuestion : null,
     );
+  }
+  void _sendAnswerToBackend({
+    required int questionId,
+    required int? categoryId,
+    required String answer,
+    required String status,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      final answerData = {
+        'users_permissions_user': userId,
+        'question': questionId,
+        'category': categoryId,
+        'answer': answer,
+        'status': status,
+        'answer_type': widget.rival == 'machine'
+            ? 'practice-vs-machine'
+            : 'practice-vs-player',
+      };
+
+      await CategoryAnswerService.updateUserAnsweredQuestion(
+        answerData: answerData,
+      );
+    } catch (e) {
+      print('Error sending answer to backend: $e');
+      // ✅ Ошибка не блокирует UI
+    }
   }
 }

@@ -524,6 +524,7 @@ class _LearningQuizQuestionScreenState
         'answer_type': 'topic',
       };
 
+
       await CategoryAnswerService.updateUserAnsweredQuestion(
         answerData: answerData,
       );

@@ -6,6 +6,7 @@ class QuestionModel {
 
   final String question;
   final List<String> answers;
+  final int? categoryId;
   String? userSelectedText;
 
   final int correctIndex;
@@ -19,6 +20,7 @@ class QuestionModel {
     required this.question,
     required this.answers,
     required this.correctIndex,
+    this.categoryId,
     this.secondAnswer,
     this.solution,
   });
@@ -50,6 +52,7 @@ class QuestionModel {
     return QuestionModel(
       id: json['id'],
       title: (json['category_name'] ?? '').toString(),
+      categoryId: json['category_id'] is int ? json['category_id'] : int.tryParse(json['category_id']?.toString() ?? ''),
       question: (json['question'] ?? '').toString(),
       answers: allAnswers,
       correctIndex: correctIndex,
@@ -65,6 +68,7 @@ class QuestionModel {
       'category_name': title,
       'question': question,
       'answer': answers[correctIndex],
+      'category_id': categoryId,
       'shuffled_answers': answers, // ✅ Save shuffled order
       'wrong_answers': answers.where((a) => a != answers[correctIndex]).toList(),
       'second_answer': secondAnswer,
