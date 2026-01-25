@@ -30,7 +30,7 @@ class PracticeQuizQuestionScreen extends StatefulWidget {
     this.rivalLabel = 'Punkte der Mas...',
     this.awardPoints = true,
     this.saveResult = true,
-    this.timeLimitSeconds = 60,
+    this.timeLimitSeconds = 600,
   });
 
   @override
@@ -159,9 +159,13 @@ class _PracticeQuizQuestionScreenState
       'users_permissions_user': userId,
       'question': q.id,
       'category': q.categoryId,
-      'answer': selectedIndex != null ? q.answers[selectedIndex!].toString() : '',
+      'answer':
+          selectedIndex != null ? q.answers[selectedIndex!].toString() : '',
       'status': 'wrong',
-      'answer_type': widget.rival == 'machine' ? 'practice-vs-machine' : 'practice-vs-player',
+      'answer_type':
+          widget.rival == 'machine'
+              ? 'practice-vs-machine'
+              : 'practice-vs-player',
     };
 
     await CategoryAnswerService.updateUserAnsweredQuestion(
@@ -402,6 +406,7 @@ class _PracticeQuizQuestionScreenState
       onNext: submitted ? _nextQuestion : null,
     );
   }
+
   void _sendAnswerToBackend({
     required int questionId,
     required int? categoryId,
@@ -418,9 +423,10 @@ class _PracticeQuizQuestionScreenState
         'category': categoryId,
         'answer': answer,
         'status': status,
-        'answer_type': widget.rival == 'machine'
-            ? 'practice-vs-machine'
-            : 'practice-vs-player',
+        'answer_type':
+            widget.rival == 'machine'
+                ? 'practice-vs-machine'
+                : 'practice-vs-player',
       };
 
       await CategoryAnswerService.updateUserAnsweredQuestion(
@@ -428,7 +434,6 @@ class _PracticeQuizQuestionScreenState
       );
     } catch (e) {
       print('Error sending answer to backend: $e');
-      // ✅ Ошибка не блокирует UI
     }
   }
 }

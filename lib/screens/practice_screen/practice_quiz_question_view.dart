@@ -63,7 +63,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
     super.initState();
     // Скроллим к текущему индексу при старте
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _scrollToIndex(widget.currentIndex),
+          (_) => _scrollToIndex(widget.currentIndex),
     );
   }
 
@@ -89,8 +89,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
       // Вычисляем смещение так, чтобы текущий кружок был по центру
       final double targetOffset =
           (index * (itemWidth + spacing)) -
-          (_scrollController.position.viewportDimension / 2) +
-          (itemWidth / 2);
+              (_scrollController.position.viewportDimension / 2) +
+              (itemWidth / 2);
 
       _scrollController.animateTo(
         targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
@@ -104,8 +104,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
   Widget build(BuildContext context) {
     final bool showThinkingText =
         !widget.submitted &&
-        widget.secondsLeft > 52 &&
-        widget.rivalLabel != 'Punkte der Mas...';
+            widget.secondsLeft > 52 &&
+            widget.rivalLabel != 'Punkte der Mas...';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -179,7 +179,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               separatorBuilder: (_, __) => const SizedBox(width: 1),
               itemBuilder: (context, i) {
                 final bool? res =
-                    (i < widget.results.length) ? widget.results[i] : null;
+                (i < widget.results.length) ? widget.results[i] : null;
                 final isCurrent = i == widget.currentIndex;
 
                 Color borderColor = Colors.grey.shade300;
@@ -248,15 +248,15 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
           showThinkingText
               ? Center(
-                child: Text(
-                  "${widget.rivalLabel} denkt gerade ...",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontStyle: FontStyle.italic,
-                    fontSize: 14,
-                  ),
-                ),
-              )
+            child: Text(
+              "${widget.rivalLabel} denkt gerade ...",
+              style: TextStyle(
+                color: Colors.black,
+                fontStyle: FontStyle.italic,
+                fontSize: 14,
+              ),
+            ),
+          )
               : const SizedBox(height: 20),
 
           // Если условие неверно, место остается пустым, но высота сохраняется
@@ -270,149 +270,151 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                // --- Заголовок и Вопрос теперь внутри скролла ---
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                MathContent(
-                  content: widget.question,
-                  isQuestion: true,
-                  fontSize: 10,
-                ),
-                const SizedBox(height: 32),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  // Обнуляем, так как padding уже есть у родителя
-                  itemCount: widget.answers.length,
-                  itemBuilder: (context, i) {
-                    final selected = widget.selectedIndex == i;
-                    final isCorrect = widget.correctAnswerIndex == i;
-                    final isMachineSelected = widget.machineSelectedIndex == i;
-                    Color? machineBorderColor;
-                    double borderWidth = 1.5;
+              // --- Заголовок и Вопрос теперь внутри скролла ---
+              Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: MathContent(
+                content: widget.question,
+                isQuestion: true,
+                fontSize: 10,
+              ),),
+              const SizedBox(height: 32),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                // Обнуляем, так как padding уже есть у родителя
+                itemCount: widget.answers.length,
+                itemBuilder: (context, i) {
+                  final selected = widget.selectedIndex == i;
+                  final isCorrect = widget.correctAnswerIndex == i;
+                  final isMachineSelected = widget.machineSelectedIndex == i;
+                  Color? machineBorderColor;
+                  double borderWidth = 1.5;
 
-                    Color? cardBg;
-                    Color? borderCol;
-                    Color contentColor = Colors.black;
+                  Color? cardBg;
+                  Color? borderCol;
+                  Color contentColor = Colors.black;
 
-                    if (widget.submitted && isMachineSelected) {
-                      machineBorderColor =
-                          (i == widget.correctAnswerIndex)
-                              ? AppColors.greenCorrect
-                              : AppColors.redWrong;
-                      borderWidth = 3.0;
-                    }
+                  if (widget.submitted && isMachineSelected) {
+                    machineBorderColor =
+                    (i == widget.correctAnswerIndex)
+                        ? AppColors.greenCorrect
+                        : AppColors.redWrong;
+                    borderWidth = 3.0;
+                  }
 
-                    if (widget.submitted && widget.correctAnswerIndex != null) {
-                      if (isCorrect) {
-                        cardBg = AppColors.greenCorrect;
-                        borderCol = AppColors.greenCorrect;
-                        contentColor = Colors.white;
-                      } else if (selected) {
-                        cardBg = AppColors.redWrong;
-                        borderCol = AppColors.redWrong;
-                        contentColor = Colors.white;
-                      } else {
-                        borderCol = Colors.grey.shade300;
-                      }
+                  if (widget.submitted && widget.correctAnswerIndex != null) {
+                    if (isCorrect) {
+                      cardBg = AppColors.greenCorrect;
+                      borderCol = AppColors.greenCorrect;
+                      contentColor = Colors.white;
                     } else if (selected) {
-                      cardBg = AppColors.primaryPurple;
-                      borderCol = AppColors.primaryPurple;
+                      cardBg = AppColors.redWrong;
+                      borderCol = AppColors.redWrong;
                       contentColor = Colors.white;
                     } else {
                       borderCol = Colors.grey.shade300;
                     }
+                  } else if (selected) {
+                    cardBg = AppColors.primaryPurple;
+                    borderCol = AppColors.primaryPurple;
+                    contentColor = Colors.white;
+                  } else {
+                    borderCol = Colors.grey.shade300;
+                  }
 
-                    List<BoxShadow>? externalBorders;
-                    if (widget.submitted && isMachineSelected) {
-                      externalBorders = [
-                        const BoxShadow(
-                          color: AppColors.primaryYellow,
-                          spreadRadius: 3,
-                          blurRadius: 0,
+                  List<BoxShadow>? externalBorders;
+                  if (widget.submitted && isMachineSelected) {
+                    externalBorders = [
+                      const BoxShadow(
+                        color: AppColors.primaryYellow,
+                        spreadRadius: 3,
+                        blurRadius: 0,
+                      ),
+                    ];
+                  }
+
+                  final bool showDoubleBorder =
+                      widget.submitted &&
+                          widget.machineSelectedIndex != null &&
+                          isMachineSelected &&
+                          cardBg != null;
+
+                  return GestureDetector(
+                    onTap: () => widget.onSelect?.call(i),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration:
+                      showDoubleBorder
+                          ? BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color:
+                          (i == widget.correctAnswerIndex)
+                              ? AppColors.greenCorrect
+                              : AppColors.redWrong,
+                          width: 2.0,
                         ),
-                      ];
-                    }
-
-                    final bool showDoubleBorder =
-                        widget.submitted &&
-                        widget.machineSelectedIndex != null &&
-                        isMachineSelected &&
-                        cardBg != null;
-
-                    return GestureDetector(
-                      onTap: () => widget.onSelect?.call(i),
+                      )
+                          : null,
+                      padding:
+                      showDoubleBorder
+                          ? const EdgeInsets.all(4.0)
+                          : EdgeInsets.zero,
                       child: Container(
-                        margin: const EdgeInsets.only(bottom: 14),
-                        decoration:
-                            showDoubleBorder
-                                ? BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color:
-                                        (i == widget.correctAnswerIndex)
-                                            ? AppColors.greenCorrect
-                                            : AppColors.redWrong,
-                                    width: 2.0,
-                                  ),
-                                )
-                                : null,
-                        padding:
-                            showDoubleBorder
-                                ? const EdgeInsets.all(4.0)
-                                : EdgeInsets.zero,
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: 60),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
+                        constraints: const BoxConstraints(minHeight: 60),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cardBg ?? Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color:
+                            machineBorderColor ??
+                                borderCol ??
+                                Colors.grey.shade300,
+                            width: borderWidth,
                           ),
-                          decoration: BoxDecoration(
-                            color: cardBg ?? Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color:
-                                  machineBorderColor ??
-                                  borderCol ??
-                                  Colors.grey.shade300,
-                              width: borderWidth,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 25,
+                              child: Text(
+                                String.fromCharCode('a'.codeUnitAt(0) + i) +
+                                    '.',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: contentColor.withOpacity(0.7),
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 25,
-                                child: Text(
-                                  String.fromCharCode('a'.codeUnitAt(0) + i) +
-                                      '.',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: contentColor.withOpacity(0.7),
-                                  ),
-                                ),
+                            Expanded(
+                              child: MathContent(
+                                content: widget.answers[i],
+                                fontSize: 22,
+                                color: contentColor,
                               ),
-                              Expanded(
-                                child: MathContent(
-                                  content: widget.answers[i],
-                                  fontSize: 22,
-                                  color: contentColor,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
+              ),
               ],
             ),
           ),
@@ -433,12 +435,10 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
     );
   }
 
-  Widget _buildPointBox(
-    String text,
-    Color bg,
-    Color textColor,
-    bool hasBorder,
-  ) {
+  Widget _buildPointBox(String text,
+      Color bg,
+      Color textColor,
+      bool hasBorder,) {
     return Expanded(
       child: Container(
         height: 50,
