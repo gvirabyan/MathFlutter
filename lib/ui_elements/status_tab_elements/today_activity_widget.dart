@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:untitled2/app_colors.dart';
 
+import '../../app_start.dart';
+
 class TodayActivity extends StatelessWidget {
   final int amount;
   final int correct;
@@ -105,7 +107,7 @@ class TodayActivity extends StatelessWidget {
         const SizedBox(height: 20),
         _CheckProgressButton(
           onTap: () {
-            DefaultTabController.of(context).animateTo(3);
+            MainScreen.of(context)?.setMainIndex(0, subIndex: 3);
           },
         ),
       ],

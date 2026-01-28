@@ -6,6 +6,7 @@ import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.
 import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
 
 import '../../app_colors.dart';
+import '../../app_start.dart';
 import '../../ui_elements/player_searching_loading.dart';
 import '../../ui_elements/primary_button.dart';
 
@@ -256,17 +257,23 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     });
   }
 
-  void _goToQuiz() {
-    Navigator.push(
+  Future<void> _goToQuiz() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PracticeQuizQuestionScreen(
           totalQuestions: selectedQuestionsCount!,
           rival: 'fake_user',
         ),
-
       ),
     );
+
+    if (result == 'go_to_status') {
+      if (mounted) {
+        final mainScreen = MainScreen.of(context);
+        mainScreen?.setMainIndex(0, subIndex: 0);
+      }
+    }
   }
 
   // ========================= HELPERS =========================
