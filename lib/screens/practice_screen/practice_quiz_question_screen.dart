@@ -9,6 +9,7 @@ import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
 import '../../services/quiz_service.dart';
 import '../../ui_elements/dialogs/practice_quiz_complete_dialog.dart';
+import '../../ui_elements/dialogs/practice_user_exited_dialog.dart';
 import '../../ui_elements/dialogs/second_answer_dialog.dart';
 import '../../ui_elements/loading_overlay.dart';
 
@@ -43,6 +44,7 @@ class _PracticeQuizQuestionScreenState
   bool loading = true;
   bool submitted = false;
   bool showAnswerLoading = false;
+  bool rivalLeft = false;
 
   List<QuestionModel> questions = [];
   List<bool?> answersResult = [];
@@ -67,6 +69,47 @@ class _PracticeQuizQuestionScreenState
     super.initState();
     secondsLeft = widget.timeLimitSeconds;
     _loadQuiz();
+  }
+
+  Future<void> _checkRivalLeft() async {
+    if (widget.rival == 'machine') return;
+    if (rivalLeft) return;
+
+    final middle = questions.length ~/ 2;
+    if (index != middle) return;
+
+    if (Random().nextDouble() < 0.1) {
+      rivalLeft = true;
+
+      timer?.cancel();
+      autoNextTimer?.cancel();
+      await _finishQuizByRivalLeft();
+
+      final confirmed = await showRivalLeftDialog(context);
+    }
+  }
+
+  Future<void> _finishQuizByRivalLeft() async {
+    if (widget.saveResult) {
+      await QuizService.saveQuizResult(
+        data: {
+          'result': 'win',
+          'user_score': myPoints,
+          'rival_score': machinePoints,
+          'rival_type': widget.rival,
+          'mode': {
+            'id': 1,
+            'questions': widget.totalQuestions,
+            'winPoints': 10,
+            'drawPoints': 5,
+            'losePoints': -2,
+            'showPoints': "+10, +5, -2",
+          },
+        },
+      );
+    }
+
+    if (!mounted) return;
   }
 
   Future<void> _loadQuiz() async {
@@ -261,6 +304,9 @@ class _PracticeQuizQuestionScreenState
 
   void _nextQuestion() {
     autoNextTimer?.cancel();
+
+    _checkRivalLeft();
+    if (rivalLeft) return;
 
     if (index + 1 >= questions.length) {
       _finishQuiz();

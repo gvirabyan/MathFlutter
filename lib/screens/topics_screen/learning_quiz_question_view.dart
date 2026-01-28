@@ -346,8 +346,10 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                                   ),
                                 ),
                               ),
-                              Expanded(
-                                child: Padding(
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
                                   padding: const EdgeInsets.only(top: 4.5),
                                   child: MathContent(
                                     content: answer,
@@ -356,6 +358,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                                   ),
                                 ),
                               ),
+                          ),
                             ],
                           ),
                         ),
