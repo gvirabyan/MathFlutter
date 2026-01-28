@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
 
@@ -22,6 +24,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   bool loading = false;
   bool rivalAvailable = true;
   bool showResults = false;
+  bool resultsAlreadyShown = false;
   int lastMyPoints = 0;
   int lastRivalPoints = 0;
   String lastRivalName = '';
@@ -36,15 +39,70 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   // ========================= ENTRY =========================
 
   @override
+  void initState() {
+    super.initState();
+    _loadSavedResults(); // ✅ Загружаем сохраненные результаты
+  }
+
+  @override
   void dispose() {
     startTimer?.cancel();
     super.dispose();
+  }
+
+  // ✅ NEW: Загрузка сохраненных результатов
+  Future<void> _loadSavedResults() async {
+    final prefs = await SharedPreferences.getInstance();
+    final resultsJson = prefs.getString('practice_vs_player_results');
+    resultsAlreadyShown = prefs.getBool('results_already_shown') ?? false;
+
+    if (resultsJson != null && !resultsAlreadyShown) {
+      try {
+        final results = json.decode(resultsJson) as Map<String, dynamic>;
+        setState(() {
+          lastMyPoints = results['myPoints'] ?? 0;
+          lastRivalPoints = results['rivalPoints'] ?? 0;
+          lastRivalName = results['rivalName'] ?? 'Gegner';
+          selectedQuestionsCount = results['totalQuestions'] ?? 10;
+          showResults = true;
+        });
+
+        // 👇 отмечаем, что уже показали
+        await prefs.setBool('results_already_shown', true);
+      } catch (e) {
+        debugPrint('Error loading results: $e');
+      }
+    }
+  }
+
+
+  // ✅ NEW: Сохранение результатов
+  Future<void> _saveResults() async {
+    final prefs = await SharedPreferences.getInstance();
+    final resultsJson = json.encode({
+      'myPoints': lastMyPoints,
+      'rivalPoints': lastRivalPoints,
+      'rivalName': lastRivalName,
+      'totalQuestions': selectedQuestionsCount,
+    });
+    await prefs.setString('practice_vs_player_results', resultsJson);
+    await prefs.setBool('results_already_shown', false);
+  }
+
+  // ✅ NEW: Очистка сохраненных результатов
+  Future<void> _clearResults() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('practice_vs_player_results');
   }
 
   // ========================= UI =========================
 
   @override
   Widget build(BuildContext context) {
+    if (showResults) {
+      return _resultsView();
+    }
+
     if (!started) return _intro();
 
     if (loading) return LoadingView();
@@ -53,9 +111,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
       return _startCountdownView();
     }
 
-    if (showResults) {
-      return _resultsView();
-    }
+
 
     return _selectionList();
   }
@@ -257,19 +313,23 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
       ),
     );
 
+    if (!mounted) return;
+
     if (result == 'go_to_status') {
-      if (mounted) {
-        final mainScreen = MainScreen.of(context);
-        mainScreen?.setMainIndex(0, subIndex: 0);
-      }
-    }
-    if (result is Map<String, dynamic>) {
+
+      final mainScreen = MainScreen.of(context);
+      mainScreen?.setMainIndex(0, subIndex: 0);
+    } else if (result is Map<String, dynamic>) {
+
       setState(() {
         lastMyPoints = result['myPoints'] ?? 0;
         lastRivalPoints = result['rivalPoints'] ?? 0;
         lastRivalName = result['rivalName'] ?? 'Gegner';
         showResults = true;
       });
+
+      // ✅ Сохраняем результаты в SharedPreferences
+      await _saveResults();
     }
   }
 
@@ -301,12 +361,14 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
             width: double.infinity,
             height: 55,
             child: PrimaryButton(
+              fontSize: 18,
               text: 'Erneut probieren',
               color: const Color(0xFFFFC107),
-              onPressed: () {
+              onPressed: () async {
+                await _clearResults();
+
                 setState(() {
-                  showResults =
-                      false; // Возвращаемся к списку выбора (10, 20, 30)
+                  showResults = false;
                 });
               },
               enabled: true,
@@ -331,47 +393,60 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
         color: const Color(0xFFF9F9FF),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "$name s Punkte",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "$name s Punkte",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "$correct/$total Richtige Antworten",
-                style: const TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                "${points > 0 ? '' : ''}$points Punkts",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryPurple,
+                const SizedBox(height: 4),
+                Text(
+                  "$correct/$total Richtige Antworten",
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.black54,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                isWinner ? "Gewonnen" : "Verloren",
-                style: const TextStyle(fontSize: 13, color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+
+            const Spacer(), // ← ПРИЖИМАЕТ К ПРАВОЙ СТЕНЕ
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  "${points > 0 ? '' : ''}$points Punkts",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryPurple,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isWinner ? "Gewonnen" : "Verloren",
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
+
   }
 
   // ========================= HELPERS =========================

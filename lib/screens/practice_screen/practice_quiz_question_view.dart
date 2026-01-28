@@ -1,4 +1,5 @@
 import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -27,6 +28,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
   final VoidCallback? onNext;
   final int? machineSelectedIndex;
   final bool showAnswerLoading;
+  final String userName;
 
   const PracticeQuizQuestionView({
     super.key,
@@ -49,6 +51,7 @@ class PracticeQuizQuestionView extends StatefulWidget {
     required this.onNext,
     this.machineSelectedIndex,
     required this.showAnswerLoading,
+    required this.userName,
   });
 
   @override
@@ -64,7 +67,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
     super.initState();
     // Скроллим к текущему индексу при старте
     WidgetsBinding.instance.addPostFrameCallback(
-          (_) => _scrollToIndex(widget.currentIndex),
+      (_) => _scrollToIndex(widget.currentIndex),
     );
   }
 
@@ -90,8 +93,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
       // Вычисляем смещение так, чтобы текущий кружок был по центру
       final double targetOffset =
           (index * (itemWidth + spacing)) -
-              (_scrollController.position.viewportDimension / 2) +
-              (itemWidth / 2);
+          (_scrollController.position.viewportDimension / 2) +
+          (itemWidth / 2);
 
       _scrollController.animateTo(
         targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
@@ -105,8 +108,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
   Widget build(BuildContext context) {
     final bool showThinkingText =
         !widget.submitted &&
-            widget.secondsLeft > 52 &&
-            widget.rivalLabel != 'Punkte der Mas...';
+        widget.secondsLeft > 52 &&
+        widget.rivalLabel != 'Punkte der Mas...';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -180,7 +183,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               separatorBuilder: (_, __) => const SizedBox(width: 1),
               itemBuilder: (context, i) {
                 final bool? res =
-                (i < widget.results.length) ? widget.results[i] : null;
+                    (i < widget.results.length) ? widget.results[i] : null;
                 final isCurrent = i == widget.currentIndex;
 
                 Color borderColor = Colors.grey.shade300;
@@ -231,7 +234,9 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
             child: Row(
               children: [
                 _buildPointBox(
-                  'Deine Punkte: ${widget.myPoints}',
+                  widget.rivalLabel != 'Punkte der Mas...'
+                      ? '${widget.userName}: ${widget.myPoints}'
+                      : 'Deine Punkte: ${widget.myPoints}',
                   AppColors.primaryPurple,
                   Colors.white,
                   false,
@@ -249,15 +254,15 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
           showThinkingText
               ? Center(
-            child: Text(
-              "${widget.rivalLabel} denkt gerade ...",
-              style: TextStyle(
-                color: Colors.black,
-                fontStyle: FontStyle.italic,
-                fontSize: 14,
-              ),
-            ),
-          )
+                child: Text(
+                  "${widget.rivalLabel} denkt gerade ...",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 14,
+                  ),
+                ),
+              )
               : const SizedBox(height: 20),
 
           // Если условие неверно, место остается пустым, но высота сохраняется
@@ -286,7 +291,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                     content: widget.question,
                     isQuestion: true,
                     fontSize: 10,
-                  ),),
+                  ),
+                ),
                 const SizedBox(height: 32),
                 Stack(
                   children: [
@@ -299,7 +305,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                       itemBuilder: (context, i) {
                         final selected = widget.selectedIndex == i;
                         final isCorrect = widget.correctAnswerIndex == i;
-                        final isMachineSelected = widget.machineSelectedIndex == i;
+                        final isMachineSelected =
+                            widget.machineSelectedIndex == i;
                         Color? machineBorderColor;
                         double borderWidth = 1.5;
 
@@ -309,13 +316,14 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
                         if (widget.submitted && isMachineSelected) {
                           machineBorderColor =
-                          (i == widget.correctAnswerIndex)
-                              ? AppColors.greenCorrect
-                              : AppColors.redWrong;
+                              (i == widget.correctAnswerIndex)
+                                  ? AppColors.greenCorrect
+                                  : AppColors.redWrong;
                           borderWidth = 3.0;
                         }
 
-                        if (widget.submitted && widget.correctAnswerIndex != null) {
+                        if (widget.submitted &&
+                            widget.correctAnswerIndex != null) {
                           if (isCorrect) {
                             cardBg = AppColors.greenCorrect;
                             borderCol = AppColors.greenCorrect;
@@ -348,31 +356,31 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
                         final bool showDoubleBorder =
                             widget.submitted &&
-                                widget.machineSelectedIndex != null &&
-                                isMachineSelected &&
-                                cardBg != null;
+                            widget.machineSelectedIndex != null &&
+                            isMachineSelected &&
+                            cardBg != null;
 
                         return GestureDetector(
                           onTap: () => widget.onSelect?.call(i),
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 14),
                             decoration:
-                            showDoubleBorder
-                                ? BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color:
-                                (i == widget.correctAnswerIndex)
-                                    ? AppColors.greenCorrect
-                                    : AppColors.redWrong,
-                                width: 2.0,
-                              ),
-                            )
-                                : null,
+                                showDoubleBorder
+                                    ? BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color:
+                                            (i == widget.correctAnswerIndex)
+                                                ? AppColors.greenCorrect
+                                                : AppColors.redWrong,
+                                        width: 2.0,
+                                      ),
+                                    )
+                                    : null,
                             padding:
-                            showDoubleBorder
-                                ? const EdgeInsets.all(4.0)
-                                : EdgeInsets.zero,
+                                showDoubleBorder
+                                    ? const EdgeInsets.all(4.0)
+                                    : EdgeInsets.zero,
                             child: Container(
                               constraints: const BoxConstraints(minHeight: 60),
                               padding: const EdgeInsets.symmetric(
@@ -384,7 +392,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
                                   color:
-                                  machineBorderColor ??
+                                      machineBorderColor ??
                                       borderCol ??
                                       Colors.grey.shade300,
                                   width: borderWidth,
@@ -396,7 +404,9 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                                   SizedBox(
                                     width: 25,
                                     child: Text(
-                                      String.fromCharCode('a'.codeUnitAt(0) + i) +
+                                      String.fromCharCode(
+                                            'a'.codeUnitAt(0) + i,
+                                          ) +
                                           '.',
                                       style: TextStyle(
                                         fontSize: 18,
@@ -405,10 +415,13 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                                     ),
                                   ),
                                   Expanded(
-                                    child: MathContent(
-                                      content: widget.answers[i],
-                                      fontSize: 22,
-                                      color: contentColor,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: MathContent(
+                                        content: widget.answers[i],
+                                        fontSize: 22,
+                                        color: contentColor,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -449,7 +462,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               fontSize: 18,
               color: AppColors.primaryYellow,
               text: widget.submitted ? 'nächstes' : 'abgeben',
-              enabled: (widget.submitted || widget.selectedIndex != null) &&
+              enabled:
+                  (widget.submitted || widget.selectedIndex != null) &&
                   !widget.showAnswerLoading,
               isLoading: false,
               onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
@@ -460,10 +474,12 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
     );
   }
 
-  Widget _buildPointBox(String text,
-      Color bg,
-      Color textColor,
-      bool hasBorder,) {
+  Widget _buildPointBox(
+    String text,
+    Color bg,
+    Color textColor,
+    bool hasBorder,
+  ) {
     return Expanded(
       child: Container(
         height: 50,

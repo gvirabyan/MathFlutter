@@ -45,7 +45,7 @@ class MathContent extends StatelessWidget {
         ),
       );
     } else if (content.startsWith('@@')) {
-      final monoContent = content.substring(2);
+      final monoContent = _decodeHtml(content.substring(2));
       final plainText = monoContent
           .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
           .replaceAll('&nbsp;', ' '); // Replace &nbsp; with a space
@@ -129,6 +129,16 @@ class MathContent extends StatelessWidget {
             }).toList(),
       );
     }
+  }
+
+  String _decodeHtml(String input) {
+    return input
+        .replaceAll('&times;', '×')
+        .replaceAll('&times', '×')
+        .replaceAll('&divide;', '÷')
+        .replaceAll('&divide', '÷')
+        .replaceAll('&middot;', '·')
+        .replaceAll('&nbsp;', ' ');
   }
 
   String _preprocessLatex(String input) {

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_view.dart';
+import 'package:untitled2/services/auth_service.dart';
 
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
@@ -45,6 +46,7 @@ class _PracticeQuizQuestionScreenState
   bool submitted = false;
   bool showAnswerLoading = false;
   bool rivalLeft = false;
+  String userName = "";
 
   List<QuestionModel> questions = [];
   List<bool?> answersResult = [];
@@ -117,11 +119,11 @@ class _PracticeQuizQuestionScreenState
       limit: widget.totalQuestions,
       rival: widget.rival,
     );
+    final response = await AuthService.getUser();
 
-    print('=== RESPONSE ===');
-    print('rival param: ${widget.rival}');
-    print('rival_user exists: ${res['rival_user'] != null}');
-    print('rival_user data: ${res['rival_user']}');
+    if (response['status'] == 'success') {
+      userName = response['user']['name'];
+    }
 
     if (!mounted) return;
 
@@ -154,8 +156,6 @@ class _PracticeQuizQuestionScreenState
       myPoints = 0;
       machinePoints = 0;
     });
-
-    print('After setState - currentRivalName: $currentRivalName');
 
     _startTimer();
   }
@@ -238,9 +238,6 @@ class _PracticeQuizQuestionScreenState
     bool isPrimaryCorrect = selected == q.correctIndex;
     bool isFinalCorrect = isPrimaryCorrect;
 
-
-
-
     if (isPrimaryCorrect &&
         q.secondAnswer != null &&
         q.secondAnswer!.trim().isNotEmpty) {
@@ -252,13 +249,12 @@ class _PracticeQuizQuestionScreenState
       );
       if (result != null) {
         isFinalCorrect = result.isCorrect;
-      }
-      else {
+      } else {
         return;
       }
     }
     final bool shouldShowLoading =
-        widget.rival == 'fake_user' && secondsLeft > 52;
+        widget.rival == 'fake_user' && secondsLeft > 59;
 
     if (shouldShowLoading) {
       setState(() {
@@ -390,7 +386,8 @@ class _PracticeQuizQuestionScreenState
           'myPoints': myPoints,
           'rivalPoints': machinePoints,
           'rivalName': currentRivalName,
-        });      },
+        });
+      },
     );
   }
 
@@ -415,9 +412,6 @@ class _PracticeQuizQuestionScreenState
 
     final displayQuestion = questions[index];
     final displayIndex = index;
-    print("=== BUILD ===");
-    print("currentRivalName: '$currentRivalName'");
-    print("widget.rival: ${widget.rival}");
     final String appBarTitle =
         widget.rival == 'fake_user'
             ? "Spieler vs $currentRivalName"
@@ -431,6 +425,7 @@ class _PracticeQuizQuestionScreenState
       total: widget.totalQuestions,
       results: answersResult,
       myPoints: myPoints,
+      userName: userName,
       machinePoints: machinePoints,
       showAnswerLoading: showAnswerLoading,
       rivalLabel:

@@ -30,7 +30,6 @@ import 'package:untitled2/ui_elements/main_app_bar.dart';
 import 'package:untitled2/ui_elements/main_bottom_nav.dart';
 import 'package:untitled2/ui_elements/notification_panel.dart';
 
-
 class AppStart extends StatefulWidget {
   const AppStart({super.key});
 
@@ -39,7 +38,6 @@ class AppStart extends StatefulWidget {
 }
 
 class _AppStartState extends State<AppStart> {
-
   @override
   void initState() {
     super.initState();
@@ -53,9 +51,7 @@ class _AppStartState extends State<AppStart> {
     final userId = prefs.getInt('user_id');
 
     if (token != null && token.isNotEmpty && userId != null) {
-
       _go(const MainScreen());
-
     } else {
       _go(const AuthScreen());
     }
@@ -67,20 +63,15 @@ class _AppStartState extends State<AppStart> {
     if (_navigated) return;
     _navigated = true;
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => page),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => page));
   }
-
 
   @override
   Widget build(BuildContext context) {
     // Можно лоадер или splash
-    return const Scaffold(
-      body: Center(
-        child:  LoadingOverlay(),
-      ),
-    );
+    return const Scaffold(body: Center(child: LoadingOverlay()));
   }
 }
 
@@ -142,8 +133,10 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     final current = _tabs[_currentIndex];
     if (current.subTabs != null) {
       _tabController?.dispose();
-      _tabController =
-          TabController(length: current.subTabs!.length, vsync: this);
+      _tabController = TabController(
+        length: current.subTabs!.length,
+        vsync: this,
+      );
       _tabController!.addListener(_handleTabSelection);
     } else {
       _tabController?.dispose();
@@ -155,8 +148,9 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (_tabController == null || _isReverting) return;
     if (_tabController!.indexIsChanging) {
       if (UnsavedChangesService().hasUnsavedChanges) {
-        final confirmed =
-        await UnsavedChangesService().showConfirmDialog(context);
+        final confirmed = await UnsavedChangesService().showConfirmDialog(
+          context,
+        );
         if (!confirmed) {
           _isReverting = true;
           _tabController!.index = _tabController!.previousIndex;
@@ -165,13 +159,17 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       }
     }
   }
+
   bool startPracticeVsFriend = false;
 
   late final List<_MainTabConfig> _tabs = [
     _MainTabConfig(
       title: 'Aktivität',
       subTabs: [
-        _SubTabConfig(label: 'Mein Status', view: StatusTab(onGoalUpdated: _onGoalChanged)),
+        _SubTabConfig(
+          label: 'Mein Status',
+          view: StatusTab(onGoalUpdated: _onGoalChanged),
+        ),
         _SubTabConfig(label: 'Top List', view: const TopListTab()),
         _SubTabConfig(label: 'Meine Antworten', view: const AnswersTab()),
         _SubTabConfig(label: 'Progress', view: const ProgressTab()),
@@ -196,8 +194,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         _SubTabConfig(label: '9.–10. Klasse', view: Topics910Tab()),
         _SubTabConfig(label: '10.–11. Klasse', view: Topics1011Tab()),
         _SubTabConfig(label: '11.–12. Klasse', view: Topics1112Tab()),
-      ]
-      ,
+      ],
     ),
     _MainTabConfig(
       title: 'Üben',
@@ -206,10 +203,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           label: 'Spieler vs Maschine',
           view: PracticeVsMachineTab(),
         ),
-        _SubTabConfig(
-          label: 'Spieler vs Speiler',
-          view: PracticeVsPlayerTab(),
-        )
+        _SubTabConfig(label: 'Spieler vs Speiler', view: PracticeVsPlayerTab()),
       ],
     ),
 
@@ -238,22 +232,25 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         controller: _tabController,
       ),
       endDrawer: const NotificationPanel(),
-      body: current.subTabs == null
-          ? current.view!
-          : TabBarView(
-        controller: _tabController,
-        physics: UnsavedChangesService().hasUnsavedChanges
-            ? const NeverScrollableScrollPhysics()
-            : null,
-        children: current.subTabs!.map((e) => e.view).toList(),
-      ),
+      body:
+          current.subTabs == null
+              ? current.view!
+              : TabBarView(
+                controller: _tabController,
+                physics:
+                    UnsavedChangesService().hasUnsavedChanges
+                        ? const NeverScrollableScrollPhysics()
+                        : null,
+                children: current.subTabs!.map((e) => e.view).toList(),
+              ),
       bottomNavigationBar: MainBottomNav(
         currentIndex: _currentIndex,
         onTap: (index) async {
           if (index == _currentIndex) return;
           if (UnsavedChangesService().hasUnsavedChanges) {
-            final confirmed =
-            await UnsavedChangesService().showConfirmDialog(context);
+            final confirmed = await UnsavedChangesService().showConfirmDialog(
+              context,
+            );
             if (!confirmed) return;
           }
           setState(() {
@@ -267,6 +264,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
     return page;
   }
+
   Future<void> _loadDailyGoal() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -307,7 +305,6 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       _goalLoaded = true;
     });
   }
-
 }
 
 class _MainTabConfig {
@@ -316,10 +313,10 @@ class _MainTabConfig {
   final List<_SubTabConfig>? subTabs;
 
   _MainTabConfig({required this.title, this.view, this.subTabs})
-      : assert(
-  (view != null) ^ (subTabs != null),
-  'Either view or subTabs must be provided (not both).',
-  );
+    : assert(
+        (view != null) ^ (subTabs != null),
+        'Either view or subTabs must be provided (not both).',
+      );
 }
 
 class _SubTabConfig {
@@ -328,4 +325,3 @@ class _SubTabConfig {
 
   _SubTabConfig({required this.label, required this.view});
 }
-
