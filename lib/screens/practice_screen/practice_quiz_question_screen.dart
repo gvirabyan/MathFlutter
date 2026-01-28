@@ -238,20 +238,8 @@ class _PracticeQuizQuestionScreenState
     bool isPrimaryCorrect = selected == q.correctIndex;
     bool isFinalCorrect = isPrimaryCorrect;
 
-    timer?.cancel();
 
-    final bool shouldShowLoading =
-        widget.rival == 'fake_user' && secondsLeft > 52;
 
-    if (shouldShowLoading) {
-      setState(() {
-        showAnswerLoading = true;
-      });
-
-      await Future.delayed(
-        Duration(milliseconds: 1000 + Random().nextInt(2000)),
-      );
-    }
 
     if (isPrimaryCorrect &&
         q.secondAnswer != null &&
@@ -265,7 +253,23 @@ class _PracticeQuizQuestionScreenState
       if (result != null) {
         isFinalCorrect = result.isCorrect;
       }
+      else {
+        return;
+      }
     }
+    final bool shouldShowLoading =
+        widget.rival == 'fake_user' && secondsLeft > 52;
+
+    if (shouldShowLoading) {
+      setState(() {
+        showAnswerLoading = true;
+      });
+
+      await Future.delayed(
+        Duration(milliseconds: 1000 + Random().nextInt(2000)),
+      );
+    }
+    timer?.cancel();
 
     setState(() {
       submitted = true;
