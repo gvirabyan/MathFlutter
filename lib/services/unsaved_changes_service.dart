@@ -63,7 +63,14 @@ class UnsavedChangesService extends ChangeNotifier {
                         child: SizedBox(
                           height: 42,
                           child: ElevatedButton(
-                            onPressed: () => Navigator.pop(context, false),
+                            onPressed: () async {
+                              Navigator.pop(context, true);
+
+                              if (onSave != null) {
+                                await Future.delayed(Duration(milliseconds: 100));
+                                onSave();
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.grey,
                               foregroundColor: Colors.white,
@@ -93,14 +100,8 @@ class UnsavedChangesService extends ChangeNotifier {
                         child: SizedBox(
                           height: 42,
                           child: ElevatedButton(
-                            onPressed: () async { // ← СДЕЛАЙ ASYNC
-                              Navigator.pop(context, true); // ← СНАЧАЛА ЗАКРОЙ ДИАЛОГ
+                            onPressed: () => Navigator.pop(context, false),
 
-                              if (onSave != null) { // ← ПОТОМ ВЫЗОВИ SAVE
-                                await Future.delayed(Duration(milliseconds: 100)); // ← МАЛЕНЬКАЯ ЗАДЕРЖКА
-                                onSave();
-                              }
-                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF7C3AED),
                               foregroundColor: Colors.white,
