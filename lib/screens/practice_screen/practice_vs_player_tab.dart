@@ -21,6 +21,10 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   bool started = false;
   bool loading = false;
   bool rivalAvailable = true;
+  bool showResults = false;
+  int lastMyPoints = 0;
+  int lastRivalPoints = 0;
+  String lastRivalName = '';
 
   // стартовый таймер (4..1)
   bool startCountdownRunning = false;
@@ -49,6 +53,10 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
       return _startCountdownView();
     }
 
+    if (showResults) {
+      return _resultsView();
+    }
+
     return _selectionList();
   }
 
@@ -75,13 +83,10 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
 
             const Text(
               'Anzahl der Fragen: 10–30',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.black87),
             ),
 
-            const SizedBox(height: 46,),
+            const SizedBox(height: 46),
 
             // Start Button (yellow)
             Padding(
@@ -106,7 +111,6 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
                     onPressed: () => setState(() => started = true),
                   ),
                 ),
-
               ),
             ),
 
@@ -117,42 +121,26 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     );
   }
 
-
   Widget _selectionList() {
     return ListView(
       padding: const EdgeInsets.only(top: 8),
       children: [
-        _item(
-          context,
-          title: '10 Fragen',
-          score: '+10, +5, -2',
-          count: 10,
-        ),
+        _item(context, title: '10 Fragen', score: '+10, +5, -2', count: 10),
         _divider(),
-        _item(
-          context,
-          title: '20 Fragen',
-          score: '+20, +10, -4',
-          count: 20,
-        ),
+        _item(context, title: '20 Fragen', score: '+20, +10, -4', count: 20),
         _divider(),
-        _item(
-          context,
-          title: '30 Fragen',
-          score: '+30, +15, -6',
-          count: 30,
-        ),
+        _item(context, title: '30 Fragen', score: '+30, +15, -6', count: 30),
         _divider(),
       ],
     );
   }
 
   Widget _item(
-      BuildContext context, {
-        required String title,
-        required String score,
-        required int count,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String score,
+    required int count,
+  }) {
     return InkWell(
       onTap: () => _startVsPlayer(count),
       child: Padding(
@@ -261,10 +249,11 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PracticeQuizQuestionScreen(
-          totalQuestions: selectedQuestionsCount!,
-          rival: 'fake_user',
-        ),
+        builder:
+            (_) => PracticeQuizQuestionScreen(
+              totalQuestions: selectedQuestionsCount!,
+              rival: 'fake_user',
+            ),
       ),
     );
 
@@ -274,6 +263,115 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
         mainScreen?.setMainIndex(0, subIndex: 0);
       }
     }
+    if (result is Map<String, dynamic>) {
+      setState(() {
+        lastMyPoints = result['myPoints'] ?? 0;
+        lastRivalPoints = result['rivalPoints'] ?? 0;
+        lastRivalName = result['rivalName'] ?? 'Gegner';
+        showResults = true;
+      });
+    }
+  }
+
+  Widget _resultsView() {
+    int myDisplayPoints = lastMyPoints > lastRivalPoints ? 10 : -2;
+    int rivalDisplayPoints = lastRivalPoints > lastMyPoints ? 10 : -2;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _resultCard(
+            name: "Narek2026",
+            // Можно взять из профиля
+            correct: lastMyPoints,
+            total: selectedQuestionsCount!,
+            points: myDisplayPoints,
+            isWinner: lastMyPoints >= lastRivalPoints,
+          ),
+          _resultCard(
+            name: lastRivalName.isEmpty ? "Gegner" : lastRivalName,
+            correct: lastRivalPoints,
+            total: selectedQuestionsCount!,
+            points: rivalDisplayPoints,
+            isWinner: lastRivalPoints > lastMyPoints,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: PrimaryButton(
+              text: 'Erneut probieren',
+              color: const Color(0xFFFFC107),
+              onPressed: () {
+                setState(() {
+                  showResults =
+                      false; // Возвращаемся к списку выбора (10, 20, 30)
+                });
+              },
+              enabled: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _resultCard({
+    required String name,
+    required int correct,
+    required int total,
+    required int points,
+    required bool isWinner,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9F9FF),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "$name s Punkte",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "$correct/$total Richtige Antworten",
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "${points > 0 ? '' : ''}$points Punkts",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryPurple,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                isWinner ? "Gewonnen" : "Verloren",
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   // ========================= HELPERS =========================
@@ -315,7 +413,11 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
                 top: 8,
                 child: IconButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  icon: const Icon(Icons.close, color: Colors.black54, size: 28),
+                  icon: const Icon(
+                    Icons.close,
+                    color: Colors.black54,
+                    size: 28,
+                  ),
                   splashRadius: 20,
                 ),
               ),
@@ -350,12 +452,19 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
                           fontWeight: FontWeight.w400,
                         ),
                         children: [
-                          const TextSpan(text: 'Sorry, aktuell ist kein Spieler verfügbar '),
+                          const TextSpan(
+                            text: 'Sorry, aktuell ist kein Spieler verfügbar ',
+                          ),
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
-                            child: Text('🤷‍♀️', style: TextStyle(fontSize: 18)),
+                            child: Text(
+                              '🤷‍♀️',
+                              style: TextStyle(fontSize: 18),
+                            ),
                           ),
-                          const TextSpan(text: '.\nProbiere später noch einmal.'),
+                          const TextSpan(
+                            text: '.\nProbiere später noch einmal.',
+                          ),
                         ],
                       ),
                     ),
@@ -371,13 +480,13 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
                           Navigator.of(ctx).pop();
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => const PracticeVsMachineTab(
-                              ),
+                              builder: (_) => const PracticeVsMachineTab(),
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:  AppColors.primaryPurple, // Яркий фиолетовый как на скрине
+                          backgroundColor: AppColors.primaryPurple,
+                          // Яркий фиолетовый как на скрине
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(

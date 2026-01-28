@@ -386,8 +386,11 @@ class _PracticeQuizQuestionScreenState
         Navigator.of(context).pop('go_to_status');
       },
       onNewGame: () {
-        Navigator.of(context).pop();
-      },
+        Navigator.of(context).pop({
+          'myPoints': myPoints,
+          'rivalPoints': machinePoints,
+          'rivalName': currentRivalName,
+        });      },
     );
   }
 
