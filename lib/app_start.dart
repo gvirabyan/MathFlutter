@@ -88,10 +88,14 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainScreen> createState() => MainScreenState();
+
+  static MainScreenState? of(BuildContext context) {
+    return context.findAncestorStateOfType<MainScreenState>();
+  }
 }
 
-class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
+class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   int _currentIndex = 0;
   int? _dailyGoal;
   bool _goalLoaded = false;
@@ -122,6 +126,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   void _onUnsavedChangesChanged() {
     if (mounted) setState(() {});
+  }
+
+  void setMainIndex(int index, {int? subIndex}) {
+    setState(() {
+      _currentIndex = index;
+      _initTabController();
+      if (subIndex != null && _tabController != null) {
+        _tabController!.index = subIndex;
+      }
+    });
   }
 
   void _initTabController() {

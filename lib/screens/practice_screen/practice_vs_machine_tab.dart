@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/app_start.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
 
 class PracticeVsMachineTab extends StatelessWidget {
   const PracticeVsMachineTab({super.key});
 
-  void _startQuiz(BuildContext context, int count) {
-    Navigator.push(
+  void _startQuiz(BuildContext context, int count) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PracticeQuizQuestionScreen(totalQuestions: count),
       ),
     );
+
+    if (result == 'go_to_status') {
+      if (context.mounted) {
+        final mainScreen = MainScreen.of(context);
+        mainScreen?.setMainIndex(0, subIndex: 0);
+      }
+    }
   }
 
   @override
