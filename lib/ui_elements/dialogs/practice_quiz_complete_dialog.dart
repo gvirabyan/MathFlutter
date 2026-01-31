@@ -25,7 +25,7 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
   }) {
     return showDialog<void>(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder:
           (_) => PracticeQuizCompleteDialog(
             result: result,
@@ -162,7 +162,10 @@ class PracticeQuizCompleteDialog extends StatelessWidget {
             right: 6,
             child: IconButton(
               icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+                onNewGame();
+              },
               splashRadius: 18,
             ),
           ),

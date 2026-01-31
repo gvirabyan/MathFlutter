@@ -61,7 +61,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     if (userRes['status'] == 'success') {
       if (mounted) {
         setState(() {
-          myUserName = userRes['user']['name'] ?? userRes['user']['username'] ?? 'Ich';
+          myUserName = userRes['user']['username'] ?? userRes['user']['username'] ?? 'Ich';
         });
       }
     }

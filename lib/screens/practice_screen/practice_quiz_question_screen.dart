@@ -46,6 +46,8 @@ class _PracticeQuizQuestionScreenState
   bool submitted = false;
   bool showAnswerLoading = false;
   bool rivalLeft = false;
+  bool _isPracticeCompleteDialogShown = false;
+
   String userName = "";
 
   List<QuestionModel> questions = [];
@@ -324,6 +326,9 @@ class _PracticeQuizQuestionScreenState
   }
 
   Future<void> _finishQuiz() async {
+    if (_isPracticeCompleteDialogShown) return;
+    _isPracticeCompleteDialogShown = true;
+
     timer?.cancel();
     autoNextTimer?.cancel();
 
@@ -375,6 +380,7 @@ class _PracticeQuizQuestionScreenState
     if (!mounted) return;
 
     await PracticeQuizCompleteDialog.show(
+
       context,
       result: result,
       points: pointsToDisplay,

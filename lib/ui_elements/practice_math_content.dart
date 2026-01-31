@@ -62,7 +62,7 @@ class _MathContentState extends State<MathContent> {
     final double scale = widget.isQuestion ? 1.0 : 0.9;
 
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 700),
       opacity: _isVisible ? 1.0 : 0.0,
       child: _buildBody(context, scale),
     );

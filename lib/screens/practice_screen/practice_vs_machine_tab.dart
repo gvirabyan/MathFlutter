@@ -13,9 +13,10 @@ class PracticeVsMachineTab extends StatelessWidget {
       ),
     );
 
-    if (result == 'go_to_status') {
+    if (result != null && result is Map && result['action'] == 'go_to_status') {
       if (context.mounted) {
         final mainScreen = MainScreen.of(context);
+        // Индекс 0 — это "Aktivität", subIndex 0 — "Mein Status"
         mainScreen?.setMainIndex(0, subIndex: 0);
       }
     }
