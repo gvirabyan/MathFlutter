@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/screens/practice_screen/practice_quiz_question_screen.dart';
 import 'package:untitled2/screens/practice_screen/practice_vs_machine_tab.dart';
+import 'package:untitled2/services/auth_service.dart';
 
 import '../../app_colors.dart';
 import '../../app_start.dart';
@@ -28,6 +29,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   int lastMyPoints = 0;
   int lastRivalPoints = 0;
   String lastRivalName = '';
+  String myUserName = 'Ich';
 
   // стартовый таймер (4..1)
   bool startCountdownRunning = false;
@@ -53,6 +55,17 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   // ✅ NEW: Загрузка сохраненных результатов
   Future<void> _loadSavedResults() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Fetch real user name
+    final userRes = await AuthService.getUser();
+    if (userRes['status'] == 'success') {
+      if (mounted) {
+        setState(() {
+          myUserName = userRes['user']['name'] ?? userRes['user']['username'] ?? 'Ich';
+        });
+      }
+    }
+
     final resultsJson = prefs.getString('practice_vs_player_results');
     resultsAlreadyShown = prefs.getBool('results_already_shown') ?? false;
 
@@ -192,11 +205,11 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   }
 
   Widget _item(
-    BuildContext context, {
-    required String title,
-    required String score,
-    required int count,
-  }) {
+      BuildContext context, {
+        required String title,
+        required String score,
+        required int count,
+      }) {
     return InkWell(
       onTap: () => _startVsPlayer(count),
       child: Padding(
@@ -307,20 +320,15 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
       MaterialPageRoute(
         builder:
             (_) => PracticeQuizQuestionScreen(
-              totalQuestions: selectedQuestionsCount!,
-              rival: 'fake_user',
-            ),
+          totalQuestions: selectedQuestionsCount!,
+          rival: 'fake_user',
+        ),
       ),
     );
 
     if (!mounted) return;
 
-    if (result == 'go_to_status') {
-
-      final mainScreen = MainScreen.of(context);
-      mainScreen?.setMainIndex(0, subIndex: 0);
-    } else if (result is Map<String, dynamic>) {
-
+    if (result is Map<String, dynamic>) {
       setState(() {
         lastMyPoints = result['myPoints'] ?? 0;
         lastRivalPoints = result['rivalPoints'] ?? 0;
@@ -330,6 +338,14 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
 
       // ✅ Сохраняем результаты в SharedPreferences
       await _saveResults();
+
+      if (result['action'] == 'go_to_status') {
+        final mainScreen = MainScreen.of(context);
+        mainScreen?.setMainIndex(0, subIndex: 0);
+      }
+    } else if (result == 'go_to_status') {
+      final mainScreen = MainScreen.of(context);
+      mainScreen?.setMainIndex(0, subIndex: 0);
     }
   }
 
@@ -342,8 +358,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
       child: Column(
         children: [
           _resultCard(
-            name: "Narek2026",
-            // Можно взять из профиля
+            name: myUserName,
             correct: lastMyPoints,
             total: selectedQuestionsCount!,
             points: myDisplayPoints,

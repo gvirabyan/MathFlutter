@@ -140,7 +140,7 @@ class _PracticeQuizQuestionScreenState
     }
 
     final List list =
-        res['questions'] is List ? List.from(res['questions']) : [];
+    res['questions'] is List ? List.from(res['questions']) : [];
     final loadedQuestions = list.map((e) => QuestionModel.fromJson(e)).toList();
     final loadedAnswers = List<bool?>.filled(widget.totalQuestions, null);
 
@@ -203,12 +203,12 @@ class _PracticeQuizQuestionScreenState
       'question': q.id,
       'category': q.categoryId,
       'answer':
-          selectedIndex != null ? q.answers[selectedIndex!].toString() : '',
+      selectedIndex != null ? q.answers[selectedIndex!].toString() : '',
       'status': 'wrong',
       'answer_type':
-          widget.rival == 'machine'
-              ? 'practice-vs-machine'
-              : 'practice-vs-player',
+      widget.rival == 'machine'
+          ? 'practice-vs-machine'
+          : 'practice-vs-player',
     };
 
     await CategoryAnswerService.updateUserAnsweredQuestion(
@@ -254,7 +254,7 @@ class _PracticeQuizQuestionScreenState
       }
     }
     final bool shouldShowLoading =
-        widget.rival == 'fake_user' && secondsLeft > 59;
+        widget.rival == 'fake_user' && secondsLeft > 52;
 
     if (shouldShowLoading) {
       setState(() {
@@ -290,7 +290,7 @@ class _PracticeQuizQuestionScreenState
             if (i != q.correctIndex) wrongIndices.add(i);
           }
           machineSelectedIndex =
-              wrongIndices[Random().nextInt(wrongIndices.length)];
+          wrongIndices[Random().nextInt(wrongIndices.length)];
         }
       }
     });
@@ -328,11 +328,11 @@ class _PracticeQuizQuestionScreenState
     autoNextTimer?.cancel();
 
     final PracticeQuizResult result =
-        myPoints > machinePoints
-            ? PracticeQuizResult.win
-            : (myPoints < machinePoints
-                ? PracticeQuizResult.lose
-                : PracticeQuizResult.draw);
+    myPoints > machinePoints
+        ? PracticeQuizResult.win
+        : (myPoints < machinePoints
+        ? PracticeQuizResult.lose
+        : PracticeQuizResult.draw);
 
     int pointsToDisplay = (myPoints - machinePoints).abs();
 
@@ -379,7 +379,12 @@ class _PracticeQuizQuestionScreenState
       result: result,
       points: pointsToDisplay,
       onMyStatus: () {
-        Navigator.of(context).pop('go_to_status');
+        Navigator.of(context).pop({
+          'action': 'go_to_status',
+          'myPoints': myPoints,
+          'rivalPoints': machinePoints,
+          'rivalName': currentRivalName,
+        });
       },
       onNewGame: () {
         Navigator.of(context).pop({
@@ -413,9 +418,9 @@ class _PracticeQuizQuestionScreenState
     final displayQuestion = questions[index];
     final displayIndex = index;
     final String appBarTitle =
-        widget.rival == 'fake_user'
-            ? "Spieler vs $currentRivalName"
-            : "Spieler vs Maschine";
+    widget.rival == 'fake_user'
+        ? "Spieler vs $currentRivalName"
+        : "Spieler vs Maschine";
 
     return PracticeQuizQuestionView(
       key: ValueKey(displayIndex),
@@ -429,9 +434,9 @@ class _PracticeQuizQuestionScreenState
       machinePoints: machinePoints,
       showAnswerLoading: showAnswerLoading,
       rivalLabel:
-          widget.rival == 'fake_user'
-              ? '$currentRivalName:'
-              : widget.rivalLabel,
+      widget.rival == 'fake_user'
+          ? '$currentRivalName:'
+          : widget.rivalLabel,
       title: displayQuestion.title,
       question: displayQuestion.question,
       answers: displayQuestion.answers,
@@ -442,15 +447,15 @@ class _PracticeQuizQuestionScreenState
       selectedIndex: selectedIndex,
 
       onSelect:
-          submitted || showAnswerLoading
-              ? null
-              : (i) {
-                setState(() => selectedIndex = i);
-              },
+      submitted || showAnswerLoading
+          ? null
+          : (i) {
+        setState(() => selectedIndex = i);
+      },
       onSubmit:
-          (selectedIndex == null || submitted || showAnswerLoading)
-              ? null
-              : () => _submitAnswer(selectedIndex!),
+      (selectedIndex == null || submitted || showAnswerLoading)
+          ? null
+          : () => _submitAnswer(selectedIndex!),
       onNext: submitted ? _nextQuestion : null,
     );
   }
@@ -472,9 +477,9 @@ class _PracticeQuizQuestionScreenState
         'answer': answer,
         'status': status,
         'answer_type':
-            widget.rival == 'machine'
-                ? 'practice-vs-machine'
-                : 'practice-vs-player',
+        widget.rival == 'machine'
+            ? 'practice-vs-machine'
+            : 'practice-vs-player',
       };
 
       await CategoryAnswerService.updateUserAnsweredQuestion(

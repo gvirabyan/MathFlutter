@@ -3,7 +3,7 @@ import 'package:flutter_tex/flutter_tex.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class MathContent extends StatelessWidget {
+class MathContent extends StatefulWidget {
   final String content;
   final double fontSize;
   final Color color;
@@ -17,6 +17,26 @@ class MathContent extends StatelessWidget {
     this.isQuestion = false,
   }) : super(key: key);
 
+  @override
+  State<MathContent> createState() => _MathContentState();
+}
+
+class _MathContentState extends State<MathContent> {
+  bool _isVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Запускаем анимацию появления после того, как виджет вставлен в дерево
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _isVisible = true;
+        });
+      }
+    });
+  }
+
   String _decodeHtml(String input) {
     return input
         .replaceAll('&times;', '×')
@@ -26,10 +46,33 @@ class MathContent extends StatelessWidget {
         .replaceAll('&middot;', '·')
         .replaceAll('&nbsp;', ' ');
   }
+
+  String _preprocessLatex(String input) {
+    String result = input.replaceAll('pi', r'\pi');
+    result = result.replaceAllMapped(
+      RegExp(r'sqrt\((.*?)\)'),
+          (match) => r'\sqrt{' + (match.group(1) ?? '') + '}',
+    );
+    result = result.replaceAll(r'\frac', r'\dfrac');
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 🔹 Единый масштаб (можно легко подкрутить)
-    final double scale = isQuestion ? 1.0 : 0.9;
+    final double scale = widget.isQuestion ? 1.0 : 0.9;
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 500),
+      opacity: _isVisible ? 1.0 : 0.0,
+      child: _buildBody(context, scale),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, double scale) {
+    final content = widget.content;
+    final color = widget.color;
+    final fontSize = widget.fontSize;
+    final isQuestion = widget.isQuestion;
 
     if (content.startsWith('@@@')) {
       return Html(
@@ -43,8 +86,7 @@ class MathContent extends StatelessWidget {
           ),
         },
       );
-    }
-    else if (content.startsWith('@emoji@')) {
+    } else if (content.startsWith('@emoji@')) {
       final emojiContent = content.substring(7);
       final plainText = emojiContent.replaceAll(RegExp(r'<[^>]*>'), '');
       return Text(
@@ -55,12 +97,11 @@ class MathContent extends StatelessWidget {
           color: color,
         ),
       );
-    }
-    else if (content.startsWith('@@')) {
+    } else if (content.startsWith('@@')) {
       final monoContent = _decodeHtml(content.substring(2));
       final plainText = monoContent
-          .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
-          .replaceAll('&nbsp;', ' '); // Replace &nbsp; with a space
+          .replaceAll(RegExp(r'<[^>]*>'), '')
+          .replaceAll('&nbsp;', ' ');
       final lines = plainText.trim().split('\n');
 
       return Column(
@@ -70,7 +111,7 @@ class MathContent extends StatelessWidget {
           line.trim(),
           style: TextStyle(
             fontSize: (isQuestion ? 18 : fontSize) * scale,
-            height: 1.2, // Adjust height for better spacing
+            height: 1.2,
             fontFamily: 'monospace',
             fontWeight: FontWeight.bold,
             letterSpacing: 4,
@@ -79,8 +120,7 @@ class MathContent extends StatelessWidget {
         ))
             .toList(),
       );
-    }
-    else if (content.startsWith('@pre@')) {
+    } else if (content.startsWith('@pre@')) {
       final preContent = content.substring(5);
       final plainText = preContent.replaceAll('<br>', '\n');
       final lines = plainText.trim().split('\n');
@@ -98,8 +138,7 @@ class MathContent extends StatelessWidget {
         ))
             .toList(),
       );
-    }
-    else if (content.startsWith('@')) {
+    } else if (content.startsWith('@')) {
       return Text(
         content.substring(1),
         style: TextStyle(
@@ -108,14 +147,12 @@ class MathContent extends StatelessWidget {
           color: color,
         ),
       );
-    }
-    else {
+    } else {
       final lines = content.split('\n');
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: lines.map((line) {
           if (line.startsWith(r'$$') && line.endsWith(r'$$')) {
-            // It's a plain text line
             return Text(
               line.substring(2, line.length - 2),
               textAlign: TextAlign.start,
@@ -125,42 +162,48 @@ class MathContent extends StatelessWidget {
               ),
             );
           } else {
-            // It's a LaTeX line
             final processedContent = _preprocessLatex(line);
-            return TeX2SVG(
+            return _LatexRenderer(
               math: r'\displaystyle ' + processedContent,
-              teXInputType: TeXInputType.teX,
-
-              formulaWidgetBuilder: (context, svg) {
-                final double finalFontSize = (isQuestion ? 18 :16) * scale;
-                final hasFraction = processedContent.contains(r'\over') ||
-                    processedContent.contains(r'\dfrac');
-                final heightMultiplier = hasFraction ? 1.8 : 1.0;
-                return SvgPicture.string(
-                  svg,
-                  height: finalFontSize * heightMultiplier,
-                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                );
-              },
+              color: color,
+              fontSize: (isQuestion ? 18 : 16) * scale,
+              processedContent: processedContent,
             );
           }
         }).toList(),
       );
     }
   }
+}
 
-  String _preprocessLatex(String input) {
-    String result = input.replaceAll('pi', r'\pi');
+class _LatexRenderer extends StatelessWidget {
+  final String math;
+  final Color color;
+  final double fontSize;
+  final String processedContent;
 
-    // sqrt(x) -> \sqrt{x}
-    result = result.replaceAllMapped(
-      RegExp(r'sqrt\((.*?)\)'),
-          (match) => r'\sqrt{' + (match.group(1) ?? '') + '}',
+  const _LatexRenderer({
+    required this.math,
+    required this.color,
+    required this.fontSize,
+    required this.processedContent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TeX2SVG(
+      math: math,
+      teXInputType: TeXInputType.teX,
+      formulaWidgetBuilder: (context, svg) {
+        final hasFraction = processedContent.contains(r'\over') ||
+            processedContent.contains(r'\dfrac');
+        final heightMultiplier = hasFraction ? 1.8 : 1.0;
+        return SvgPicture.string(
+          svg,
+          height: fontSize * heightMultiplier,
+          colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+        );
+      },
     );
-
-    // делаем дроби визуально нормальными
-    result = result.replaceAll(r'\frac', r'\dfrac');
-
-    return result;
   }
 }
