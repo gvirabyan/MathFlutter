@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:untitled2/ui_elements/loading_overlay.dart';
 import '../../app_colors.dart';
 import '../../services/category_service.dart';
+import '../../screens/topics_screen/learning_quiz_question_screen.dart';
 
 class SearchOverlay extends StatefulWidget {
   const SearchOverlay({super.key});
@@ -69,9 +71,32 @@ class _SearchOverlayState extends State<SearchOverlay> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      // Можно показать ошибку пользователю
       print('Search error: $e');
     }
+  }
+
+  void _openCategory(Map<String, dynamic> item) {
+    final categoryId = item['id'];
+    final categoryName = item['attributes']['name'] ?? '';
+    final totalQuestions = item['questions'] ?? 0;
+
+    // Close search dialog first
+    Navigator.pop(context);
+
+    // Navigate to LearningQuizQuestionScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LearningQuizQuestionScreen(
+          categoryId: categoryId,
+          categoryName: categoryName,
+          learningMode: true,
+          totalQuestions: totalQuestions,
+          awardPoints: false,
+          saveResult: false,
+        ),
+      ),
+    );
   }
 
   @override
@@ -84,27 +109,49 @@ class _SearchOverlayState extends State<SearchOverlay> {
             // Заголовок на фиолетовом фоне
             Container(
               color: AppColors.primaryPurple,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              width: double.infinity,
+              // Убираем padding отсюда, чтобы Stack занимал все пространство
+              child: Stack(
                 children: [
-                  const Text(
-                    "Suche",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  // 1. SVG: теперь она привязана к краям самого Container
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0, // Растягиваем по вертикали, если нужно
+                    child: Opacity(
+                      opacity: 0.3,
+                      child: SvgPicture.asset(
+                        'assets/pics_for_buttons/pointsRight.svg',
+                        fit: BoxFit.cover, // Чтобы картинка заполняла область
+                      ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 28,
+
+                  // 2. Контент: накладываем Padding только на текст и кнопку
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 34, 16, 8),                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Suche",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    onPressed: () => Navigator.pop(context),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
@@ -114,25 +161,42 @@ class _SearchOverlayState extends State<SearchOverlay> {
             Expanded(
               child: Container(
                 color: Colors.white,
+
                 child: Column(
                   children: [
                     // Поле поиска
                     Container(
+
                       color: Colors.white,
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                       child: TextField(
                         controller: _controller,
+                        enableSuggestions: false,
                         onChanged: (value) {
                           setState(() => _searchQuery = value);
                           _performSearch(value);
                         },
                         decoration: InputDecoration(
+
                           hintText: "Das Schlüsselwort eingeben",
-                          hintStyle: const TextStyle(color: Colors.grey),
+                          hintStyle: const TextStyle(color: Colors.black54,fontSize: 14),
                           filled: true,
                           fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 12,
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
+                          ),
+
+                          // 2. Устанавливаем ту же линию, когда пользователь нажал на поле (фокус)
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
+                          ),
+
+                          // 3. На всякий случай для других состояний
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
                           ),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
@@ -178,6 +242,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
               (cat) => ActionChip(
             label: Text(cat),
             backgroundColor: AppColors.primaryPurple.withOpacity(0.1),
+                side: BorderSide.none,
             labelStyle: const TextStyle(
               color: Colors.black87,
               fontSize: 12,
@@ -205,8 +270,7 @@ class _SearchOverlayState extends State<SearchOverlay> {
   Widget _buildSearchResults() {
     if (_isLoading) {
       return const Center(
-        child: LoadingOverlay(
-        ),
+        child: LoadingOverlay(),
       );
     }
 
@@ -232,49 +296,51 @@ class _SearchOverlayState extends State<SearchOverlay> {
         final questions = item['questions'] ?? 0;
         final answers = item['answers'] ?? 0;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            // Это выравнивает все элементы внутри Row по нижней линии
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Название категории (займет всё свободное место слева)
-              Expanded(
-                child: Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 16),
-
-              // Блок статистики (будет в самом низу и справа)
-              Column(
-                mainAxisSize: MainAxisSize.min, // Занимает минимум места по высоте
-                crossAxisAlignment: CrossAxisAlignment.end, // Текст внутри прижат к правому краю
-                children: [
-                  Text(
-                    '$answers/$questions',
+        return InkWell(
+          onTap: () => _openCategory(item),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // Название категории
+                Expanded(
+                  child: Text(
+                    name,
                     style: const TextStyle(
-                      color: AppColors.primaryPurple,
+                      color: Colors.black,
+                      fontSize: 17,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  if (className.isNotEmpty)
+                ),
+
+                const SizedBox(width: 16),
+
+                // Блок статистики
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     Text(
-                      "Klasse $className",
+                      '$answers/$questions',
                       style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
+                        color: AppColors.primaryPurple,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                ],
-              ),
-            ],
+                    if (className.isNotEmpty)
+                      Text(
+                        "Klasse $className",
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
