@@ -10,6 +10,7 @@ import 'package:untitled2/services/auth_service.dart';
 
 import '../../app_colors.dart';
 import '../../app_start.dart';
+import '../../ui_elements/countdown_circle.dart';
 import '../../ui_elements/dialogs/no_player_dialog.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/player_searching_loading.dart';
@@ -266,21 +267,37 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   Widget _divider() => const Divider(indent: 20, endIndent: 20);
 
   Widget _startCountdownView() {
-    final progress = startCountdown / 4;
+    // Вычисляем прогресс (от 0.0 до 1.0)
+    // Если хотим, чтобы при 4 было пусто, а при 1 — почти полно:
+    final progress = (4 - startCountdown) / 3;
 
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 160,
-            height: 160,
-            child: CircularProgressIndicator(value: progress),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '$startCountdown',
-            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 150, // Размер как на картинке
+                height: 150,
+                child: CustomPaint(
+                  painter: CountdownPainter(
+                    progress: progress,
+                    activeColor: const Color(0xFF7C3AED), // Яркий фиолетовый
+                    inactiveColor: const Color(0xFFF3E8FF), // Светло-фиолетовый фон
+                  ),
+                ),
+              ),
+              Text(
+                '$startCountdown',
+                style: const TextStyle(
+                  fontSize: 36, // Крупный текст
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF7C3AED),
+                ),
+              ),
+            ],
           ),
         ],
       ),
