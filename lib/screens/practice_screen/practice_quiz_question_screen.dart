@@ -124,7 +124,7 @@ class _PracticeQuizQuestionScreenState
     final response = await AuthService.getUser();
 
     if (response['status'] == 'success') {
-      userName = response['user']['name'];
+      userName = response['user']['username'];
     }
 
     if (!mounted) return;
@@ -137,8 +137,6 @@ class _PracticeQuizQuestionScreenState
       coefficient =
           (res['rival_user']['coefficient'] as num?)?.toDouble() ?? 0.5;
 
-      print('Parsed rivalName: $rivalName');
-      print('Parsed coefficient: $coefficient');
     }
 
     final List list =
@@ -425,7 +423,7 @@ class _PracticeQuizQuestionScreenState
     final displayIndex = index;
     final String appBarTitle =
     widget.rival == 'fake_user'
-        ? "Spieler vs $currentRivalName"
+        ? "Spieler vs Spieler"
         : "Spieler vs Maschine";
 
     // ✅ FIXED: Remove key to prevent recreation and animation restart
