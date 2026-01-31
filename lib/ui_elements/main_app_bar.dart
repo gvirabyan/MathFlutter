@@ -10,6 +10,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Tab>? tabs;
   final int? dailyGoal;
   final TabController? controller;
+  final VoidCallback? onSearchTap;
 
   const MainAppBar({
     super.key,
@@ -17,6 +18,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.tabs,
     this.dailyGoal,
     this.controller,
+    this.onSearchTap,
   });
 
   static const double _myToolbarHeight = 100.0;
@@ -34,6 +36,12 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: false,
       toolbarHeight: _myToolbarHeight,
       actions: [
+        if (onSearchTap != null)
+          IconButton(
+            icon: const Icon(Icons.search, size: 26),
+            color: Colors.white,
+            onPressed: onSearchTap,
+          ),
         Builder(
           builder:
               (context) => Padding(

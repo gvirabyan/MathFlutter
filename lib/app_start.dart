@@ -25,6 +25,7 @@ import 'package:untitled2/screens/topics_screen/topics_8_9_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_9_10_tab.dart';
 import 'package:untitled2/services/auth_service.dart';
 import 'package:untitled2/services/unsaved_changes_service.dart';
+import 'package:untitled2/ui_elements/dialogs/search_dialog.dart';
 import 'package:untitled2/ui_elements/loading_overlay.dart';
 import 'package:untitled2/ui_elements/main_app_bar.dart';
 import 'package:untitled2/ui_elements/main_bottom_nav.dart';
@@ -230,6 +231,18 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         tabs: current.subTabs?.map((e) => Tab(text: e.label)).toList(),
         dailyGoal: _goalLoaded ? _dailyGoal : -1,
         controller: _tabController,
+        onSearchTap:
+            _currentIndex == 1
+                ? () {
+                  showGeneralDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    pageBuilder:
+                        (context, _, __) =>
+                            const SearchOverlay(), // Твой UI поиска
+                  );
+                }
+                : null,
       ),
       endDrawer: const NotificationPanel(),
       body:
