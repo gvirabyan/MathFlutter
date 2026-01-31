@@ -67,7 +67,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
     super.initState();
     // Скроллим к текущему индексу при старте
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _scrollToIndex(widget.currentIndex),
+          (_) => _scrollToIndex(widget.currentIndex),
     );
   }
 
@@ -93,8 +93,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
       // Вычисляем смещение так, чтобы текущий кружок был по центру
       final double targetOffset =
           (index * (itemWidth + spacing)) -
-          (_scrollController.position.viewportDimension / 2) +
-          (itemWidth / 2);
+              (_scrollController.position.viewportDimension / 2) +
+              (itemWidth / 2);
 
       _scrollController.animateTo(
         targetOffset.clamp(0, _scrollController.position.maxScrollExtent),
@@ -108,8 +108,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
   Widget build(BuildContext context) {
     final bool showThinkingText =
         !widget.submitted &&
-        widget.secondsLeft > 52 &&
-        widget.rivalLabel != 'Punkte der Mas...';
+            widget.secondsLeft > 52 &&
+            widget.rivalLabel != 'Punkte der Mas...';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -172,55 +172,9 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 32),
-          // Кружки
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              scrollDirection: Axis.horizontal,
-              itemCount: widget.total,
-              separatorBuilder: (_, __) => const SizedBox(width: 1),
-              itemBuilder: (context, i) {
-                final bool? res =
-                    (i < widget.results.length) ? widget.results[i] : null;
-                final isCurrent = i == widget.currentIndex;
-
-                Color borderColor = Colors.grey.shade300;
-                Color backgroundColor = Colors.transparent;
-                Color textColor = Colors.black38;
-
-                if (isCurrent) {
-                  backgroundColor = Colors.black;
-                  borderColor = Colors.black;
-                  textColor = Colors.white;
-                } else if (res == true) {
-                  borderColor = AppColors.greenCorrect;
-                  textColor = AppColors.greenCorrect;
-                } else if (res == false) {
-                  borderColor = AppColors.redWrong;
-                  textColor = AppColors.redWrong;
-                }
-                return Container(
-                  width: 64,
-                  height: 64,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: backgroundColor,
-                    border: Border.all(color: borderColor, width: 2),
-                  ),
-                  child: Text(
-                    '${i + 1}',
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                );
-              },
-            ),
+          // ✅ FIXED: Wrap circles in RepaintBoundary to prevent unnecessary repaints
+          RepaintBoundary(
+            child: _buildCircles(),
           ),
           const SizedBox(height: 20),
           const Padding(
@@ -254,15 +208,15 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
 
           showThinkingText
               ? Center(
-                child: Text(
-                  "${widget.rivalLabel} denkt gerade ...",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontStyle: FontStyle.italic,
-                    fontSize: 14,
-                  ),
-                ),
-              )
+            child: Text(
+              "${widget.rivalLabel} denkt gerade ...",
+              style: TextStyle(
+                color: Colors.black,
+                fontStyle: FontStyle.italic,
+                fontSize: 14,
+              ),
+            ),
+          )
               : const SizedBox(height: 20),
 
           // Если условие неверно, место остается пустым, но высота сохраняется
@@ -294,164 +248,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                Stack(
-                  children: [
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
-                      // Обнуляем, так как padding уже есть у родителя
-                      itemCount: widget.answers.length,
-                      itemBuilder: (context, i) {
-                        final selected = widget.selectedIndex == i;
-                        final isCorrect = widget.correctAnswerIndex == i;
-                        final isMachineSelected =
-                            widget.machineSelectedIndex == i;
-                        Color? machineBorderColor;
-                        double borderWidth = 1.5;
-
-                        Color? cardBg;
-                        Color? borderCol;
-                        Color contentColor = Colors.black;
-
-                        if (widget.submitted && isMachineSelected) {
-                          machineBorderColor =
-                              (i == widget.correctAnswerIndex)
-                                  ? AppColors.greenCorrect
-                                  : AppColors.redWrong;
-                          borderWidth = 3.0;
-                        }
-
-                        if (widget.submitted &&
-                            widget.correctAnswerIndex != null) {
-                          if (isCorrect) {
-                            cardBg = AppColors.greenCorrect;
-                            borderCol = AppColors.greenCorrect;
-                            contentColor = Colors.white;
-                          } else if (selected) {
-                            cardBg = AppColors.redWrong;
-                            borderCol = AppColors.redWrong;
-                            contentColor = Colors.white;
-                          } else {
-                            borderCol = Colors.grey.shade300;
-                          }
-                        } else if (selected) {
-                          cardBg = AppColors.primaryPurple;
-                          borderCol = AppColors.primaryPurple;
-                          contentColor = Colors.white;
-                        } else {
-                          borderCol = Colors.grey.shade300;
-                        }
-
-                        List<BoxShadow>? externalBorders;
-                        if (widget.submitted && isMachineSelected) {
-                          externalBorders = [
-                            const BoxShadow(
-                              color: AppColors.primaryYellow,
-                              spreadRadius: 3,
-                              blurRadius: 0,
-                            ),
-                          ];
-                        }
-
-                        final bool showDoubleBorder =
-                            widget.submitted &&
-                            widget.machineSelectedIndex != null &&
-                            isMachineSelected &&
-                            cardBg != null;
-
-                        return GestureDetector(
-                          onTap: () => widget.onSelect?.call(i),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 14),
-                            decoration:
-                                showDoubleBorder
-                                    ? BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color:
-                                            (i == widget.correctAnswerIndex)
-                                                ? AppColors.greenCorrect
-                                                : AppColors.redWrong,
-                                        width: 2.0,
-                                      ),
-                                    )
-                                    : null,
-                            padding:
-                                showDoubleBorder
-                                    ? const EdgeInsets.all(4.0)
-                                    : EdgeInsets.zero,
-                            child: Container(
-                              constraints: const BoxConstraints(minHeight: 60),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: cardBg ?? Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color:
-                                      machineBorderColor ??
-                                      borderCol ??
-                                      Colors.grey.shade300,
-                                  width: borderWidth,
-                                ),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 25,
-                                    child: Text(
-                                      String.fromCharCode(
-                                            'a'.codeUnitAt(0) + i,
-                                          ) +
-                                          '.',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        color: contentColor.withOpacity(0.7),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: MathContent(
-                                        content: widget.answers[i],
-                                        fontSize: 22,
-                                        color: contentColor,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    if (widget.showAnswerLoading)
-                      Positioned.fill(
-                        child: AbsorbPointer(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                              child: Container(
-                                color: Colors.white.withOpacity(0.2),
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primaryPurple,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                // ✅ FIXED: Wrap answers in StatefulBuilder to localize setState calls
+                _buildAnswersList(),
               ],
             ),
           ),
@@ -463,7 +261,7 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
               color: AppColors.primaryYellow,
               text: widget.submitted ? 'nächstes' : 'abgeben',
               enabled:
-                  (widget.submitted || widget.selectedIndex != null) &&
+              (widget.submitted || widget.selectedIndex != null) &&
                   !widget.showAnswerLoading,
               isLoading: false,
               onPressed: widget.submitted ? widget.onNext : widget.onSubmit,
@@ -474,12 +272,111 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
     );
   }
 
+  // ✅ FIXED: Separate circles building to prevent unnecessary rebuilds
+  Widget _buildCircles() {
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        controller: _scrollController,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: widget.total,
+        separatorBuilder: (_, __) => const SizedBox(width: 1),
+        itemBuilder: (context, i) {
+          final bool? res =
+          (i < widget.results.length) ? widget.results[i] : null;
+          final isCurrent = i == widget.currentIndex;
+
+          Color borderColor = Colors.grey.shade300;
+          Color backgroundColor = Colors.transparent;
+          Color textColor = Colors.black38;
+
+          if (isCurrent) {
+            backgroundColor = Colors.black;
+            borderColor = Colors.black;
+            textColor = Colors.white;
+          } else if (res == true) {
+            borderColor = AppColors.greenCorrect;
+            textColor = AppColors.greenCorrect;
+          } else if (res == false) {
+            borderColor = AppColors.redWrong;
+            textColor = AppColors.redWrong;
+          }
+          return Container(
+            width: 64,
+            height: 64,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: backgroundColor,
+              border: Border.all(color: borderColor, width: 2),
+            ),
+            child: Text(
+              '${i + 1}',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ✅ FIXED: Separate answers list building with memoization
+  Widget _buildAnswersList() {
+    return Stack(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemCount: widget.answers.length,
+          itemBuilder: (context, i) {
+            // ✅ FIXED: Use separate widget for each answer item
+            return _AnswerItem(
+              key: ValueKey('answer_${widget.currentIndex}_$i'),
+              answer: widget.answers[i],
+              index: i,
+              selected: widget.selectedIndex == i,
+              isCorrect: widget.correctAnswerIndex == i,
+              isMachineSelected: widget.machineSelectedIndex == i,
+              submitted: widget.submitted,
+              onTap: () => widget.onSelect?.call(i),
+            );
+          },
+        ),
+        if (widget.showAnswerLoading)
+          Positioned.fill(
+            child: AbsorbPointer(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Container(
+                    color: Colors.white.withOpacity(0.2),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryPurple,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildPointBox(
-    String text,
-    Color bg,
-    Color textColor,
-    bool hasBorder,
-  ) {
+      String text,
+      Color bg,
+      Color textColor,
+      bool hasBorder,
+      ) {
     return Expanded(
       child: Container(
         height: 50,
@@ -494,6 +391,141 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
           textAlign: TextAlign.center,
           maxLines: 1,
           style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
+  }
+}
+
+// ✅ NEW: Separate stateless widget for answer items to prevent unnecessary rebuilds
+class _AnswerItem extends StatelessWidget {
+  final String answer;
+  final int index;
+  final bool selected;
+  final bool isCorrect;
+  final bool isMachineSelected;
+  final bool submitted;
+  final VoidCallback onTap;
+
+  const _AnswerItem({
+    super.key,
+    required this.answer,
+    required this.index,
+    required this.selected,
+    required this.isCorrect,
+    required this.isMachineSelected,
+    required this.submitted,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color? machineBorderColor;
+    double borderWidth = 1.5;
+
+    Color? cardBg;
+    Color? borderCol;
+    Color contentColor = Colors.black;
+
+    if (submitted && isMachineSelected) {
+      machineBorderColor =
+      isCorrect
+          ? AppColors.greenCorrect
+          : AppColors.redWrong;
+      borderWidth = 3.0;
+    }
+
+    if (submitted) {
+      if (isCorrect) {
+        cardBg = AppColors.greenCorrect;
+        borderCol = AppColors.greenCorrect;
+        contentColor = Colors.white;
+      } else if (selected) {
+        cardBg = AppColors.redWrong;
+        borderCol = AppColors.redWrong;
+        contentColor = Colors.white;
+      } else {
+        borderCol = Colors.grey.shade300;
+      }
+    } else if (selected) {
+      cardBg = AppColors.primaryPurple;
+      borderCol = AppColors.primaryPurple;
+      contentColor = Colors.white;
+    } else {
+      borderCol = Colors.grey.shade300;
+    }
+
+    final bool showDoubleBorder =
+        submitted &&
+            isMachineSelected &&
+            cardBg != null;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration:
+        showDoubleBorder
+            ? BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color:
+            isCorrect
+                ? AppColors.greenCorrect
+                : AppColors.redWrong,
+            width: 2.0,
+          ),
+        )
+            : null,
+        padding:
+        showDoubleBorder
+            ? const EdgeInsets.all(4.0)
+            : EdgeInsets.zero,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 60),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
+          decoration: BoxDecoration(
+            color: cardBg ?? Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color:
+              machineBorderColor ??
+                  borderCol ??
+                  Colors.grey.shade300,
+              width: borderWidth,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 25,
+                child: Text(
+                  String.fromCharCode(
+                    'a'.codeUnitAt(0) + index,
+                  ) +
+                      '.',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: contentColor.withOpacity(0.7),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: MathContent(
+                    content: answer,
+                    fontSize: 22,
+                    color: contentColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

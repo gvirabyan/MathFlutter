@@ -428,8 +428,8 @@ class _PracticeQuizQuestionScreenState
         ? "Spieler vs $currentRivalName"
         : "Spieler vs Maschine";
 
+    // ✅ FIXED: Remove key to prevent recreation and animation restart
     return PracticeQuizQuestionView(
-      key: ValueKey(displayIndex),
       currentIndex: displayIndex,
       submitted: submitted,
       appBarTitle: appBarTitle,
