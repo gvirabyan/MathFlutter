@@ -10,6 +10,8 @@ import 'package:untitled2/services/auth_service.dart';
 
 import '../../app_colors.dart';
 import '../../app_start.dart';
+import '../../ui_elements/dialogs/no_player_dialog.dart';
+import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/player_searching_loading.dart';
 import '../../ui_elements/primary_button.dart';
 
@@ -30,6 +32,9 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
   int lastRivalPoints = 0;
   String lastRivalName = '';
   String myUserName = 'Ich';
+
+  // ✅ NEW: Флаг для начальной загрузки
+  bool isInitializing = true;
 
   // стартовый таймер (4..1)
   bool startCountdownRunning = false;
@@ -52,18 +57,14 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     super.dispose();
   }
 
-  // ✅ NEW: Загрузка сохраненных результатов
+  // ✅ FIXED: Загрузка сохраненных результатов с немедленным отображением
   Future<void> _loadSavedResults() async {
     final prefs = await SharedPreferences.getInstance();
 
     // Fetch real user name
     final userRes = await AuthService.getUser();
     if (userRes['status'] == 'success') {
-      if (mounted) {
-        setState(() {
-          myUserName = userRes['user']['username']  ?? 'Ich';
-        });
-      }
+      myUserName = userRes['user']['username'] ?? 'Ich';
     }
 
     final resultsJson = prefs.getString('practice_vs_player_results');
@@ -72,18 +73,35 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     if (resultsJson != null && !resultsAlreadyShown) {
       try {
         final results = json.decode(resultsJson) as Map<String, dynamic>;
-        setState(() {
-          lastMyPoints = results['myPoints'] ?? 0;
-          lastRivalPoints = results['rivalPoints'] ?? 0;
-          lastRivalName = results['rivalName'] ?? 'Gegner';
-          selectedQuestionsCount = results['totalQuestions'] ?? 10;
-          showResults = true;
-        });
+
+        // ✅ CRITICAL: Обновляем состояние ДО завершения initState
+        if (mounted) {
+          setState(() {
+            lastMyPoints = results['myPoints'] ?? 0;
+            lastRivalPoints = results['rivalPoints'] ?? 0;
+            lastRivalName = results['rivalName'] ?? 'Gegner';
+            selectedQuestionsCount = results['totalQuestions'] ?? 10;
+            showResults = true;
+            isInitializing = false; // ✅ Завершили инициализацию
+          });
+        }
 
         // 👇 отмечаем, что уже показали
         await prefs.setBool('results_already_shown', true);
       } catch (e) {
         debugPrint('Error loading results: $e');
+        if (mounted) {
+          setState(() {
+            isInitializing = false;
+          });
+        }
+      }
+    } else {
+      // ✅ Нет сохраненных результатов - просто завершаем инициализацию
+      if (mounted) {
+        setState(() {
+          isInitializing = false;
+        });
       }
     }
   }
@@ -112,6 +130,11 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ CRITICAL: Показываем loading пока идет инициализация
+    if (isInitializing) {
+      return const Center(child: LoadingOverlay());
+    }
+
     if (showResults) {
       return _resultsView();
     }
@@ -123,8 +146,6 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     if (startCountdownRunning) {
       return _startCountdownView();
     }
-
-
 
     return _selectionList();
   }
@@ -273,7 +294,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     setState(() => loading = true);
 
     // 1️⃣ random delay 5–20s (как Vue)
-    final delayMs = 5000 + Random().nextInt(15001);
+    final delayMs = 5000 + Random().nextInt(7000);
     await Future.delayed(Duration(milliseconds: delayMs));
 
     // 2️⃣ check availability (Berlin time)
@@ -487,147 +508,23 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (ctx) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Stack(
-            children: [
-              // Кнопка закрытия (крестик) в углу
-              Positioned(
-                right: 8,
-                top: 8,
-                child: IconButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.black54,
-                    size: 28,
-                  ),
-                  splashRadius: 20,
-                ),
-              ),
+      builder: (ctx) => NoPlayersDialog(
+        onPracticePressed: () {
+          Navigator.of(ctx).pop(); // Закрываем диалог
 
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Заголовок
-                    const Text(
-                      'Kein Spieler ist verfügbar',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800, // Extra Bold
-                        color: Colors.black,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
+          // Используем ваш статический метод, чтобы найти состояние MainScreen
+          final mainScreen = MainScreen.of(context);
 
-                    const SizedBox(height: 18),
-
-                    // Описание с эмодзи
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          height: 1.3,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        children: [
-                          const TextSpan(
-                            text: 'Sorry, aktuell ist kein Spieler verfügbar ',
-                          ),
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Text(
-                              '🤷‍♀️',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                          const TextSpan(
-                            text: '.\nProbiere später noch einmal.',
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Фиолетовая кнопка "Gehe zum Üben"
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const PracticeVsMachineTab(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryPurple,
-                          // Яркий фиолетовый как на скрине
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Gehe zum Üben',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Фиолетовая кнопка "Erneut versuchen"
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          _startVsPlayer(selectedQuestionsCount!);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryPurple,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Erneut versuchen',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+          if (mainScreen != null) {
+            // Индекс 2 — это вкладка "Üben"
+            // subIndex 0 — это "Spieler vs Maschine" (первый под-таб)
+            mainScreen.setMainIndex(2, subIndex: 0);
+          }
+        },
+        onRetryPressed: () {
+          Navigator.of(ctx).pop(); // Закрываем диалог
+          _startVsPlayer(selectedQuestionsCount!); // Вызываем вашу логику
+        },
+      ),
     );
-  }
-}
+  }}
