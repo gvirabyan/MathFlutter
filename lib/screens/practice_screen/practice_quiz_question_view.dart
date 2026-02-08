@@ -74,9 +74,15 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
   @override
   void didUpdateWidget(PracticeQuizQuestionView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Скроллим автоматически, если индекс изменился (перешли к следующему вопросу)
+
+    // Скроллим автоматически, если индекс изменился
     if (oldWidget.currentIndex != widget.currentIndex) {
       _scrollToIndex(widget.currentIndex);
+
+      // ✅ Добавьте это для обновления вопроса/ответов
+      if (mounted) {
+        setState(() {}); // Пересобираем build() с новыми данными
+      }
     }
   }
 
@@ -228,6 +234,8 @@ class _PracticeQuizQuestionViewState extends State<PracticeQuizQuestionView> {
           // Вопрос
           Expanded(
             child: ListView(
+              key: ValueKey('question_body_${widget.currentIndex}'), // ✅ ВОТ ЭТО!
+
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 // --- Заголовок и Вопрос теперь внутри скролла ---
