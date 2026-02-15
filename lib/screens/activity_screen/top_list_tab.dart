@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../app_colors.dart';
+import '../../app_start.dart';
 import '../../services/auth_service.dart';
 import '../../services/top_list_service.dart';
 import '../../ui_elements/loading_overlay.dart';
@@ -25,30 +26,18 @@ class _TopListTabState extends State<TopListTab> {
 
   final List<TopListCategory> categories = [
     TopListCategory(
-      title: 'Kurs',
-      fieldName: 'Kurs',
+      title: 'In deiner Klasse',
+      fieldName: 'Klasse',
       key: 'course',
     ),
     TopListCategory(
-      title: 'Institution',
-      fieldName: 'Institution',
+      title: 'In deiner Schule',
+      fieldName: 'Schule',
       key: 'institution',
     ),
-    TopListCategory(
-      title: 'Stadt',
-      fieldName: 'Stadt',
-      key: 'city',
-    ),
-    TopListCategory(
-      title: 'Land',
-      fieldName: 'Land',
-      key: 'country',
-    ),
-    TopListCategory(
-      title: 'Welt',
-      fieldName: 'Welt',
-      key: 'world',
-    ),
+    TopListCategory(title: 'In deiner Stadt', fieldName: 'Stadt', key: 'city'),
+    TopListCategory(title: 'In deniem Land', fieldName: 'Land', key: 'country'),
+    TopListCategory(title: 'In der Welt', fieldName: 'Welt', key: 'world'),
   ];
 
   @override
@@ -85,7 +74,7 @@ class _TopListTabState extends State<TopListTab> {
           c.place = rm['my_place']?.toString();
           final usersAmount = rm['users_amount']?.toString();
           if (usersAmount != null) {
-            c.fromText = 'Von $usersAmount Personen';
+            c.fromText = 'aus $usersAmount Spielern';
           }
           c.points = rm['points']?.toString();
         } else {
@@ -112,14 +101,7 @@ class _TopListTabState extends State<TopListTab> {
     if (_canOpenCategory(c)) {
       setState(() => selectedCategory = c);
     } else {
-      // как в Vue: показываем подсказку “please update your ...”
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Bitte aktualisiere dein Profil: ${c.fieldName}',
-          ),
-        ),
-      );
+      MainScreen.of(context)?.setMainIndex(3);
     }
   }
 
@@ -146,9 +128,10 @@ class _TopListTabState extends State<TopListTab> {
     }
 
     // 1-й экран: меню как в Vue
-    final points = (user['points'] is num)
-        ? (user['points'] as num).toInt()
-        : int.tryParse(user['points']?.toString() ?? '') ?? 0;
+    final points =
+        (user['points'] is num)
+            ? (user['points'] as num).toInt()
+            : int.tryParse(user['points']?.toString() ?? '') ?? 0;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -156,11 +139,13 @@ class _TopListTabState extends State<TopListTab> {
         children: [
           _CirclePoints(points: points),
           const SizedBox(height: 16),
-          ...categories.map((c) => _TopListMenuCard(
-            category: c,
-            enabled: _canOpenCategory(c),
-            onTap: () => _chooseCategory(c),
-          )),
+          ...categories.map(
+            (c) => _TopListMenuCard(
+              category: c,
+              enabled: _canOpenCategory(c),
+              onTap: () => _chooseCategory(c),
+            ),
+          ),
         ],
       ),
     );
@@ -168,9 +153,9 @@ class _TopListTabState extends State<TopListTab> {
 }
 
 class TopListCategory {
-  final String title;     // UI
+  final String title; // UI
   final String fieldName; // UI
-  final String key;       // backend key
+  final String key; // backend key
 
   String? place;
   String? fromText;
@@ -194,7 +179,8 @@ class _CirclePoints extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OpenCircleGauge(
-      percent: 100, // полный круг
+      percent: 100,
+      // полный круг
       size: 180,
       strokeWidth: 8,
       color: const Color(0xFFEDE7FF),
@@ -203,10 +189,7 @@ class _CirclePoints extends StatelessWidget {
         children: [
           Text(
             '$points',
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
           const Text('Punkte'),
         ],
@@ -214,7 +197,6 @@ class _CirclePoints extends StatelessWidget {
     );
   }
 }
-
 
 class _TopListMenuCard extends StatelessWidget {
   final TopListCategory category;
@@ -233,17 +215,16 @@ class _TopListMenuCard extends StatelessWidget {
     final points = category.points ?? '0';
 
     return Opacity(
-      opacity: enabled ? 1 : 0.6,
+      opacity: enabled ? 1 : 1, //changeddd!!
       child: InkWell(
         onTap: enabled ? onTap : onTap, // Vue тоже даёт тап, но внутри решает
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.black12),
-            color: Colors.white,
+            color: Color(0xf535353),
           ),
           child: Column(
             children: [
@@ -251,13 +232,20 @@ class _TopListMenuCard extends StatelessWidget {
                 children: [
                   Text(
                     category.title,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const Spacer(),
                   if (place != null)
                     Text(
                       '$place Platz',
-                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.primaryPurple,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                 ],
               ),
@@ -265,32 +253,32 @@ class _TopListMenuCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: place != null
-                        ? Text(
-                      category.fromText ?? '',
-                      style: const TextStyle(color: Colors.black54),
-                    )
-                        : Text.rich(
-                      TextSpan(
-                        children: [
-                          const TextSpan(text: 'Bitte aktualisiere dein Profil: '),
-                          TextSpan(
-                            text: category.fieldName,
-                            style: const TextStyle(
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.bold,
+                    child:
+                        place != null
+                            ? Text(
+                              category.fromText ?? '',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 10,
+                              ),
+                            )
+                            : Text.rich(
+                              TextSpan(
+                                children: [
+                                  const TextSpan(text: 'Bitte Update: '),
+                                  TextSpan(
+                                    text: category.fieldName,
+                                    style: const TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              style: const TextStyle(color: Colors.black54),
                             ),
-                          ),
-                        ],
-                      ),
-                      style: const TextStyle(color: Colors.black54),
-                    ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    points,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
                 ],
               ),
             ],
@@ -428,47 +416,49 @@ class _TopListSingleState extends State<TopListSingle> {
 
         // СПИСОК
         Expanded(
-          child: isLoading
-              ? const Center(child: LoadingOverlay())
-              : ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(),
-            itemBuilder: (context, index) {
-              final u = items[index];
-              final username = u['username']?.toString() ?? '—';
-              final points = _toInt(u['points']);
-
-              return Row(
-                children: [
-                  Text(
-                    '${index + 1}.',
-                    style: const TextStyle(color: Colors.black54),
+          child:
+              isLoading
+                  ? const Center(child: LoadingOverlay())
+                  : ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemBuilder: (context, index) {
+                      final u = items[index];
+                      final username = u['username']?.toString() ?? '—';
+                      final points = _toInt(u['points']);
+                      final currentItemPlace = index + 1;
+                      final bool isMe = currentItemPlace == int.tryParse(widget.category.place ?? '');
+                      return Row(
+                        children: [
+                          Text(
+                            '${index + 1}.',
+                            style: const TextStyle(color: Colors.black54),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              username,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isMe ? AppColors.primaryPurple : Colors.black,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '$points',
+                            style: const TextStyle(
+                              color: Colors.purple,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      username,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '$points',
-                    style: const TextStyle(
-                      color: Colors.purple,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
         ),
       ],
     );
   }
-
 }
