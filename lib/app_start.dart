@@ -95,6 +95,8 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   TabController? _tabController;
   bool _isReverting = false;
 
+  final Map<int, int> _lastSubTabIndex = {};
+
   void _onGoalChanged(int newGoal) {
     setState(() {
       _dailyGoal = newGoal;
@@ -136,9 +138,15 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     final current = _tabs[_currentIndex];
     if (current.subTabs != null) {
       _tabController?.dispose();
+
+      final initialIndex = (_currentIndex == 1)
+          ? (_lastSubTabIndex[_currentIndex] ?? 0)
+          : 0;
+
       _tabController = TabController(
         length: current.subTabs!.length,
         vsync: this,
+        initialIndex: initialIndex,
       );
       _tabController!.addListener(_handleTabSelection);
     } else {
@@ -160,11 +168,15 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           _isReverting = false;
         }
       }
+      if (_currentIndex == 1) {
+        _lastSubTabIndex[_currentIndex] = _tabController!.index;
+      }
       AudioService().play('tabChange');
     }
   }
 
   bool startPracticeVsFriend = false;
+
 
   late final List<_MainTabConfig> _tabs = [
     _MainTabConfig(
@@ -268,6 +280,9 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               context,
             );
             if (!confirmed) return;
+          }
+          if (_currentIndex == 1 && _tabController != null) {
+            _lastSubTabIndex[_currentIndex] = _tabController!.index;
           }
           setState(() {
             _currentIndex = index;
