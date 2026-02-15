@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/screens/topics_screen/learning_quiz_question_view.dart';
 import 'package:untitled2/services/questions_service.dart';
+import 'package:untitled2/ui_elements/dialogs/exist_skiped_dialog.dart';
 
 import '../../models/question_model.dart';
 import '../../services/category_answer_service.dart';
@@ -19,13 +20,9 @@ class LearningQuizQuestionScreen extends StatefulWidget {
   final int totalQuestions;
   final String categoryName;
 
-  /// learning mode
   final int? categoryId;
   final bool learningMode;
 
-  /// backend params / mode
-
-  /// logic toggles
   final bool awardPoints;
   final bool saveResult;
 
@@ -53,18 +50,15 @@ class _LearningQuizQuestionScreenState
   String? secondAnswerValue;
 
   List<QuestionModel> questions = [];
-  List<bool?> answersResult = []; // для цветов сверху
+  List<bool?> answersResult = [];
 
-  // ✅ NEW: Store history of answered questions
   List<QuestionModel> historyQuestions = [];
   int initialHistoryLength = 0;
 
-  // ✅ FIXED: Store user's selected answer TEXT (not index) for history questions
-  Map<int, String> historyUserAnswers = {}; // questionId -> selectedAnswerText
+  Map<int, String> historyUserAnswers = {};
 
   int index = 0;
 
-  // ✅ NEW: Flag to show if we're viewing history
   bool viewingHistory = false;
   int? historyIndex;
 
@@ -110,11 +104,9 @@ class _LearningQuizQuestionScreenState
 
     final data = res['data'] ?? {};
 
-    // ✅ BACKEND-ИСТИНА
     final List historyList = data['history'] ?? [];
     final List resultsList = data['results'] ?? [];
 
-    // ✅ Load saved shuffled orders from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     final shuffledOrdersJson = prefs.getString(
       'shuffled_answers_${widget.categoryId}',
@@ -135,7 +127,6 @@ class _LearningQuizQuestionScreenState
       }
     }
 
-    // ✅ HISTORY — with saved shuffle order
     historyQuestions =
         historyList.map((e) {
           final questionId = e['id'] as int;
@@ -147,11 +138,9 @@ class _LearningQuizQuestionScreenState
 
           List<String> allAnswers;
 
-          // ✅ Use saved shuffle order if exists
           if (savedShuffledOrders.containsKey(questionId)) {
             allAnswers = savedShuffledOrders[questionId]!;
           } else {
-            // First time seeing this question - shuffle
             allAnswers = [correct, ...wrong];
             allAnswers.shuffle(Random());
             savedShuffledOrders[questionId] = allAnswers;
@@ -164,7 +153,6 @@ class _LearningQuizQuestionScreenState
             'user_answer': e['user_answer'],
           });
 
-          // ✅ Store the user's actual selected answer TEXT
           if (e['user_answer'] != null && e['user_answer']['answer'] != null) {
             final userAnswerText = e['user_answer']['answer'].toString();
             historyUserAnswers[questionModel.id] = userAnswerText;
@@ -173,7 +161,6 @@ class _LearningQuizQuestionScreenState
           return questionModel;
         }).toList();
 
-    // ✅ АКТУАЛЬНЫЕ ВОПРОСЫ - with saved shuffle order
     questions =
         resultsList.map((e) {
           final questionId = e['id'] as int;
@@ -185,11 +172,9 @@ class _LearningQuizQuestionScreenState
 
           List<String> allAnswers;
 
-          // ✅ Use saved shuffle order if exists
           if (savedShuffledOrders.containsKey(questionId)) {
             allAnswers = savedShuffledOrders[questionId]!;
           } else {
-            // First time seeing this question - shuffle
             allAnswers = [correct, ...wrong];
             allAnswers.shuffle(Random());
             savedShuffledOrders[questionId] = allAnswers;
@@ -198,7 +183,6 @@ class _LearningQuizQuestionScreenState
           return QuestionModel.fromJson({...e, 'shuffled_answers': allAnswers});
         }).toList();
 
-    // ✅ Save shuffled orders to SharedPreferences
     final ordersToSave = savedShuffledOrders.map(
       (key, value) => MapEntry(key.toString(), value),
     );
@@ -207,11 +191,9 @@ class _LearningQuizQuestionScreenState
       json.encode(ordersToSave),
     );
 
-    // ✅ ОБЩЕЕ КОЛ-ВО ВОПРОСОВ
     initialHistoryLength = historyQuestions.length;
     final total = (res['meta']?['total'] ?? 0) + initialHistoryLength;
 
-    // ✅ КРУЖКИ (1-в-1 как Vue)
     answersResult = List.generate(total, (i) {
       if (i < initialHistoryLength) {
         return historyQuestions[i].userAnswerStatus == 'correct';
@@ -234,7 +216,6 @@ class _LearningQuizQuestionScreenState
     final q = questions[index];
     final bool isFirstCorrect = selected == q.correctIndex;
 
-    // Если первого ответа нет или он неверный, то и второй не нужен — сразу Wrong
     if (!isFirstCorrect) {
       setState(() {
         submitted = true;
@@ -244,12 +225,10 @@ class _LearningQuizQuestionScreenState
       return;
     }
 
-    // Если первый верный, проверяем наличие Второго Ответа
     bool hasSecondAnswer =
         q.secondAnswer != null && q.secondAnswer!.trim().isNotEmpty;
 
     if (hasSecondAnswer) {
-      // Показываем диалог
       final result = await SecondAnswerDialog.show(
         context,
         title: 'Errechne das Ergebnis',
@@ -285,7 +264,6 @@ class _LearningQuizQuestionScreenState
           answersResult[circleIndex] = false;
         }
 
-        // Move to history
         if (!historyQuestions.contains(q)) {
           historyQuestions.add(q);
           historyUserAnswers[q.id] = q.userSelectedText ?? '';
@@ -293,26 +271,64 @@ class _LearningQuizQuestionScreenState
       });
     }
 
-    // Ищем только те, где статус совсем пустой (еще не видели)
     int nextIndex = questions.indexWhere((q) => q.userAnswerStatus == null);
 
-    if (nextIndex == -1) {
-      _finishQuiz();
-      return;
-    }
+    if (nextIndex != -1) {
+      setState(() {
+        index = nextIndex;
+        selectedIndex = null;
+        submitted = false;
+        viewingHistory = false;
+      });
+    } else {
+      bool hasSkipped = questions.any((q) => q.userAnswerStatus == 'skipped');
 
-    setState(() {
-      index = nextIndex;
-      selectedIndex = null;
-      submitted = false;
-      viewingHistory = false;
-    });
+      if (hasSkipped) {
+        _showSkippedQuestionsDialog();
+      } else {
+        _finishQuiz();
+      }
+    }
   }
 
-  // ✅ NEW: Show history question
+  void _showSkippedQuestionsDialog() {
+    WhiteboardService.hideButton();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => ExistSkipedDialog(
+            onShowSkipped: () {
+              WhiteboardService.showButton(context);
+
+              int skippedIndex = questions.indexWhere(
+                (q) => q.userAnswerStatus == 'skipped',
+              );
+
+              Navigator.pop(context);
+
+              setState(() {
+                index = skippedIndex;
+                selectedIndex = null;
+                submitted = false;
+                viewingHistory = false;
+              });
+            },
+            onLeave: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            skippedCount:
+                questions.where((q) => q.userAnswerStatus == 'skipped').length,
+            onDismiss: () {
+              WhiteboardService.showButton(context);
+            },
+          ),
+    );
+  }
+
   void _showHistoryQuestion(int circleIndex) {
     if (circleIndex < initialHistoryLength) {
-      // Previous sessions history
       setState(() {
         viewingHistory = true;
         historyIndex = circleIndex;
@@ -320,7 +336,6 @@ class _LearningQuizQuestionScreenState
     } else {
       int sessionIndex = circleIndex - initialHistoryLength;
       if (sessionIndex < index) {
-        // Already answered in this session
         setState(() {
           viewingHistory = true;
           historyIndex = circleIndex;
@@ -331,7 +346,6 @@ class _LearningQuizQuestionScreenState
     }
   }
 
-  // ✅ NEW: Return to present question
   void _returnToPresentQuestion() {
     setState(() {
       viewingHistory = false;
@@ -371,11 +385,6 @@ class _LearningQuizQuestionScreenState
   void dispose() {
     WhiteboardService.hideButton();
     super.dispose();
-  }
-
-  Future<void> _clearShuffledOrders() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('shuffled_answers_${widget.categoryId}');
   }
 
   @override
@@ -460,12 +469,9 @@ class _LearningQuizQuestionScreenState
     }
 
     final q = questions[index];
-    final circleIndex = initialHistoryLength + index;
 
-    // ✅ Don't change circle color for skipped - keep it null (grey)
     setState(() {
       q.userAnswerStatus = 'skipped';
-      // answersResult[circleIndex] stays null (grey circle)
     });
 
     if (widget.learningMode && widget.categoryId != null) {
@@ -496,20 +502,14 @@ class _LearningQuizQuestionScreenState
   ) async {
     final q = questions[index];
 
-    // ✅ ДОБАВИТЬ: Сохраняем текст ответа пользователя в саму модель вопроса
     q.userSelectedText = q.answers[selectedIndex];
 
     setState(() {
-      // answersResult[circleIndex] = isFinalCorrect; // DELAYED UNTIL _nextQuestion
       q.userAnswerStatus = isFinalCorrect ? 'correct' : 'wrong';
-
-      // historyQuestions.add(q); // DELAYED UNTIL _nextQuestion
     });
 
-    // ✅ Wait a frame to ensure UI updates
     await Future.delayed(Duration.zero);
 
-    // Then send to backend
     if (widget.learningMode && widget.categoryId != null) {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
@@ -523,7 +523,6 @@ class _LearningQuizQuestionScreenState
         'status': isFinalCorrect ? 'correct' : 'wrong',
         'answer_type': 'topic',
       };
-
 
       await CategoryAnswerService.updateUserAnsweredQuestion(
         answerData: answerData,

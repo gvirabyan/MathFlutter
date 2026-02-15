@@ -455,7 +455,7 @@ class _PracticeVsPlayerTabState extends State<PracticeVsPlayerTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "$name s Punkte",
+                  "${name}s Punkte",
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
