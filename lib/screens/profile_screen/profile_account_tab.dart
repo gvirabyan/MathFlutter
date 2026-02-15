@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:untitled2/app_colors.dart';
 import 'package:untitled2/services/unsaved_changes_service.dart';
 import 'package:untitled2/ui_elements/dialogs/account_error_info_dialog.dart';
@@ -6,6 +7,7 @@ import 'package:untitled2/ui_elements/dialogs/account_error_info_dialog.dart';
 import '../../screens/auth/auth_screen.dart';
 import '../../services/audio_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/google_places_service.dart';
 import '../../ui_elements/dialogs/account_info_save_dialog.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/primary_button.dart';
@@ -19,6 +21,44 @@ class ProfileAccountTab extends StatefulWidget {
 
 class _ProfileAccountTabState extends State<ProfileAccountTab>
     with AutomaticKeepAliveClientMixin {
+  Widget _autocompleteInput({
+    required TextEditingController controller,
+    //required String label,
+    required String placeType, // 'country', '(cities)', или 'school'
+    String? hint,
+    bool enabled = true,
+    Function(Map<String, dynamic>)? onSelected,
+  }) {
+    return TypeAheadField<Map<String, dynamic>>(
+      controller: controller,
+      builder: (context, ctrl, focusNode) {
+        return TextField(
+          controller: ctrl,
+          focusNode: focusNode,
+          enabled: enabled,
+          onChanged: (_) => _checkForChanges(),
+          decoration: InputDecoration(
+            isDense: true,
+            hintText: hint,
+            hintStyle: const TextStyle(color: Colors.black38),
+            border: InputBorder.none,
+          ),
+        );
+      },
+      // Вызываем ваш сервис поиска
+      suggestionsCallback:
+          (search) => GooglePlacesService().searchPlaces(search, placeType),
+      itemBuilder: (context, suggestion) {
+        return ListTile(title: Text(suggestion['description'] ?? ''));
+      },
+      onSelected: (suggestion) {
+        controller.text = suggestion['description'] ?? '';
+        _checkForChanges();
+        if (onSelected != null) onSelected(suggestion);
+      },
+    );
+  }
+
   // ===== controllers =====
   final emailCtrl = TextEditingController();
   final nameCtrl = TextEditingController();
@@ -114,7 +154,6 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
         builder: (_) => const AccountInfoSaveDialog(),
       );
       AudioService().play('formSubmit');
-
     } else {
       showDialog(
         context: context,
@@ -244,26 +283,44 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
               _divider(),
 
               _label('Land'),
-              _input(
-                countryCtrl,
+              _autocompleteInput(
+                controller: countryCtrl,
+                placeType: 'country', // Поиск только стран
                 hint: 'In welchem Land lebst du?',
                 enabled: !disableInputs,
+                onSelected: (_) {
+                  // Логика из Vue: при смене страны чистим остальное
+                  cityCtrl.clear();
+                  schoolCtrl.clear();
+                  classCtrl.clear();
+                },
               ),
               _divider(),
 
               _label('Stadt'),
-              _input(
-                cityCtrl,
+              _autocompleteInput(
+                controller: cityCtrl,
+                placeType: '(cities)', // Поиск только городов
                 hint: 'In welcher Stadt lebst du?',
                 enabled: !disableInputs,
+                onSelected: (_) {
+                  schoolCtrl.clear();
+                  classCtrl.clear();
+                },
               ),
               _divider(),
 
               _label('Schule'),
-              _input(
-                schoolCtrl,
+              _autocompleteInput(
+                controller: schoolCtrl,
+                placeType: 'school', // Поиск учебных заведений
                 hint: 'Name deiner Schule',
                 enabled: !disableInputs,
+                onSelected: (suggestion) {
+                  // Тут можно сохранить place_id, если ваш бэкенд его требует
+                  // String placeId = suggestion['place_id'];
+                  classCtrl.clear();
+                },
               ),
               _divider(),
 
