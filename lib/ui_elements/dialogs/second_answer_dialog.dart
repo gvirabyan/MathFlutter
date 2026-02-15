@@ -162,9 +162,10 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
             TextField(
               controller: _controller,
               enabled: !isAnswered,
-              keyboardType: const TextInputType.numberWithOptions(signed: true),
+              keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true), // Разрешаем decimal
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^-?\d*$')),
+                // Разрешает минус в начале, цифры и одну точку/запятую
+                FilteringTextInputFormatter.allow(RegExp(r'^-?[\d.,]*')),
               ],
               decoration: const InputDecoration(
                 hintText: 'Ergebnis eingeben',
