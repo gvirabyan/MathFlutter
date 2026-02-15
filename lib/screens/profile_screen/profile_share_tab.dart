@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/audio_service.dart';
 import '../../services/parents_emails_service.dart';
 import '../../ui_elements/loading_overlay.dart';
 
@@ -80,7 +81,7 @@ class _ProfileShareTabState extends State<ProfileShareTab>
     if (!mounted) return;
 
     if (res['status'] == 'success') {
-      // 🔥 локально добавляем (без reload)
+      AudioService().play('formSubmit');
       for (final email in emails) {
         parentsEmails.add({
           'id': DateTime.now().millisecondsSinceEpoch,

@@ -23,6 +23,7 @@ import 'package:untitled2/screens/topics_screen/topics_6_7_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_7_8_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_8_9_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_9_10_tab.dart';
+import 'package:untitled2/services/audio_service.dart';
 import 'package:untitled2/services/auth_service.dart';
 import 'package:untitled2/services/unsaved_changes_service.dart';
 import 'package:untitled2/ui_elements/dialogs/search_dialog.dart';
@@ -99,6 +100,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       _dailyGoal = newGoal;
       _goalLoaded = true;
     });
+    AudioService().play('goalUpdate');
   }
 
   @override
@@ -158,6 +160,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           _isReverting = false;
         }
       }
+      AudioService().play('tabChange');
     }
   }
 
@@ -271,6 +274,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             _initTabController();
             startPracticeVsFriend = false;
           });
+          AudioService().play('tabChange');
         },
       ),
     );
@@ -291,7 +295,6 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       return;
     }
 
-    // 2️⃣ идём на backend
     final res = await AuthService.getUser();
 
     if (res['status'] == 'success') {
@@ -307,9 +310,14 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         });
         return;
       }
+      print(user['sound']);
+      print(user['volume_sound']);
+      print("=======================");
+
+      AudioService().updateSettings(
+          enabled: user['sound'], volumePercent: user['volume_sound']);
     }
 
-    // 3️⃣ fallback = 10
     const fallback = 10;
     await prefs.setInt('daily_goal', fallback);
 

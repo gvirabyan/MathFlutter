@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app_start.dart';
+import '../../services/audio_service.dart';
 import '../../ui_elements/auth_input_decoration.dart';
 import '../../ui_elements/primary_button.dart';
 import '../../services/auth_service.dart';
@@ -54,6 +55,8 @@ class _LoginFormState extends State<LoginForm> {
     setState(() => _loading = false);
 
     if (res['status'] == 'success') {
+      AudioService().play('formSubmit');
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MainScreen()),

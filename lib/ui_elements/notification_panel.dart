@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/services/audio_service.dart';
 import '../../app_colors.dart';
 
-class NotificationPanel extends StatelessWidget {
+class NotificationPanel extends StatefulWidget {
   const NotificationPanel({super.key});
+
+  @override
+  State<NotificationPanel> createState() => _NotificationPanelState();
+}
+
+class _NotificationPanelState extends State<NotificationPanel> {
+
+  @override
+  void initState() {
+    super.initState();
+    AudioService().play('notificationOpen');
+  }
 
   @override
   Widget build(BuildContext context) {

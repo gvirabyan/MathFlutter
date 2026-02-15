@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app_colors.dart';
+import '../../services/audio_service.dart';
 import '../../services/auth_service.dart';
 import '../../ui_elements/primary_button.dart';
 
@@ -54,6 +55,8 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
     setState(() => _saving = false);
 
     if (res['status'] == 'success') {
+      AudioService().play('formSubmit');
+
       passwordCtrl.clear();
       confirmCtrl.clear();
       _show('Passwort erfolgreich geändert');

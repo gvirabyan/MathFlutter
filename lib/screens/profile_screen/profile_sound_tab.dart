@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../app_colors.dart';
+import '../../services/audio_service.dart';
 import '../../services/auth_service.dart';
 import '../../ui_elements/loading_overlay.dart';
 
@@ -35,8 +37,7 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
       final user = res['user'];
 
       soundEnabled = user['sound'] ?? false;
-      soundVolume =
-      soundEnabled ? (user['volume_sound'] ?? 50).toDouble() : 0;
+      soundVolume = soundEnabled ? (user['volume_sound'] ?? 50).toDouble() : 0;
     }
 
     setState(() => isLoading = false);
@@ -52,7 +53,12 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
         soundVolume = 50;
       }
     });
-
+    if (soundEnabled) {
+      AudioService().enableSound(enabled: true);
+      AudioService().play('correct');
+    } else {
+      AudioService().enableSound(enabled: false);
+    }
     await AuthService.updateUser({
       'sound': soundEnabled,
       'volume_sound': soundVolume.toInt(),
@@ -62,6 +68,7 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
   /// 🎚 SLIDER
   Future<void> _updateVolume(double value) async {
     setState(() {
+      AudioService().updateSettings(enabled: true, volumePercent: value);
       soundVolume = value;
 
       if (value == 0) {
@@ -70,7 +77,9 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
         soundEnabled = true;
       }
     });
-
+    if (value > 0) {
+      AudioService().play('correct');
+    }
     await AuthService.updateUser({
       'sound': soundEnabled,
       'volume_sound': soundVolume.toInt(),
@@ -96,16 +105,9 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
             children: [
               const Text(
                 'Ton',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
-              Switch(
-                value: soundEnabled,
-                onChanged: _toggleSound,
-
-              ),
+              Switch(value: soundEnabled, onChanged: _toggleSound),
             ],
           ),
 
@@ -117,10 +119,7 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
             children: [
               const Text(
                 'Lautstärke',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -142,7 +141,8 @@ class _ProfileSoundTabState extends State<ProfileSoundTab>
               });
             },
 
-            onChangeEnd: _updateVolume,            activeColor: AppColors.primaryPurple,
+            onChangeEnd: _updateVolume,
+            activeColor: AppColors.primaryPurple,
             inactiveColor: Colors.grey.withOpacity(0.4),
           ),
         ],

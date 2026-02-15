@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -97,22 +99,32 @@ class _PrivacyContent extends StatelessWidget {
         SizedBox(height: 16),
 
         Text('Kontakt', style: _h3),
-        GestureDetector(
-          onTap: () =>
-              launchUrl(Uri.parse('mailto:info@schulmatheapp.de')),
-          child: Text(
-            'info@schulmatheapp.de',
-            style: TextStyle(decoration: TextDecoration.underline),
-          ),
-        ),
-        SizedBox(height: 6),
-        GestureDetector(
-          onTap: () =>
-              launchUrl(Uri.parse('https://schulmatheapp.de')),
-          child: Text(
-            'https://schulmatheapp.de',
-            style: TextStyle(decoration: TextDecoration.underline),
-          ),
+        Column(
+          children: [
+            // --- Ссылка на Email ---
+            Platform.isAndroid
+                ? GestureDetector(
+              onTap: () => launchUrl(Uri.parse('mailto:info@schulmatheapp.de')),
+              child: Text(
+                'info@schulmatheapp.de',
+                style: TextStyle(decoration: TextDecoration.underline),
+              ),
+            )
+                : Text('info@schulmatheapp.de'),
+
+            SizedBox(height: 6),
+
+            // --- Ссылка на Сайт ---
+            Platform.isAndroid
+                ? GestureDetector(
+              onTap: () => launchUrl(Uri.parse('https://schulmatheapp.de')),
+              child: Text(
+                'https://schulmatheapp.de',
+                style: TextStyle(decoration: TextDecoration.underline),
+              ),
+            )
+                : Text('https://schulmatheapp.de'),
+          ],
         ),
         SizedBox(height: 20),
 

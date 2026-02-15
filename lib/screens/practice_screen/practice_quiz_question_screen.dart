@@ -7,6 +7,7 @@ import 'package:untitled2/screens/practice_screen/practice_quiz_question_view.da
 import 'package:untitled2/services/auth_service.dart';
 
 import '../../models/question_model.dart';
+import '../../services/audio_service.dart';
 import '../../services/category_answer_service.dart';
 import '../../services/quiz_service.dart';
 import '../../ui_elements/dialogs/practice_quiz_complete_dialog.dart';
@@ -94,6 +95,8 @@ class _PracticeQuizQuestionScreenState
   }
 
   Future<void> _finishQuizByRivalLeft() async {
+    AudioService().play('win');
+
     if (widget.saveResult) {
       await QuizService.saveQuizResult(
         data: {
@@ -169,6 +172,9 @@ class _PracticeQuizQuestionScreenState
         t.cancel();
         _submitTimeout();
         return;
+      }
+      if (secondsLeft == 6 ){
+        AudioService().play('achtung_short');
       }
 
       if (mounted) {
@@ -253,6 +259,10 @@ class _PracticeQuizQuestionScreenState
         return;
       }
     }
+    else{
+      AudioService().play(isFinalCorrect ? 'correct' : 'wrong');
+
+    }
     final bool shouldShowLoading =
         widget.rival == 'fake_user' && secondsLeft > 52;
 
@@ -265,6 +275,7 @@ class _PracticeQuizQuestionScreenState
         Duration(milliseconds: 1000 + Random().nextInt(2000)),
       );
     }
+
     timer?.cancel();
 
     setState(() {
@@ -376,7 +387,17 @@ class _PracticeQuizQuestionScreenState
     }
 
     if (!mounted) return;
-
+    switch (result) {
+      case PracticeQuizResult.win:
+        AudioService().play('win');
+        break;
+      case PracticeQuizResult.lose:
+        AudioService().play('lose');
+        break;
+      case PracticeQuizResult.draw:
+        AudioService().play('draw');
+        break;
+    }
     await PracticeQuizCompleteDialog.show(
 
       context,

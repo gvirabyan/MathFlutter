@@ -9,6 +9,7 @@ import 'package:untitled2/services/questions_service.dart';
 import 'package:untitled2/ui_elements/dialogs/exist_skiped_dialog.dart';
 
 import '../../models/question_model.dart';
+import '../../services/audio_service.dart';
 import '../../services/category_answer_service.dart';
 import '../../ui_elements/complete_of_learning_page.dart';
 import '../../ui_elements/dialogs/second_answer_dialog.dart';
@@ -217,6 +218,8 @@ class _LearningQuizQuestionScreenState
     final bool isFirstCorrect = selected == q.correctIndex;
 
     if (!isFirstCorrect) {
+      AudioService().play('wrong');
+
       setState(() {
         submitted = true;
         q.userAnswerStatus = 'wrong';
@@ -241,15 +244,19 @@ class _LearningQuizQuestionScreenState
           submitted = true;
           q.userAnswerStatus = result.isCorrect ? 'correct' : 'wrong';
         });
+
         await _finalizeAnswer(selected, result.value, result.isCorrect);
       }
     } else {
+      AudioService().play('correct');
+
       setState(() {
         submitted = true;
         q.userAnswerStatus = 'correct';
       });
       await _finalizeAnswer(selected, null, true);
     }
+
   }
 
   void _nextQuestion() {
@@ -467,6 +474,7 @@ class _LearningQuizQuestionScreenState
       _nextQuestion();
       return;
     }
+    AudioService().play('skipped');
 
     final q = questions[index];
 

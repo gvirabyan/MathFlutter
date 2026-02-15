@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app_colors.dart';
+import '../../services/audio_service.dart';
 import '../math_content.dart';
 
 enum SecondAnswerState { idle, answered }
@@ -78,13 +79,35 @@ class _SecondAnswerDialogState extends State<SecondAnswerDialog> {
 
   void _onButtonPressed() {
     if (_state == SecondAnswerState.idle) {
-      final value = _controller.text.trim();
-      final isCorrect = value == widget.correctSecondAnswer;
+      final valueStr = _controller.text.trim().replaceAll(',', '.'); // Заменяем запятую на точку, если юзер ее ввел
+
+      // Пытаемся превратить ввод пользователя в число
+      final userValue = double.tryParse(valueStr);
+      // Пытаемся превратить правильный ответ из ассетов/базы в число
+      final correctValue = double.tryParse(widget.correctSecondAnswer.replaceAll(',', '.'));
+
+      bool isCorrect = false;
+
+      if (userValue != null && correctValue != null) {
+        // Сравниваем их как числа (10.0 станет равно 10)
+        isCorrect = userValue == correctValue;
+      } else {
+        // Если это не числа (например, текст), сравниваем как строки
+        isCorrect = valueStr == widget.correctSecondAnswer;
+      }
 
       setState(() {
         _isCorrect = isCorrect;
         _state = SecondAnswerState.answered;
       });
+
+      // Добавляем озвучку результата
+      if (isCorrect) {
+        AudioService().play('correct');
+      } else {
+        AudioService().play('wrong');
+      }
+
     } else {
       Navigator.pop(
         context,

@@ -38,6 +38,7 @@ dependencies:
   flutter_tex: ^5.1.10
   flutter_html: ^3.0.0
   webview_flutter: ^4.13.1
+  audioplayers: ^5.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -89,6 +90,7 @@ flutter:
     - assets/buttons/buttons_pic.svg
     - assets/gifs/loading.gif
     - assets/pics_for_buttons/
+    - assets/audios/
   fonts:
     - family: Rubik
       fonts:
