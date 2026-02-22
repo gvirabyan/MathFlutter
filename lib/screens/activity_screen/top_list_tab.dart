@@ -373,7 +373,7 @@ class _TopListSingleState extends State<TopListSingle> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'In der ${widget.category.title}',
+                      '${widget.category.title}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

@@ -324,7 +324,7 @@ class _FooterText extends StatelessWidget {
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
-          style: const TextStyle(fontSize: 14, height: 1.4),
+          style: const TextStyle(fontSize: 14, height: 1.3),
           children: [
             const TextSpan(
               text: 'Du bist in Mathe App ',

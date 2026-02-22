@@ -14,6 +14,8 @@ class GaugeCircle extends StatelessWidget {
   final Widget? middle;  // например "123"
   final Widget? bottom;  // например описание
 
+  final double spacingMiddleBottom;
+
   /// дуга: как в твоём Vue (1.5*pi)
   final double startAngle; // radians
   final double sweepAngle; // radians
@@ -33,6 +35,7 @@ class GaugeCircle extends StatelessWidget {
     this.startAngle = pi * 0.75,
     this.sweepAngle = pi * 1.5,
     this.backgroundOpacity = 0.2,
+    this.spacingMiddleBottom = 6,
   });
 
   @override
@@ -60,10 +63,10 @@ class GaugeCircle extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (top != null) top!,
-              if (top != null) const SizedBox(height: 4),
+              if (top != null) const SizedBox(height: 2),
               if (middle != null) middle!,
               if (bottom != null) ...[
-                const SizedBox(height: 6),
+                SizedBox(height: spacingMiddleBottom),
                 bottom!,
               ],
             ],

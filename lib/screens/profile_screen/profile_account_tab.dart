@@ -23,14 +23,22 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
     with AutomaticKeepAliveClientMixin {
   Widget _autocompleteInput({
     required TextEditingController controller,
-    //required String label,
-    required String placeType, // 'country', '(cities)', или 'school'
+    required String placeType,
     String? hint,
     bool enabled = true,
     Function(Map<String, dynamic>)? onSelected,
   }) {
+    // Создаём контроллер для управления списком
+    final suggestionsController = SuggestionsController<Map<String, dynamic>>();
+
     return TypeAheadField<Map<String, dynamic>>(
       controller: controller,
+      suggestionsController: suggestionsController, // ← передаём контроллер
+      hideOnUnfocus: false,
+      emptyBuilder: (context) => const SizedBox.shrink(),
+      hideWithKeyboard: false,
+      constraints: const BoxConstraints(maxHeight: 300),
+
       builder: (context, ctrl, focusNode) {
         return TextField(
           controller: ctrl,
@@ -45,14 +53,20 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
           ),
         );
       },
-      // Вызываем ваш сервис поиска
-      suggestionsCallback:
-          (search) => GooglePlacesService().searchPlaces(search, placeType),
+      suggestionsCallback: (search) {
+        if (search.trim().isEmpty) return [];
+        return GooglePlacesService().searchPlaces(search, placeType);
+      },
       itemBuilder: (context, suggestion) {
-        return ListTile(title: Text(suggestion['description'] ?? ''));
+        return ListTile(
+          dense: true,
+          title: Text(suggestion['description'] ?? ''),
+        );
       },
       onSelected: (suggestion) {
         controller.text = suggestion['description'] ?? '';
+        suggestionsController.close(); // ← закрываем список вручную
+        FocusManager.instance.primaryFocus?.unfocus(); // ← убираем клавиатуру
         _checkForChanges();
         if (onSelected != null) onSelected(suggestion);
       },

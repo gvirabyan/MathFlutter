@@ -124,6 +124,11 @@ class _AboutItem extends StatelessWidget {
                 Icons.arrow_forward_ios,
                 size: 16,
               ),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: Colors.grey.shade300,
+              ),
             ],
           ),
         ),

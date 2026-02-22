@@ -62,20 +62,21 @@ class _AnswersTabState extends State<AnswersTab> {
       color: color,
       size: 200,
       strokeWidth: 11,
+      spacingMiddleBottom: 0,
       top: Text(
         '${percent.toInt()}%',
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, fontFamily: ""),
       ),
       middle: Text(
         value.toString(),
-        style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w500, fontFamily: ""),
       ),
       bottom: SizedBox(
-        width: 160,
+        width: 130,
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 13),
+          style: const TextStyle(fontSize: 11),
         ),
       ),
     );
@@ -122,8 +123,9 @@ class _AnswersTabState extends State<AnswersTab> {
           _gauge(
             percent: totalPercent,
             value: totalCount,
-            label: 'von $totalQuestions Beantwortete Fragen',
+            label: 'von $totalQuestions\nBeantwortete Fragen',
             color: const Color(0xFF8419FF),
+
           ),
           const SizedBox(height: 40),
 
