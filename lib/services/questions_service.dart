@@ -29,7 +29,7 @@ class QuestionsService {
   /// Вопросы для админа
   static Future<Map<String, dynamic>> getQuestionsForAdmin({
     required int categoryId,
-    required bool isAdmin,
+     bool isAdmin = true,
     int page = 1,
   }) async {
     return await ApiService.get(

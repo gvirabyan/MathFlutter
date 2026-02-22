@@ -3,6 +3,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TokenStorage {
   static const _keyToken = 'token';
   static const _keyUserId = 'user_id';
+  static const _isAdmin = 'is_admin';
+
+  static Future<void> saveIsAdmin(bool isAdmin) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isAdmin, isAdmin);
+  }
+
+  static Future<bool?> getIsAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isAdmin);
+  }
 
   // ===== TOKEN =====
   static Future<void> saveToken(String token) async {

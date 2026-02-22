@@ -142,6 +142,7 @@ class AuthService {
       ) async {
     await TokenStorage.saveToken(data['jwt']);
     await TokenStorage.saveUserId(data['user']['id']);
+    await TokenStorage.saveIsAdmin(data['user']['is_admin']);
   }
 
 }

@@ -125,10 +125,10 @@ class _ProfileAccountTabState extends State<ProfileAccountTab> {
       nameCtrl.text = (u['name'] ?? '').toString();
       surnameCtrl.text = (u['surname'] ?? '').toString();
       nicknameCtrl.text = (u['username'] ?? '').toString();
-      birthCtrl.text = (u['birthDate'] ?? '').toString();
+      birthCtrl.text = (u['dateOfBirth'] ?? '').toString();
       countryCtrl.text = (u['country'] ?? '').toString();
       cityCtrl.text = (u['city'] ?? '').toString();
-      schoolCtrl.text = (u['school'] ?? '').toString();
+      schoolCtrl.text = (u['institution']['name'] ?? '').toString();
       classCtrl.text = (u['class'] ?? '').toString();
     }
 

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:untitled2/screens/topics_screen/generate_question.dart';
+import 'package:untitled2/screens/topics_screen/reciew_question.dart';
+
 import '../../models/topic_progress_item.dart';
 import '../../services/topics_cache_service.dart';
 import '../../ui_elements/loading_overlay.dart';
@@ -26,7 +29,7 @@ class _Topics12TabState extends State<Topics12Tab> {
   Future<void> _load() async {
     try {
       final result = await _cacheService.getCategoriesForClass(
-        categoryClassId: 1, // 1.–2. Klasse
+        categoryClassId: 1,
         onUpdate: (updatedItems) {
           if (mounted) {
             setState(() {
@@ -53,28 +56,48 @@ class _Topics12TabState extends State<Topics12Tab> {
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      children: items.map((e) {
-        return TopicProgressItemWidget(
-          title: e.title,
-          done: e.done,
-          total: e.total,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => LearningQuizQuestionScreen(
-                  categoryId: e.categoryId,
-                  categoryName: e.title,
-                  learningMode: true,
-                  totalQuestions: e.total,
-                  awardPoints: false,
-                  saveResult: false,
-                ),
-              ),
+      children:
+          items.map((e) {
+            return TopicProgressItemWidget(
+              title: e.title,
+              done: e.done,
+              total: e.total,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => LearningQuizQuestionScreen(
+                          categoryId: e.categoryId,
+                          categoryName: e.title,
+                          learningMode: true,
+                          totalQuestions: e.total,
+                          awardPoints: false,
+                          saveResult: false,
+                        ),
+                  ),
+                );
+              },
+              onGenerate: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => GenerateQuestionPage(categoryId: e.categoryId),
+                  ),
+                );
+              },
+              onReview: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (_) => ReviewQuestionPage(categoryId: e.categoryId),
+                  ),
+                );
+              },
             );
-          },
-        );
-      }).toList(),
+          }).toList(),
     );
   }
 }

@@ -18,7 +18,7 @@ class ProfileAboutTab extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => page,
-        fullscreenDialog: true, // iOS-style с X
+        fullscreenDialog: true,
       ),
     );
   }
@@ -28,59 +28,18 @@ class ProfileAboutTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       children: [
-        // ---------------- Datenschutz ----------------
         _AboutItem(
           title: 'Datenschutz',
-          onTap: () {
-            _openPage(
-              context,
-              const PrivacyPopup(),
-            );
-          },
+          onTap: () => _openPage(context, const PrivacyPopup()),
         ),
-
-        // ---------------- Software-Lizenzen ----------------
         _AboutItem(
           title: 'Software-Lizenzen',
-          onTap: () {
-            _openPage(
-              context,
-              const SoftwarePage(),
-            );
-          },
+          onTap: () => _openPage(context, const SoftwarePage()),
         ),
-
-        // ---------------- Versionshinweise ----------------
         _AboutItem(
           title: 'Versionshinweise',
-          onTap: () {
-            _openPage(
-              context,
-              const ReleaseNotesPopup(),
-            );
-          },
+          onTap: () => _openPage(context, const ReleaseNotesPopup()),
         ),
-
-        // ---------------- WRITE REVIEW ----------------
-        /*if (Platform.isAndroid)
-          _AboutItem(
-            title: 'Bewertung schreiben',
-            onTap: () {
-              _openExternalLink(
-                'https://play.google.com/store/apps/details?id=io.framework7.matheapp',
-              );
-            },
-          ),
-
-        if (Platform.isIOS)
-          _AboutItem(
-            title: 'Bewertung schreiben',
-            onTap: () {
-              _openExternalLink(
-                'https://apps.apple.com/de/app/matheappde/id6447060725',
-              );
-            },
-          ),*/
       ],
     );
   }
@@ -99,40 +58,38 @@ class _AboutItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-              ),
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: Colors.grey.shade300,
-              ),
-            ],
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+        const Divider(
+          height: 1,
+          thickness: 1,
+          color: Color(0xFFE0E0E0),
+          indent: 16,
+          endIndent: 16,
+        ),
+      ],
     );
   }
 }
