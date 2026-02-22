@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../services/audio_service.dart';
 import '../../services/parents_emails_service.dart';
 import '../../ui_elements/loading_overlay.dart';
@@ -18,8 +19,10 @@ class _ProfileShareTabState extends State<ProfileShareTab>
 
   List<Map<String, dynamic>> parentsEmails = [];
 
-  final List<TextEditingController> controllers =
-  List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> controllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
 
   @override
   bool get wantKeepAlive => true;
@@ -36,9 +39,10 @@ class _ProfileShareTabState extends State<ProfileShareTab>
     if (!mounted) return;
 
     if (res['status'] == 'success') {
-      parentsEmails = (res['data'] as List)
-          .map((e) => Map<String, dynamic>.from(e))
-          .toList();
+      parentsEmails =
+          (res['data'] as List)
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList();
     }
 
     setState(() => isLoading = false);
@@ -57,8 +61,7 @@ class _ProfileShareTabState extends State<ProfileShareTab>
   }
 
   bool get isSaveDisabled {
-    final hasAtLeastOne =
-    controllers.any((c) => c.text.trim().isNotEmpty);
+    final hasAtLeastOne = controllers.any((c) => c.text.trim().isNotEmpty);
     return !hasAtLeastOne || isSaving;
   }
 
@@ -70,13 +73,13 @@ class _ProfileShareTabState extends State<ProfileShareTab>
       errorMsg = '';
     });
 
-    final emails = controllers
-        .map((c) => c.text.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
+    final emails =
+        controllers
+            .map((c) => c.text.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
 
-    final res =
-    await ParentsEmailsService.saveParentsEmails(emails);
+    final res = await ParentsEmailsService.saveParentsEmails(emails);
 
     if (!mounted) return;
 
@@ -100,8 +103,7 @@ class _ProfileShareTabState extends State<ProfileShareTab>
   }
 
   Future<void> _removeEmail(int id) async {
-    final res =
-    await ParentsEmailsService.removeParentEmail(id);
+    final res = await ParentsEmailsService.removeParentEmail(id);
 
     if (!mounted) return;
 
@@ -142,24 +144,24 @@ class _ProfileShareTabState extends State<ProfileShareTab>
                   if (parentsEmails.isNotEmpty) ...[
                     const Text(
                       'Gespeicherte E-Mails:',
-                      style:
-                      TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 12),
                     ...parentsEmails.map(
-                          (e) => _SavedEmailItem(
+                      (e) => _SavedEmailItem(
                         email: e['email'],
-                        onDelete: () =>
-                            _removeEmail(e['id']),
+                        onDelete: () => _removeEmail(e['id']),
                       ),
                     ),
                   ] else ...[
-                    const SizedBox(height: 10,),
+                    const SizedBox(height: 10),
                     const Text(
                       'Du hast keine E-Mail-Adresse gespeichert',
-                      style: TextStyle( fontSize: 13,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w400),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ],
 
@@ -169,23 +171,25 @@ class _ProfileShareTabState extends State<ProfileShareTab>
                   if (canAddMore)
                     ...List.generate(
                       visibleInputs,
-                          (index) => Padding(
-                        padding:
-                        const EdgeInsets.only(bottom: 16),
+                      (index) => Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: TextField(
                           controller: controllers[index],
-                          keyboardType:
-                          TextInputType.emailAddress,
+                          keyboardType: TextInputType.emailAddress,
                           onChanged: (_) => setState(() {}),
-                          decoration:
-                          const InputDecoration(
-                            hintText:
-                            'E-Mail Adresse angeben',
-                            hintStyle: TextStyle(
-                              color: Colors.black38,
+                          decoration: InputDecoration(
+                            hintText: 'E-Mail Adresse angeben',
+                            hintStyle: const TextStyle(color: Colors.black38),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
                             ),
-                            border:
-                            UnderlineInputBorder(),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -194,20 +198,15 @@ class _ProfileShareTabState extends State<ProfileShareTab>
                   if (parentsEmails.length >= 4)
                     const Text(
                       'Du kannst maximal 4 E-Mail-Adressen hinzufügen.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.black54,
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.black54),
                     ),
 
                   if (errorMsg.isNotEmpty)
                     Padding(
-                      padding:
-                      const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.only(top: 12),
                       child: Text(
                         errorMsg,
-                        style:
-                        const TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ),
                 ],
@@ -217,40 +216,37 @@ class _ProfileShareTabState extends State<ProfileShareTab>
 
           /// ---------- SAVE BUTTON (КАК В НАЧАЛЕ) ----------
           Padding(
-            padding:
-            const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed:
-                isSaveDisabled ? null : _saveEmails,
+                onPressed: isSaveDisabled ? null : _saveEmails,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber,
-                  disabledBackgroundColor:
-                  Colors.amber.withOpacity(0.4),
+                  disabledBackgroundColor: Colors.amber.withOpacity(0.4),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: isSaving
-                    ? const SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-                    : const Text(
-                  'Speichern',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child:
+                    isSaving
+                        ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Text(
+                          'Speichern',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
               ),
             ),
           ),
@@ -266,24 +262,23 @@ class _SavedEmailItem extends StatelessWidget {
   final String email;
   final VoidCallback onDelete;
 
-  const _SavedEmailItem({
-    required this.email,
-    required this.onDelete,
-  });
+  const _SavedEmailItem({required this.email, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(child: Text(email)),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: onDelete,
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(email, style: const TextStyle(fontSize: 16))),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.grey),
+              onPressed: onDelete,
+            ),
+          ],
+        ),
+        Divider(height: 1, color: Colors.grey.shade300), // Серая линия
+      ],
     );
   }
 }
