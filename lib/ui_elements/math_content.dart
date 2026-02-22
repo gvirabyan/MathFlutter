@@ -74,23 +74,24 @@ class MathContent extends StatelessWidget {
     } else if (content.startsWith('@pre@')) {
       final preContent = content.substring(5);
       final plainText = preContent.replaceAll('<br>', '\n');
-      final lines = plainText.trim().split('\n');
+
+      final lines = plainText.split('\n');
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children:
-            lines
-                .map(
-                  (line) => Text(
-                    line.trim(),
-                    style: TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: (isQuestion ? 18 : fontSize) * scale,
-                      color: color,
-                    ),
-                  ),
-                )
-                .toList(),
+        lines
+            .map(
+              (line) => Text(
+            line,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: (isQuestion ? 18 : fontSize) * scale,
+              color: color,
+            ),
+          ),
+        )
+            .toList(),
       );
     } else if (content.startsWith('@')) {
       return Text(
