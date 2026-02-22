@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/topic_progress_item.dart';
 import '../../services/category_service.dart';
+import '../../services/topics_cache_service.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/topic_progress_item.dart';
 import 'learning_quiz_question_screen.dart';
@@ -15,6 +16,7 @@ class Topics45Tab extends StatefulWidget {
 class _Topics45TabState extends State<Topics45Tab> {
   bool isLoading = true;
   List<TopicProgressItem> items = [];
+  final _cacheService = TopicsCacheService();
 
   @override
   void initState() {
@@ -24,23 +26,22 @@ class _Topics45TabState extends State<Topics45Tab> {
 
   Future<void> _load() async {
     try {
-      final categories = await CategoryService.getCategoriesByClass(
-        categoryClassId: 4, // 4.–5. Klasse
-        isAdmin: false,
+      final result = await _cacheService.getCategoriesForClass(
+        categoryClassId: 4,
+        onUpdate: (updatedItems) {
+          if (mounted) {
+            setState(() {
+              items = updatedItems;
+            });
+          }
+        },
       );
 
-      final result =
-          categories.map<TopicProgressItem>((cat) {
-            return TopicProgressItem(
-              categoryId: cat['id'],
-              title: cat['attributes']['name'],
-              done: cat['answers'] ?? 0,
-              total: cat['questions'] ?? 0,
-            );
-          }).toList();
-
-      setState(() => items = result);
-    } finally {
+      setState(() {
+        items = result;
+        isLoading = false;
+      });
+    } catch (e) {
       setState(() => isLoading = false);
     }
   }
@@ -53,31 +54,28 @@ class _Topics45TabState extends State<Topics45Tab> {
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      children:
-          items.map((e) {
-            return TopicProgressItemWidget(
-              title: e.title,
-              done: e.done,
-              total: e.total,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => LearningQuizQuestionScreen(
-                          categoryId: e.categoryId,
-                          learningMode: true,
-                          totalQuestions: e.total,
-                          categoryName: e.title,
-
-                          awardPoints: false,
-                          saveResult: false,
-                        ),
-                  ),
-                );
-              },
+      children: items.map((e) {
+        return TopicProgressItemWidget(
+          title: e.title,
+          done: e.done,
+          total: e.total,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => LearningQuizQuestionScreen(
+                  categoryId: e.categoryId,
+                  categoryName: e.title,
+                  learningMode: true,
+                  totalQuestions: e.total,
+                  awardPoints: false,
+                  saveResult: false,
+                ),
+              ),
             );
-          }).toList(),
+          },
+        );
+      }).toList(),
     );
   }
 }
