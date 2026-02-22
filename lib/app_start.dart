@@ -158,18 +158,30 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void _handleTabSelection() async {
     if (_tabController == null || _isReverting) return;
     if (_tabController!.indexIsChanging) {
+      final newIndex = _tabController!.index;
+      final previousIndex = _tabController!.previousIndex;
+
       if (UnsavedChangesService().hasUnsavedChanges) {
-        final confirmed = await UnsavedChangesService().showConfirmDialog(
-          context,
-        );
-        if (!confirmed) {
+        _isReverting = true;
+        _tabController!.index = previousIndex;
+        _isReverting = false;
+
+        final confirmed = await UnsavedChangesService().showConfirmDialog(context);
+
+        if (confirmed) {
           _isReverting = true;
-          _tabController!.index = _tabController!.previousIndex;
+          _tabController!.animateTo(newIndex);
           _isReverting = false;
+          if (_currentIndex == 1) {
+            _lastSubTabIndex[_currentIndex] = newIndex;
+          }
+          AudioService().play('tabChange');
         }
+        return;
       }
+
       if (_currentIndex == 1) {
-        _lastSubTabIndex[_currentIndex] = _tabController!.index;
+        _lastSubTabIndex[_currentIndex] = newIndex;
       }
       AudioService().play('tabChange');
     }

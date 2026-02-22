@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../app_colors.dart';
 import '../../services/audio_service.dart';
 import '../../services/auth_service.dart';
@@ -20,10 +21,30 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
   bool _saving = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Слушаем изменения в обоих контроллерах
+    passwordCtrl.addListener(_onTextChanged);
+    confirmCtrl.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    // Вызываем setState, чтобы перестроить UI и обновить состояние кнопки
+    setState(() {});
+  }
+
+  @override
   void dispose() {
+    // Не забываем удалять слушателей (хотя dispose контроллеров обычно достаточно, это хорошая практика)
+    passwordCtrl.removeListener(_onTextChanged);
+    confirmCtrl.removeListener(_onTextChanged);
     passwordCtrl.dispose();
     confirmCtrl.dispose();
     super.dispose();
+  }
+
+  bool get _isFormValid {
+    return passwordCtrl.text.isNotEmpty && confirmCtrl.text.isNotEmpty;
   }
 
   Future<void> _changePassword() async {
@@ -48,9 +69,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
     setState(() => _saving = true);
 
     /// 👉 Backend call
-    final res = await AuthService.updateUser({
-      'password': password,
-    });
+    final res = await AuthService.updateUser({'password': password});
 
     setState(() => _saving = false);
 
@@ -66,9 +85,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
   }
 
   void _show(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   @override
@@ -83,8 +100,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
           _passwordInput(
             controller: passwordCtrl,
             hidden: _hidePassword,
-            onToggle: () =>
-                setState(() => _hidePassword = !_hidePassword),
+            onToggle: () => setState(() => _hidePassword = !_hidePassword),
           ),
           _divider(),
 
@@ -93,8 +109,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
           _passwordInput(
             controller: confirmCtrl,
             hidden: _hideConfirm,
-            onToggle: () =>
-                setState(() => _hideConfirm = !_hideConfirm),
+            onToggle: () => setState(() => _hideConfirm = !_hideConfirm),
           ),
           _divider(),
 
@@ -103,7 +118,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
           /// SAVE BUTTON
           PrimaryButton(
             text: _saving ? 'SPEICHERN...' : 'SPEICHERN',
-            enabled: !_saving,
+            enabled: _isFormValid && !_saving,
             onPressed: _changePassword,
             color: AppColors.primaryYellow,
           ),
@@ -122,7 +137,7 @@ class _ProfileSecurityTabState extends State<ProfileSecurityTab> {
         style: const TextStyle(
           fontSize: 12,
           color: Colors.black,
-          fontWeight: FontWeight.w300
+          fontWeight: FontWeight.w300,
         ),
       ),
     );

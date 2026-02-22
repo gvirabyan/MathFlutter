@@ -19,8 +19,8 @@ class ProfileAccountTab extends StatefulWidget {
   State<ProfileAccountTab> createState() => _ProfileAccountTabState();
 }
 
-class _ProfileAccountTabState extends State<ProfileAccountTab>
-    with AutomaticKeepAliveClientMixin {
+class _ProfileAccountTabState extends State<ProfileAccountTab> {
+
   Widget _autocompleteInput({
     required TextEditingController controller,
     required String placeType,
@@ -88,13 +88,12 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
   bool _saving = false; // save profile
   bool _processing = false; // logout / delete
 
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _loadUser();
+    UnsavedChangesService().discardCallback = _loadUser;
   }
 
   @override
@@ -108,12 +107,15 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
     cityCtrl.dispose();
     schoolCtrl.dispose();
     classCtrl.dispose();
+    UnsavedChangesService().discardCallback = null;
     super.dispose();
   }
 
   // ===== API =====
 
   Future<void> _loadUser() async {
+
+
     final res = await AuthService.getUser();
 
     if (res['status'] == 'success') {
@@ -248,8 +250,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    if (_loading) {
+   if (_loading) {
       return const Center(child: LoadingOverlay());
     }
 
@@ -262,7 +263,7 @@ class _ProfileAccountTabState extends State<ProfileAccountTab>
 
         final shouldPop = await UnsavedChangesService().showConfirmDialog(
           context,
-          onSave: _saveProfile, // ← ПЕРЕДАЙ ФУНКЦИЮ СОХРАНЕНИЯ
+          onSave: _saveProfile,
         );
         if (shouldPop == true && context.mounted) {
           Navigator.pop(context);
