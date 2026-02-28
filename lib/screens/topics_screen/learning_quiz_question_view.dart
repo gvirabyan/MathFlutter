@@ -109,9 +109,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
     double targetOffset =
         16.0 +
-        (index * itemWithSpacing) -
-        (viewportWidth / 2) +
-        (itemWidth / 2);
+            (index * itemWithSpacing) -
+            (viewportWidth / 2) +
+            (itemWidth / 2);
 
     final double minScroll = _scrollController.position.minScrollExtent;
     final double maxScroll = _scrollController.position.maxScrollExtent;
@@ -143,6 +143,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
         backgroundColor: AppColors.primaryPurple,
         foregroundColor: Colors.white,
         elevation: 0,
+        titleSpacing: -10,
         title: Text(
           widget.title,
           overflow: TextOverflow.ellipsis,
@@ -275,9 +276,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                       final isCorrect = widget.correctAnswerIndex == i;
 
                       final bool isUserChoice =
-                          widget.isViewingHistory
-                              ? (widget.selectedAnswerText == answer)
-                              : (widget.selectedIndex == i);
+                      widget.isViewingHistory
+                          ? (widget.selectedAnswerText == answer)
+                          : (widget.selectedIndex == i);
 
                       String letter =
                           String.fromCharCode('a'.codeUnitAt(0) + i) + '.';
@@ -318,9 +319,9 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
                       return GestureDetector(
                         onTap:
-                            widget.isViewingHistory
-                                ? null
-                                : () => widget.onSelect?.call(i),
+                        widget.isViewingHistory
+                            ? null
+                            : () => widget.onSelect?.call(i),
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 14),
                           padding: const EdgeInsets.all(14),
@@ -341,24 +342,24 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                                   letter,
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: textColor,
+                                    color: answersColor,
                                     height: 1.0,
                                   ),
                                 ),
                               ),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                  padding: const EdgeInsets.only(top: 4.5),
-                                  child: MathContent(
-                                    content: answer,
-                                    fontSize: 18,
-                                    color: answersColor,
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4.5),
+                                    child: MathContent(
+                                      content: answer,
+                                      fontSize: 18,
+                                      color: answersColor,
+                                    ),
                                   ),
                                 ),
                               ),
-                          ),
                             ],
                           ),
                         ),
@@ -391,7 +392,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
 
           if (!widget.isViewingHistory)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
                   Expanded(
@@ -406,9 +407,12 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                           ),
                         ),
                         onPressed: widget.onSkip,
-                        child: const Text(
+                        child: Text(
                           'überspringen',
-                          style: TextStyle(fontSize: 12, color: Colors.black87),
+                          style: TextStyle(fontSize: 14, color: Colors.black54),
+                          softWrap: false,
+                          overflow: TextOverflow.visible,
+
                         ),
                       ),
                     ),
@@ -420,11 +424,12 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                       height: 48,
                       child: PrimaryButton(
                         color: AppColors.primaryYellow,
+                        fontSize: 15,
                         text: (widget.submitted) ? 'nächstes' : 'abgeben',
                         enabled:
-                            (widget.submitted || widget.selectedIndex != null),
+                        (widget.submitted || widget.selectedIndex != null),
                         onPressed:
-                            widget.submitted ? widget.onNext : widget.onSubmit,
+                        widget.submitted ? widget.onNext : widget.onSubmit,
                       ),
                     ),
                   ),
