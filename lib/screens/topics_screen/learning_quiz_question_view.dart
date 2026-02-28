@@ -370,7 +370,7 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
               ),
             ),
           ),
-          const SizedBox(height: 54),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Align(
