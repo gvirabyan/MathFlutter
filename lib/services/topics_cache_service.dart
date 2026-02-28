@@ -37,6 +37,7 @@ class TopicsCacheService {
             title: cat['attributes']['name'],
             done: cat['answers'] ?? 0,
             total: cat['questions'] ?? 0,
+            count: cat['unpublishedQuestions'] ?? 0,
           );
         }).toList();
 
@@ -63,6 +64,7 @@ class TopicsCacheService {
               title: cat['attributes']['name'],
               done: cat['answers'] ?? 0,
               total: cat['questions'] ?? 0,
+              count: cat['unpublishedQuestions'] ?? 0,
             );
           }).toList();
 

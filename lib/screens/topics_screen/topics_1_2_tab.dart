@@ -62,6 +62,7 @@ class _Topics12TabState extends State<Topics12Tab> {
               title: e.title,
               done: e.done,
               total: e.total,
+              count: e.count,
               onTap: () {
                 Navigator.push(
                   context,

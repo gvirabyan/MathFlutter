@@ -149,7 +149,7 @@ class _GenerateQuestionPageState extends State<GenerateQuestionPage> {
         actions: [
           TextButton(
             onPressed: _shortlisted.isEmpty ? null : _createQuestions,
-            child: const Text('Submit', style: TextStyle(color: Colors.white)),
+            child: const Text('Submit', style: TextStyle(color: Colors.green)),
           ),
         ],
       ),

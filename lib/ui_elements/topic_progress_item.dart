@@ -6,6 +6,7 @@ class TopicProgressItemWidget extends StatelessWidget {
   final String title;
   final int done;
   final int total;
+  final int? count;
   final VoidCallback? onTap;
   final VoidCallback? onGenerate;
   final VoidCallback? onReview;
@@ -17,6 +18,7 @@ class TopicProgressItemWidget extends StatelessWidget {
     required this.title,
     required this.done,
     required this.total,
+    this.count,
     this.onTap,
     this.onGenerate,
     this.onReview,
@@ -57,20 +59,21 @@ class TopicProgressItemWidget extends StatelessWidget {
               ],
             ),
 
-            // Секция для админа
             if (isAdmin) ...[
-              const SizedBox(height: 12), // Отступ между текстом и кнопками
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _AdminButton(
                     label: 'Generate',
+                    count: count,
                     onPressed: () {
                       onGenerate?.call();
                     },
                   ),
                   _AdminButton(
                     label: 'Review',
+                    count: count,
                     onPressed: () {
                       onReview?.call();
                     },
@@ -88,21 +91,29 @@ class TopicProgressItemWidget extends StatelessWidget {
 // Вспомогательный мини-виджет для кнопок, чтобы не дублировать код
 class _AdminButton extends StatelessWidget {
   final String label;
+  final int? count;
   final VoidCallback onPressed;
 
-  const _AdminButton({required this.label, required this.onPressed});
+  const _AdminButton({
+    required this.label,
+    required this.onPressed,
+    this.count,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final bool showCount = label == 'Review' && (count ?? 0) > 0;
+
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primaryPurple,
-        side: const BorderSide(color: AppColors.primaryPurple),
+        foregroundColor: showCount ? Colors.white : AppColors.primaryPurple,
+        backgroundColor: showCount ? Colors.red : null,
+        side: BorderSide(color: showCount ? Colors.red : AppColors.primaryPurple),
         visualDensity: VisualDensity.compact,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      child: Text(label),
+      child: Text(showCount ? '$label $count' : label),
     );
   }
 }
