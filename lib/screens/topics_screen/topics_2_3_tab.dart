@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../models/topic_progress_item.dart';
-import '../../services/category_service.dart';
 import '../../services/topics_cache_service.dart';
 import '../../ui_elements/loading_overlay.dart';
 import '../../ui_elements/topic_progress_item.dart';
@@ -14,6 +13,8 @@ class Topics23Tab extends StatefulWidget {
 }
 
 class _Topics23TabState extends State<Topics23Tab> {
+  static const int _categoryClassId = 2;
+
   bool isLoading = true;
   List<TopicProgressItem> items = [];
   final _cacheService = TopicsCacheService();
@@ -27,7 +28,7 @@ class _Topics23TabState extends State<Topics23Tab> {
   Future<void> _load() async {
     try {
       final result = await _cacheService.getCategoriesForClass(
-        categoryClassId: 2,
+        categoryClassId: _categoryClassId,
         onUpdate: (updatedItems) {
           if (mounted) {
             setState(() {
@@ -46,6 +47,20 @@ class _Topics23TabState extends State<Topics23Tab> {
     }
   }
 
+  /// Тихое обновление без индикатора загрузки
+  Future<void> _silentRefresh() async {
+    try {
+      _cacheService.clearCacheForClass(_categoryClassId);
+      final result = await _cacheService.getCategoriesForClass(
+        categoryClassId: _categoryClassId,
+        onUpdate: (updatedItems) {
+          if (mounted) setState(() => items = updatedItems);
+        },
+      );
+      if (mounted) setState(() => items = result);
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -59,8 +74,8 @@ class _Topics23TabState extends State<Topics23Tab> {
           title: e.title,
           done: e.done,
           total: e.total,
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => LearningQuizQuestionScreen(
@@ -73,6 +88,7 @@ class _Topics23TabState extends State<Topics23Tab> {
                 ),
               ),
             );
+            _silentRefresh();
           },
         );
       }).toList(),

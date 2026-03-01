@@ -16,6 +16,8 @@ class Topics12Tab extends StatefulWidget {
 }
 
 class _Topics12TabState extends State<Topics12Tab> {
+  static const int _categoryClassId = 1;
+
   bool isLoading = true;
   List<TopicProgressItem> items = [];
   final _cacheService = TopicsCacheService();
@@ -29,7 +31,7 @@ class _Topics12TabState extends State<Topics12Tab> {
   Future<void> _load() async {
     try {
       final result = await _cacheService.getCategoriesForClass(
-        categoryClassId: 1,
+        categoryClassId: _categoryClassId,
         onUpdate: (updatedItems) {
           if (mounted) {
             setState(() {
@@ -48,6 +50,20 @@ class _Topics12TabState extends State<Topics12Tab> {
     }
   }
 
+  /// Тихое обновление без индикатора загрузки
+  Future<void> _silentRefresh() async {
+    try {
+      _cacheService.clearCacheForClass(_categoryClassId);
+      final result = await _cacheService.getCategoriesForClass(
+        categoryClassId: _categoryClassId,
+        onUpdate: (updatedItems) {
+          if (mounted) setState(() => items = updatedItems);
+        },
+      );
+      if (mounted) setState(() => items = result);
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -57,48 +73,49 @@ class _Topics12TabState extends State<Topics12Tab> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       children:
-          items.map((e) {
-            return TopicProgressItemWidget(
-              title: e.title,
-              done: e.done,
-              total: e.total,
-              count: e.count,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => LearningQuizQuestionScreen(
-                          categoryId: e.categoryId,
-                          categoryName: e.title,
-                          learningMode: true,
-                          totalQuestions: e.total,
-                          awardPoints: false,
-                          saveResult: false,
-                        ),
-                  ),
-                );
-              },
-              onGenerate: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => GenerateQuestionPage(categoryId: e.categoryId),
-                  ),
-                );
-              },
-              onReview: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (_) => ReviewQuestionPage(categoryId: e.categoryId),
-                  ),
-                );
-              },
+      items.map((e) {
+        return TopicProgressItemWidget(
+          title: e.title,
+          done: e.done,
+          total: e.total,
+          count: e.count,
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => LearningQuizQuestionScreen(
+                  categoryId: e.categoryId,
+                  categoryName: e.title,
+                  learningMode: true,
+                  totalQuestions: e.total,
+                  awardPoints: false,
+                  saveResult: false,
+                ),
+              ),
             );
-          }).toList(),
+            _silentRefresh();
+          },
+          onGenerate: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => GenerateQuestionPage(categoryId: e.categoryId),
+              ),
+            );
+          },
+          onReview: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => ReviewQuestionPage(categoryId: e.categoryId),
+              ),
+            );
+          },
+        );
+      }).toList(),
     );
   }
 }
