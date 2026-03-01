@@ -1,12 +1,13 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/services/token_storage.dart';
+
 import 'api_service.dart';
 
 class AuthService {
   // 🔐 LOGIN
   static Future<Map<String, dynamic>> login(
-      Map<String, dynamic> userData,
-      ) async {
+    Map<String, dynamic> userData,
+  ) async {
     final data = await ApiService.post(
       'auth/local?populate[0]=institution',
       userData,
@@ -21,12 +22,10 @@ class AuthService {
 
   // 🔑 PROVIDER LOGIN
   static Future<Map<String, dynamic>> loginViaProvider(
-      String provider,
-      String accessToken,
-      ) async {
-    final data = await ApiService.get(
-      'auth/$provider/callback$accessToken',
-    );
+    String provider,
+    String accessToken,
+  ) async {
+    final data = await ApiService.get('auth/$provider/callback$accessToken');
 
     if (data['error'] == null) {
       await _storeJwtAndUser(data);
@@ -37,10 +36,9 @@ class AuthService {
 
   // 📝 REGISTER
   static Future<Map<String, dynamic>> register(
-      Map<String, dynamic> userData,
-      ) async {
-    final data =
-    await ApiService.post('auth/local/register', userData);
+    Map<String, dynamic> userData,
+  ) async {
+    final data = await ApiService.post('auth/local/register', userData);
 
     if (data['error'] == null) {
       await _storeJwtAndUser(data);
@@ -49,10 +47,29 @@ class AuthService {
     return {'status': 'error', 'error': data['error']};
   }
 
+  static Future<Map<String, dynamic>> registerDeviceToken({
+    required String token,
+    required String platform,
+  }) async {
+    final userId = await TokenStorage.getUserId();
+
+    final data = await ApiService.post('installations', {
+      'data': {
+        'token': token,
+        'platform': platform,
+        'users_permissions_user': userId,
+      },
+    });
+
+    return data['error'] == null
+        ? {'status': 'success'}
+        : {'status': 'error', 'message': data['error']?['message']};
+  }
+
   // 🧑 REGISTER BY NICKNAME
   static Future<Map<String, dynamic>> registerByNickname(
-      Map<String, dynamic> userData,
-      ) async {
+    Map<String, dynamic> userData,
+  ) async {
     final data = await ApiService.post(
       'auth/local/register-nicknamed-user',
       userData,
@@ -67,10 +84,9 @@ class AuthService {
 
   // 📧 FORGOT PASSWORD
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
-    final data = await ApiService.post(
-      'auth/forgot-password',
-      {'email': email},
-    );
+    final data = await ApiService.post('auth/forgot-password', {
+      'email': email,
+    });
 
     return data['error'] == null
         ? {'status': 'success'}
@@ -79,10 +95,9 @@ class AuthService {
 
   // 🔁 RESET PASSWORD
   static Future<Map<String, dynamic>> resetPassword(
-      Map<String, dynamic> body,
-      ) async {
-    final data =
-    await ApiService.post('auth/reset-password', body);
+    Map<String, dynamic> body,
+  ) async {
+    final data = await ApiService.post('auth/reset-password', body);
 
     if (data['error'] == null) {
       await _storeJwtAndUser(data);
@@ -103,11 +118,10 @@ class AuthService {
         : {'status': 'error', 'message': data['error']?['message']};
   }
 
-
   // ✏️ UPDATE USER
   static Future<Map<String, dynamic>> updateUser(
-      Map<String, dynamic> body,
-      ) async {
+    Map<String, dynamic> body,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
 
@@ -123,9 +137,7 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('user-id');
 
-    final data = await ApiService.delete(
-      'users/$userId/delete-nicknamed-user',
-    );
+    final data = await ApiService.delete('users/$userId/delete-nicknamed-user');
 
     return data['error'] == null
         ? {'status': 'success'}
@@ -136,13 +148,9 @@ class AuthService {
     await TokenStorage.clearAll();
   }
 
-
-  static Future<void> _storeJwtAndUser(
-      Map<String, dynamic> data,
-      ) async {
+  static Future<void> _storeJwtAndUser(Map<String, dynamic> data) async {
     await TokenStorage.saveToken(data['jwt']);
     await TokenStorage.saveUserId(data['user']['id']);
     await TokenStorage.saveIsAdmin(data['user']['is_admin']);
   }
-
 }

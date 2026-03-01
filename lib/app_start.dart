@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/screens/activity_screen/answers_tab.dart';
@@ -25,6 +27,7 @@ import 'package:untitled2/screens/topics_screen/topics_8_9_tab.dart';
 import 'package:untitled2/screens/topics_screen/topics_9_10_tab.dart';
 import 'package:untitled2/services/audio_service.dart';
 import 'package:untitled2/services/auth_service.dart';
+import 'package:untitled2/services/push_notification_service.dart';
 import 'package:untitled2/services/unsaved_changes_service.dart';
 import 'package:untitled2/ui_elements/dialogs/search_dialog.dart';
 import 'package:untitled2/ui_elements/loading_overlay.dart';
@@ -53,10 +56,28 @@ class _AppStartState extends State<AppStart> {
     final userId = prefs.getInt('user_id');
 
     if (token != null && token.isNotEmpty && userId != null) {
+      _initPushNotifications();
       _go(const MainScreen());
     } else {
       _go(const AuthScreen());
     }
+  }
+
+  Future<void> _initPushNotifications() async {
+    final token = await PushNotificationService.getToken();
+    if (token != null) {
+      await AuthService.registerDeviceToken(
+        token: token,
+        platform: Platform.isAndroid ? 'android' : 'ios',
+      );
+    }
+
+    PushNotificationService.onTokenRefresh.listen((newToken) {
+      AuthService.registerDeviceToken(
+        token: newToken,
+        platform: Platform.isAndroid ? 'android' : 'ios',
+      );
+    });
   }
 
   bool _navigated = false;
@@ -330,7 +351,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
       final isAdmin = user['is_admin'];
       await prefs.setBool('is_admin', isAdmin == true);
-      
+
       if (backendGoal is int) {
         await prefs.setInt('daily_goal', backendGoal);
 
