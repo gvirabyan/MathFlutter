@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
+import '../services/user_session.dart';
 
-class TopicProgressItemWidget extends StatelessWidget {
+class TopicProgressItemWidget extends StatefulWidget {
   final String title;
   final int done;
   final int total;
@@ -10,8 +11,6 @@ class TopicProgressItemWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onGenerate;
   final VoidCallback? onReview;
-
-  bool get isAdmin => true;
 
   const TopicProgressItemWidget({
     super.key,
@@ -25,9 +24,29 @@ class TopicProgressItemWidget extends StatelessWidget {
   });
 
   @override
+  State<TopicProgressItemWidget> createState() => _TopicProgressItemWidgetState();
+}
+
+class _TopicProgressItemWidgetState extends State<TopicProgressItemWidget> {
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAdminStatus();
+  }
+
+  Future<void> _loadAdminStatus() async {
+    final isAdmin = await UserSession.instance.isAdmin;
+    if (mounted) {
+      setState(() => _isAdmin = isAdmin);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: const BoxDecoration(
@@ -35,13 +54,12 @@ class TopicProgressItemWidget extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Основная строка (Заголовок и Прогресс)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    title,
+                    widget.title,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -49,7 +67,7 @@ class TopicProgressItemWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$done/$total',
+                  '${widget.done}/${widget.total}',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -59,24 +77,20 @@ class TopicProgressItemWidget extends StatelessWidget {
               ],
             ),
 
-            if (isAdmin) ...[
+            if (_isAdmin) ...[
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _AdminButton(
                     label: 'Generate',
-                    count: count,
-                    onPressed: () {
-                      onGenerate?.call();
-                    },
+                    count: widget.count,
+                    onPressed: () => widget.onGenerate?.call(),
                   ),
                   _AdminButton(
                     label: 'Review',
-                    count: count,
-                    onPressed: () {
-                      onReview?.call();
-                    },
+                    count: widget.count,
+                    onPressed: () => widget.onReview?.call(),
                   ),
                 ],
               ),

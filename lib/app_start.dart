@@ -328,6 +328,9 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       final user = res['user'];
       final backendGoal = user['everyday_goal'];
 
+      final isAdmin = user['is_admin'];
+      await prefs.setBool('is_admin', isAdmin == true);
+      
       if (backendGoal is int) {
         await prefs.setInt('daily_goal', backendGoal);
 
