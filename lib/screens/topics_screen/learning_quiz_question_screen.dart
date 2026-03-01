@@ -73,15 +73,10 @@ class _LearningQuizQuestionScreenState
             ? historyQuestions[historyIndex!]
             : questions[index];
 
-    Navigator.push(
+    SolutionWebView.show(
       context,
-      MaterialPageRoute(
-        builder:
-            (_) => SolutionWebView(
-              questionId: currentQuestion.id,
-              categoryName: widget.categoryName,
-            ),
-      ),
+      currentQuestion.id,
+      widget.categoryName,
     );
   }
 
