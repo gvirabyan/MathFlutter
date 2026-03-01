@@ -352,10 +352,13 @@ class _LearningQuizQuestionViewState extends State<LearningQuizQuestionView> {
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 4.5),
-                                    child: MathContent(
-                                      content: answer,
-                                      fontSize: 18,
-                                      color: answersColor,
+                                    child: ColoredBox(
+                                      color: Colors.red.withOpacity(0.5), // ← только вокруг MathContent
+                                      child: MathContent(
+                                        content: answer,
+                                        fontSize: 18,
+                                        color: answersColor,
+                                      ),
                                     ),
                                   ),
                                 ),
